@@ -1,0 +1,7 @@
+#!/bin/bash
+workon labrad
+source virtualenvwrapper.sh
+workon labrad
+python /home/space-time/LabRAD/space-time/clients/Space_Time_GUI.py
+read -p "Press [Enter] key to start backup..."
+
