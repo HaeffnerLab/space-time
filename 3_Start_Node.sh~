@@ -1,5 +1,0 @@
-#!/bin/bash
-source virtualenvwrapper.sh
-workon labrad
-python /home/space-time/LabRAD/space-time/clients/NodeClient-spacetime.py
-
