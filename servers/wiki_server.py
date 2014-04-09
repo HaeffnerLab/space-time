@@ -29,7 +29,7 @@ class WikiServer(LabradServer):
 
     @setting(21, 'Update Wiki')
     def update_wiki(self, c):
-        savedir = '/home/space-time/LabRAD/'
+        savedir = '/home/space-time/'
         data = 'Home.md'
         yield os.system("mv " + savedir + data + " /home/space-time/TestWiki/TestWiki/wiki/" + data)
         yield os.system("bash /home/space-time/TestWiki/TestWiki/updatewiki.sh")
