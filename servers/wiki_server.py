@@ -31,8 +31,8 @@ class WikiServer(LabradServer):
     def update_wiki(self, c):
         savedir = '/home/space-time/'
         data = 'Home.md'
-        yield os.system("cp " + savedir + data + " /home/space-time/TestWiki/TestWiki/wiki/" + data)
-        yield os.system("bash /home/space-time/TestWiki/TestWiki/updatewiki.sh")
+        yield os.system("cp " + savedir + data + " /home/space-time/TestWiki/wiki/" + data)
+        yield os.system("bash /home/space-time/TestWiki/updatewiki.sh")
 
 
 if __name__ == "__main__":
