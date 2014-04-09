@@ -44,17 +44,17 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         self.setCentralWidget(centralWidget)
 	self.setWindowTitle('Spacetime GUI')
 
-    def makeScriptControl(self, reactor):
+   def makeScriptControl(self, reactor):
         from common.clients.guiscriptcontrol.scriptcontrol import ScriptControl
         self.sc = ScriptControl(reactor, self)
         self.sc, self.experimentParametersWidget = self.sc.getWidgets()
         self.createExperimentParametersTab()
         return self.sc
 
-    def createExperimentParametersTab(self):
+   def createExperimentParametersTab(self):
         self.tabWidget.addTab(self.experimentParametersWidget, '&Experiment Parameters') 
 
-    def makeLaserRoomWidget(self, reactor, cxn):
+   def makeLaserRoomWidget(self, reactor, cxn):
         widget = QtGui.QWidget()
  
         from common.clients.CAVITY_CONTROL import cavityWidget
