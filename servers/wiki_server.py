@@ -27,12 +27,13 @@ class WikiServer(LabradServer):
     """
     name = 'WikiServer'
 
-    @setting(21, 'Update Wiki', returns = 's')
+    @setting(21, 'Update Wiki')
     def update_wiki(self, c):
         savedir = '/home/space-time/LabRAD/'
         data = 'Home.md'
         yield os.system("mv " + savedir + data + " /home/space-time/TestWiki/TestWiki/wiki/" + data)
         yield os.system("bash /home/space-time/TestWiki/TestWiki/updatewiki.sh")
+
 
 if __name__ == "__main__":
     from labrad import util
