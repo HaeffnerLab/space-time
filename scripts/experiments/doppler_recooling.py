@@ -24,7 +24,6 @@ class doppler_recooling(experiment):
         self.cxnlab = labrad.connect('192.168.169.49')
         self.dv = cxn.data_vault
         self.pv = cxn.parametervault
-        self.pmt = cxn.normalpmtflow
         
         self.nbars = []
         min_time,max_time,steps = self.parameters.DopplerRecooling.heating_scan

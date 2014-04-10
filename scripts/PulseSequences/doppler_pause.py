@@ -14,10 +14,12 @@ class doppler_pause(pulse_sequence):
     replaced_parameters = {empty_sequence:[('EmptySequence','empty_sequence_duration')]
                            }
 
-    def sequence(self):
+    def sequence(self): #should we be repumping?
         p = self.parameters
         self.addSequence(turn_off_all)
         self.addSequence(doppler_cooling)
         self.addSequence(empty_sequence, TreeDict.fromdict({'EmptySequence.empty_sequence_duration':p.Heating.background_heating_time}))
+        self.addTTL('TimeResolvedCount', self.start, p.DopplerCooling.doppler_cooling_duration + p.DopplerCooling.doppler_cooling_repump_additional )#check this channel in hardware config
         self.addSequence(doppler_cooling)
+        
         
