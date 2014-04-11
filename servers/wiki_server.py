@@ -17,6 +17,8 @@ timeout = 20
 """
 
 import os
+import sys
+import labrad
 from labrad.server import LabradServer, setting, Signal
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
@@ -26,14 +28,27 @@ class WikiServer(LabradServer):
     WikiServer for pushing data to wiki
     """
     name = 'WikiServer'
+    
+    @inlineCallbacks
+    def initServer(self):
+        yield self.client.registry.cd(['','Servers', 'wikiserver'])
+        self.maindir = yield self.client.registry.get('wikipath')
+        self.maindir = self.maindir[0] + '/'
 
-    @setting(21, 'Update Wiki')
-    def update_wiki(self, c):
-        savedir = '/home/space-time/'
-        data = 'Home.md'
-        yield os.system("cp " + savedir + data + " /home/space-time/TestWiki2/wiki/" + data)
-        yield os.chdir('/home/space-time/TestWiki2/')
+    @setting(21, 'Update Wiki', sourcefile='s', destinationfile='s', returns='')
+    def update_wiki(self, c, sourcefile, destinationfile):
+        yield os.system("cp " + self.datadir + sourcefile + " " + self.maindir + self.wikidir + destinationfile)
+        yield os.chdir(self.maindir)
+        print os.getcwd()
         yield os.system("bash updatewiki.sh")
+        
+    @setting(22, 'Add wiki directory', wikidir='s',returns='')    
+    def set_wiki_dir(self, c, wikidir):
+        self.wikidir = wikidir + '/'
+     
+    @setting(23, 'Add data directory', datadir='s',returns='')    
+    def set_data_dir(self, c, datadir):
+        self.datadir = datadir + '/'
 
 
 if __name__ == "__main__":
