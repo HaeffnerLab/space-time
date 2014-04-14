@@ -1,11 +1,10 @@
 from common.abstractdevices.script_scanner.scan_methods import experiment
-from space_time.scripts.scriptLibrary import dvParameters
-from labrad.units import WithUnit
+#from space_time.scripts.scriptLibrary import dvParameters
+from space_time.scripts.scriptLibrary.fly_processing import Binner
 from numpy import linspace
-from space_time.scripts.PulseSquences.doppler_pause import doppler_pause
+from space_time.scripts.PulseSequences.doppler_pause import doppler_pause
 import time
-import labrad
-
+from labrad.units import WithUnit
 
 '''
 Doppler ReCooling Experiment - do seperate exp to scan heating times
@@ -22,7 +21,7 @@ class doppler_recooling(experiment):
     
     required_parameters.extend(doppler_pause.all_required_parameters())
     
-   # required_parameters.remove(('Heating','background_heating_time'))
+# required_parameters.remove(('Heating','background_heating_time'))
     
     def initialize(self, cxn, context, ident):
         self.ident = ident
@@ -77,17 +76,17 @@ class doppler_recooling(experiment):
     def program_pulser(self):
         self.pulser.reset_timetags()
         pulse_sequence = doppler_pause(self.parameters)
-        pulse.sequence.programSequence(self.pulser)
+        pulse_sequence.programSequence(self.pulser)
         self.start_recording_timetags = pulse_sequence.start_recording_timetags
         self.cooling_duration = pulse_sequence.cooling_duration
         
-    def get_timetags(self,iter):
+    def get_timetags(self,iteration):
         self.pulser.start_sequence() #is this right?
         self.pulser.wait_sequence_done()
         self.pulser.stop_sequence
         timetags = self.pulser.get_timetags().asarray
         timetags = timetags - self.start_recording_timetags
-        self.dv.add([iter,timetags],context = self.timetag_save_context)
+        self.dv.add([iteration,timetags],context = self.timetag_save_context)
         return timetags
             
     def save_histogram(self):
@@ -108,11 +107,11 @@ class doppler_recooling(experiment):
     
         #do the dopplerpause sequence a bunch of times and bin everything
         
-        for iter in range(self.iterations):
-            timetags = self.get_timetags(iter)
+        for index in range(self.iterations):
+            timetags = self.get_timetags(index)
             self.binner.add(timetags)
             self.save_histogram()
-            self.update_progress(iter)
+            self.update_progress(index)
             should_stop = self.pause_or_stop()
             if should_stop: break
             

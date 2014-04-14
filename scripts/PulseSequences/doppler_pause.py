@@ -1,6 +1,7 @@
 from common.okfpgaservers.pulser.pulse_sequences.pulse_sequence import pulse_sequence
 from subsequences.DopplerCooling import doppler_cooling
 from subsequences.TurnOffAll import turn_off_all
+from subsequences.EmptySequence import empty_sequence
 from labrad.units import WithUnit
 from treedict import TreeDict
 
