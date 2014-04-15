@@ -1,6 +1,7 @@
 from common.abstractdevices.script_scanner.scan_methods import experiment
-#from space_time.scripts.scriptLibrary import dvParameters
+from space_time.scripts.scriptLibrary import dvParameters
 from space_time.scripts.scriptLibrary.fly_processing import Binner
+import numpy
 from numpy import linspace
 from space_time.scripts.PulseSequences.doppler_pause import doppler_pause
 import time
