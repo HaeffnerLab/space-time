@@ -7,6 +7,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         self.clipboard = clipboard
         self.reactor = reactor
         self.connect_labrad()
+    #   self.startgrapher()
 
     @inlineCallbacks
     def connect_labrad(self):
@@ -36,15 +37,16 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         self.setWindowTitle('Spacetime GUI')
 
     def makeScriptControlWidget(self, reactor, cxn):
-        widget = QtGui.QWidget()
-        
-        from common.clients.script_scanner_gui.script_scanner_gui import script_scanner_gui
-        gridLayout = QtGui.QGridLayout()
-       
-        gridLayout.addWidget(script_scanner_gui(reactor))
-        
-        widget.setLayout(gridLayout)
-        return widget
+        return
+#        widget = QtGui.QWidget()
+#        
+#        from common.clients.script_scanner_gui.script_scanner_gui import script_scanner_gui
+#        gridLayout = QtGui.QGridLayout()
+#       
+#        gridLayout.addWidget(script_scanner_gui(reactor))
+#        
+#        widget.setLayout(gridLayout)
+#        return widget
 
     def makeLaserRoomWidget(self, reactor, cxn):
         widget = QtGui.QWidget()
@@ -72,7 +74,8 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         from common.clients.PMT_CONTROL    import pmtWidget
         from common.clients.SWITCH_CONTROL import switchWidget
         from common.clients.DDS_CONTROL    import DDS_CONTROL
-        from common.clients.DAC_CONTROL    import DAC_Control
+        #from common.clients.DAC_CONTROL    import DAC_Control
+        from common.clients.NEW_DAC_CONTROL import DAC_Control
         gridLayout = QtGui.QGridLayout()
 
         gridLayout.addWidget(switchWidget(reactor, cxn),        0,4,1,1)
@@ -85,6 +88,10 @@ class SPACETIME_GUI(QtGui.QMainWindow):
 
     def closeEvent(self, x):
         self.reactor.stop()
+        
+    def startgrapher(self):
+        import common.clients.pygrapherlive.grapher as grapher
+       # grapher.main()
 
 if __name__=="__main__":
     a = QtGui.QApplication( [] )
