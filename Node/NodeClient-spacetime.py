@@ -13,7 +13,14 @@ except:
 
 nodeDict = {
 			'node spacetime-exp-control':
-				['NormalPMTFlow','Data Vault', 'DAC Server', 'Pulser', 'ParameterVault','ScriptScanner'],
+				['NormalPMTFlow',
+				'Data Vault', 
+				'DAC Server', 
+				'Pulser', 
+				'ParameterVault',
+				'SD Tracker',
+				'ScriptScanner'
+				]
 	}
 
 for node in nodeDict.keys(): #sets the order of opening

@@ -91,7 +91,7 @@ class CHANNEL_CONTROL (QtGui.QWidget):
         super(CHANNEL_CONTROL, self).__init__(parent)
         self.reactor = reactor
         self.makeGUI()
-        self.connect()
+        self.connect()     
      
     def makeGUI(self):
         self.dacDict = dict(hc.elec_dict.items() + hc.sma_dict.items())

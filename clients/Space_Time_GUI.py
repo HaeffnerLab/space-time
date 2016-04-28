@@ -7,7 +7,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         self.clipboard = clipboard
         self.reactor = reactor
         self.connect_labrad()
-    #   self.startgrapher()
+       # self.startgrapher()
 
     @inlineCallbacks
     def connect_labrad(self):
@@ -25,11 +25,15 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         laser_room = self.makeLaserRoomWidget(reactor, cxn)
         laser_control = self.makeControlWidget(reactor, cxn)
         script_scanner = self.makeScriptControlWidget(reactor, cxn)
-
+        histogram = self.make_histogram_widget(reactor, cxn)
+        drift_tracker = self.makeDriftTrackerWidget(reactor, cxn)
+        
         self.tabWidget = QtGui.QTabWidget()
         self.tabWidget.addTab(laser_room,'&Laser Room')
         self.tabWidget.addTab(laser_control,'&Control')
         self.tabWidget.addTab(script_scanner, '&Script Scanner')
+        self.tabWidget.addTab(histogram, '&Readout Histogram')
+        self.tabWidget.addTab(drift_tracker, '&Drift Tracker')
         
         layout.addWidget(self.tabWidget)
         centralWidget.setLayout(layout)
@@ -61,12 +65,20 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         widget.setLayout(gridLayout)
         return widget
     
-#    def make_histogram_widget(self, reactor, cxn):
-#        histograms_tab = QtGui.QTabWidget()
-#        from common.clients.readout_histogram import readout_histogram
-#        pmt_readout = readout_histogram(reactor, cxn)
-#        histograms_tab.addTab(pmt_readout, "PMT")
-#        return histograms_tab
+    def make_histogram_widget(self, reactor, cxn):
+        histograms_tab = QtGui.QTabWidget()
+        from common.clients.readout_histogram import readout_histogram
+        pmt_readout = readout_histogram(reactor, cxn)
+        histograms_tab.addTab(pmt_readout, "PMT")
+        return histograms_tab
+    
+    def makeDriftTrackerWidget(self, reactor, cxn):
+        dt_tab = QtGui.QTabWidget()
+        from common.clients.drift_tracker.drift_tracker import drift_tracker
+        tracker = drift_tracker(reactor, cxn)
+        dt_tab.addTab(tracker,"Drift Tracker")
+        return dt_tab
+        
     
     def makeControlWidget(self, reactor, cxn):
         widget = QtGui.QWidget()
@@ -90,7 +102,8 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         self.reactor.stop()
         
     def startgrapher(self):
-        import common.clients.pygrapherlive.grapher as grapher
+       # import common.clients.pygrapherlive.grapher as grapher
+       import common.devel.RealSimpleGrapher.rsg as grapher
        # grapher.main()
 
 if __name__=="__main__":

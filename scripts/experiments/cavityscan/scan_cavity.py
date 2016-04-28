@@ -9,7 +9,7 @@ class scan_cavity(experiment):
     required_parameters = [
                            ('CavityScans','average'),
                            ('CavityScans','cavity_name'),
-                           ('CavityScans','cavity_scan'),
+                           ('CavityScans','cavity_scan_397'),
                            ('CavityScans','point_delay'),
                            ('CavityScans','moving_resolution'),
                            ]
