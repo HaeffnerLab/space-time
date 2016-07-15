@@ -1,7 +1,7 @@
 from space_time.scripts.PulseSequences.advanceDACsShuttle import advance_DACs_shuttle
 from space_time.scripts.PulseSequences.resetDACs import reset_DACs
 from common.abstractdevices.script_scanner.scan_methods import experiment
-
+from space_time.scripts.experiments.Experiments729.excitations import excitation_729
 from space_time.scripts.experiments.Experiments729.excitations import excitation_729_with_multipole_ramp
 from space_time.scripts.scriptLibrary.common_methods_729 import common_methods_729 as cm
 from space_time.scripts.scriptLibrary import dvParameters
@@ -43,15 +43,6 @@ class adiabatic_cooling_test(experiment):
 						   ('TrapFrequencies','radial_frequency_2'),
 						   ('TrapFrequencies','rf_drive_frequency'),
 						   
-						   ('Crystallization', 'auto_crystallization'),
-						   ('Crystallization', 'camera_record_exposure'),
-						   ('Crystallization', 'camera_threshold'),
-						   ('Crystallization', 'max_attempts'),
-						   ('Crystallization', 'max_duration'),
-						   ('Crystallization', 'min_duration'),
-						   ('Crystallization', 'pmt_record_duration'),
-						   ('Crystallization', 'pmt_threshold'),
-						   ('Crystallization', 'use_camera')
 						   ]
 	
 	spectrum_optional_parmeters = [
@@ -61,7 +52,7 @@ class adiabatic_cooling_test(experiment):
 	@classmethod
 	def all_required_parameters(cls):
 		parameters = set(cls.required_parameters)
-#		parameters = parameters.union(set(excitation_729.all_required_parameters()))
+		parameters = parameters.union(set(excitation_729.all_required_parameters()))
 		parameters = list(parameters)
 		#removing parameters we'll be overwriting, and they do not need to be loaded
 #		parameters.remove(('Excitation_729','rabi_excitation_amplitude'))
@@ -137,12 +128,10 @@ class adiabatic_cooling_test(experiment):
 		
 		#program in DAC voltage ramp
 		self.dac_server.ramp_multipole(multipole, initial_field, final_field, total_steps)
-		###
-
 		time_interval = duration/float(total_steps) #in us
 		time_interval = time_interval * 10**-6
 		self.parameters['advanceDACs.times'] = [i*time_interval for i in range(0,total_steps+1)]
-
+		
 		for i,freq in enumerate(self.scan):
 			should_stop = self.pause_or_stop()
 			if should_stop: break
@@ -151,6 +140,9 @@ class adiabatic_cooling_test(experiment):
 			self.parameters['Excitation_729.rabi_excitation_frequency'] = freq
 			self.excite.set_parameters(self.parameters)
 			excitation, readouts = self.excite.run(cxn, context)
+			
+			#self.dac_server.set_first_voltages()
+			
 			# end: run sequence directly
 			
 			if excitation is None: break
@@ -158,13 +150,6 @@ class adiabatic_cooling_test(experiment):
 			submission.extend(excitation)
 			self.dv.add(submission, context = self.spectrum_save_context)
 			self.update_progress(i)
-
-#		self.seq = advance_DACs_shuttle(self.parameters)
-#		self.doSequence()
-		
-#		self.dac_server.set_first_voltages()
-#		self.seq = reset_DACs(self.parameters)
-#		self.doSequence()
 
 	def finalize(self, cxn, context):
 		self.excite.finalize(cxn, context)
@@ -178,12 +163,6 @@ class adiabatic_cooling_test(experiment):
 		measuredDict = dvParameters.measureParameters(cxn, cxnlab)
 		dvParameters.saveParameters(dv, measuredDict, context)
 		dvParameters.saveParameters(dv, dict(self.parameters), context)  
-
-#	def doSequence(self):
-#		self.seq.programSequence(self.pulser)
-#		self.pulser.start_single()
-#		self.pulser.wait_sequence_done()
-#		self.pulser.stop_sequence()
 
 if __name__ == '__main__':
 	cxn = labrad.connect()
