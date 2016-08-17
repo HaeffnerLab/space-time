@@ -41,25 +41,25 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         self.setWindowTitle('Spacetime GUI')
 
     def makeScriptControlWidget(self, reactor, cxn):
-        return
-#        widget = QtGui.QWidget()
-#        
-#        from common.clients.script_scanner_gui.script_scanner_gui import script_scanner_gui
-#        gridLayout = QtGui.QGridLayout()
-#       
-#        gridLayout.addWidget(script_scanner_gui(reactor))
-#        
-#        widget.setLayout(gridLayout)
-#        return widget
+        widget = QtGui.QWidget()
+        
+        from common.clients.script_scanner_gui.script_scanner_gui import script_scanner_gui
+        gridLayout = QtGui.QGridLayout()
+       
+        gridLayout.addWidget(script_scanner_gui(reactor))
+        
+        widget.setLayout(gridLayout)
+        return widget
 
     def makeLaserRoomWidget(self, reactor, cxn):
         widget = QtGui.QWidget()
  
-        from common.clients.CAVITY_CONTROL import cavityWidget
+        #from common.clients.CAVITY_CONTROL import cavityWidget
+	from common.clients.LASERDAC_CONTROL import DAC_Control as laserdac_control_widget
         from common.clients.multiplexer.MULTIPLEXER_CONTROL import multiplexerWidget
         gridLayout = QtGui.QGridLayout()
 
-        gridLayout.addWidget(cavityWidget(reactor),             0,0)
+        gridLayout.addWidget(laserdac_control_widget(reactor),             0,0)
         gridLayout.addWidget(multiplexerWidget(reactor),        0,1)
 
         widget.setLayout(gridLayout)
@@ -88,11 +88,13 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         from common.clients.DDS_CONTROL    import DDS_CONTROL
         #from common.clients.DAC_CONTROL    import DAC_Control
         from common.clients.NEW_DAC_CONTROL import DAC_Control
+	from quick_actions.quick_actions import actions_widget
         gridLayout = QtGui.QGridLayout()
 
         gridLayout.addWidget(switchWidget(reactor, cxn),        0,4,1,1)
         gridLayout.addWidget(pmtWidget(reactor),                0,3,1,1)
-        gridLayout.addWidget(DDS_CONTROL(reactor, cxn),         2,3,4,3)
+        gridLayout.addWidget(DDS_CONTROL(reactor, cxn),         2,4,4,2)
+        gridLayout.addWidget(actions_widget(reactor, cxn),      2,3,4,1)
         gridLayout.addWidget(DAC_Control(reactor),              0,0,7,3)
         
         widget.setLayout(gridLayout)

@@ -154,7 +154,8 @@ class CHANNEL_CONTROL (QtGui.QWidget):
 
     def sendToServer(self):
         if self.inputUpdated:            
-            self.dacserver.set_individual_analog_voltages([(self.changedChannel, round(self.controls[self.changedChannel].spinLevel.value(), 3))]*17)
+            #self.dacserver.set_individual_analog_voltages([(self.changedChannel, round(self.controls[self.changedChannel].spinLevel.value(), 3))]*17)
+            self.dacserver.set_individual_analog_voltages([(self.changedChannel, round(self.controls[self.changedChannel].spinLevel.value(), 3))])
             self.inputUpdated = False
             
     @inlineCallbacks    

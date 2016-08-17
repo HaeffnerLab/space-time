@@ -16,6 +16,12 @@ class fft_spectrum(experiment):
                            ('FFT','record_time'),
                            ]
     
+    @classmethod
+    def all_required_parameters(cls):
+        parameters = set(cls.required_parameters)
+        parameters = list(parameters)
+        return parameters     
+    
     def initialize(self, cxn, context, ident):
         self.ident = ident
         self.processor = processFFT()
@@ -55,7 +61,8 @@ class fft_spectrum(experiment):
         self.setup_parameters()
         print self.parameters.TrapFrequencies.rf_drive_frequency
         pwr = self.getPowerSpectrum()
-        #self.saveData(pwr)  ##put back in later
+        print pwr
+        self.saveData(pwr)  ##put back in later
     
     def getPowerSpectrum(self):
         pwr = np.zeros_like(self.freqs)
@@ -71,7 +78,7 @@ class fft_spectrum(experiment):
             print timetags
             if exporttags:
                 np.savetxt("tags"+str(i)+".csv",timetags,delimiter=",") 
-            #pwr += self.processor.getPowerSpectrum(self.freqs, timetags, self.record_time['s'], self.time_resolution)
+            pwr += self.processor.getPowerSpectrum(self.freqs, timetags, self.record_time['s'], self.time_resolution)
             #put back in later
             #import IPython
             #IPython.embed()
