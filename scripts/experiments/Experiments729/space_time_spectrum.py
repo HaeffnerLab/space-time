@@ -2,7 +2,9 @@ from common.abstractdevices.script_scanner.scan_methods import experiment
 from excitations import excitation_729
 from space_time.scripts.scriptLibrary.common_methods_729 import common_methods_729 as cm
 from space_time.scripts.scriptLibrary import dvParameters
-from space_time.scripts.experiments.Crystallization.crystallization import crystallization
+
+#from space_time.scripts.experiments.Crystallization.crystallization import crystallization
+
 import time
 import labrad
 from labrad.units import WithUnit
@@ -16,8 +18,6 @@ class spectrum(experiment):
                            ('Spectrum','normal'),
                            ('Spectrum','fine'),
                            ('Spectrum','ultimate'),
-                           #('Spectrum','car1_sensitivity'),
-                           #('Spectrum','car2_sensitivity'),
                            
                            ('Spectrum','line_selection'),
                            ('Spectrum','manual_amplitude_729'),
@@ -41,8 +41,7 @@ class spectrum(experiment):
                            ('Crystallization', 'pmt_record_duration'),
                            ('Crystallization', 'pmt_threshold'),
                            ('Crystallization', 'use_camera'),
-]
-                           #('Display', 'relative_frequencies'),                           ]
+                           ]
     
     spectrum_optional_parmeters = [
                           ('Spectrum', 'window_name')
@@ -59,35 +58,35 @@ class spectrum(experiment):
         parameters.remove(('Excitation_729','rabi_excitation_frequency'))
         return parameters
     
-    def initialize(self, cxn, context, ident, use_camera_override=None):
+    def initialize(self, cxn, context, ident):
         self.ident = ident
+        
+        ## ???
+        #print "spectrum"
+        #import IPython
+        #IPython.embed()            
+        
         self.excite = self.make_experiment(excitation_729)
-        self.excite.initialize(cxn, context, ident, use_camera_override)
+        self.excite.initialize(cxn, context, ident)
         if self.parameters.Crystallization.auto_crystallization:
             self.crystallizer = self.make_experiment(crystallization)
             self.crystallizer.initialize(cxn, context, ident)
         self.scan = []
         self.amplitude = None
         self.duration = None
-        self.cxnlab = labrad.connect('192.168.169.49') #connection to labwide network
+        #self.cxnlab = labrad.connect('192.168.169.49') #connection to labwide network
         self.drift_tracker = cxn.sd_tracker
         self.dv = cxn.data_vault
         self.spectrum_save_context = cxn.context()
-        try:
-            self.grapher = cxn.grapher
-        except: self.grapher = None
-        self.cxn = cxn
-        
+    
     def setup_sequence_parameters(self):
         sp = self.parameters.Spectrum
         if sp.scan_selection == 'manual':
             minim,maxim,steps = sp.manual_scan
             duration = sp.manual_excitation_time
             amplitude = sp.manual_amplitude_729
-            self.carrier_frequency = WithUnit(0.0, 'MHz')
         elif sp.scan_selection == 'auto':
             center_frequency = cm.frequency_from_line_selection(sp.scan_selection, None , sp.line_selection, self.drift_tracker)
-            self.carrier_frequency = center_frequency
             center_frequency = cm.add_sidebands(center_frequency, sp.sideband_selection, self.parameters.TrapFrequencies)
             span, resolution, duration, amplitude = sp[sp.sensitivity_selection]
             minim = center_frequency - span / 2.0
@@ -101,17 +100,11 @@ class spectrum(experiment):
         minim = minim['MHz']; maxim = maxim['MHz']
         self.scan = np.linspace(minim,maxim, steps)
         self.scan = [WithUnit(pt, 'MHz') for pt in self.scan]
-
-    def get_window_name(self):
-        if self.parameters.Spectrum.scan_selection == 'manual':
-            return ['spectrum']
-        else:
-            car = self.parameters.Spectrum.line_selection
-            sb = self.parameters.Spectrum.sideband_selection
-            window_name = car
-            if sb != [0, 0, 0, 0]: # the scan is some kind of sideband scan
-                window_name = window_name + str(sb)
-            return [window_name]
+        
+        ## here
+        #import IPython
+        #IPython.embed()
+        
         
     def setup_data_vault(self):
         localtime = time.localtime()
@@ -123,50 +116,32 @@ class spectrum(experiment):
         self.dv.cd(directory ,True, context = self.spectrum_save_context)
         output_size = self.excite.output_size
         dependants = [('Excitation','Ion {}'.format(ion),'Probability') for ion in range(output_size)]
-        ds = self.dv.new('Spectrum {}'.format(datasetNameAppend),[('Excitation', 'us')], dependants , context = self.spectrum_save_context)
-        window_name = self.parameters.get('Spectrum.window_name', ['spectrum'])[0]
-        #window_name = self.get_window_name()
-        self.dv.add_parameter('Window', [window_name], context = self.spectrum_save_context)
-        #self.dv.add_parameter('plotLive', False, context = self.spectrum_save_context)
-        self.save_parameters(self.dv, self.cxn, self.cxnlab, self.spectrum_save_context)
-        sc = []
-        #if self.parameters.Display.relative_frequencies:
-        #    sc =[x - self.carrier_frequency for x in self.scan]
-        #else: 
-	sc = self.scan
-        if self.grapher is not None:
-            self.grapher.plot_with_axis(ds, window_name, sc, False)
+        self.dv.new('Spectrum {}'.format(datasetNameAppend),[('Excitation', 'us')], dependants , context = self.spectrum_save_context)
+        window_name = self.parameters.get('Spectrum.window_name', ['Spectrum'])
+        self.dv.add_parameter('Window', window_name, context = self.spectrum_save_context)
+        self.dv.add_parameter('plotLive', True, context = self.spectrum_save_context)
         
     def run(self, cxn, context):
-        import time
-        #t0 = time.time()
-        
-        self.setup_sequence_parameters()
         self.setup_data_vault()
-        
-
-        fr = []
-        exci = []
-        
+        self.setup_sequence_parameters()
         for i,freq in enumerate(self.scan):
             should_stop = self.pause_or_stop()
             if should_stop: break
-            excitation = self.get_excitation_crystallizing(cxn, context, freq)
+            
+            # circumvent crystallization
+            #excitation = self.get_excitation_crystallizing(cxn, context, freq)
+            
+            # start: run sequence directly
+            self.parameters['Excitation_729.rabi_excitation_frequency'] = freq
+            self.excite.set_parameters(self.parameters)
+            excitation, readouts = self.excite.run(cxn, context)
+            # end: run sequence directly
+            
             if excitation is None: break
-            if self.parameters.Display.relative_frequencies:
-                submission = [freq['MHz'] - self.carrier_frequency['MHz']]
-            else:
-                submission = [freq['MHz']]
+            submission = [freq['MHz']]
             submission.extend(excitation)
             self.dv.add(submission, context = self.spectrum_save_context)
             self.update_progress(i)
-            fr.append(submission[0])
-            exci.append(excitation)
-            
-        #t1 = time.time()
-        
-        #print t1 - t0    
-        return fr, exci
     
     def get_excitation_crystallizing(self, cxn, context, freq):
         excitation = self.do_get_excitation(cxn, context, freq)
@@ -214,8 +189,7 @@ class spectrum(experiment):
     def save_parameters(self, dv, cxn, cxnlab, context):
         measuredDict = dvParameters.measureParameters(cxn, cxnlab)
         dvParameters.saveParameters(dv, measuredDict, context)
-        dvParameters.saveParameters(dv, dict(self.parameters), context)
-        cxnlab.disconnect()
+        dvParameters.saveParameters(dv, dict(self.parameters), context)   
 
 if __name__ == '__main__':
     cxn = labrad.connect()

@@ -62,7 +62,8 @@ class adiabatic_cooling_test(experiment):
 ###	
 	def initialize(self, cxn, context, ident):
 		self.ident = ident  #
-		self.dac_server = cxn.dac_server
+		self.dac_ser
+		ver = cxn.dac_server
 		self.pulser = cxn.pulser
 		
 		self.excite = self.make_experiment(excitation_729_with_multipole_ramp)

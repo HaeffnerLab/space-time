@@ -21,7 +21,7 @@ nodeDict = {
 				'Pulser', 
 				'ParameterVault',
 				'SD Tracker',
-		#		'ScriptScanner'
+				'ScriptScanner'
 				]
 	}
 

@@ -155,7 +155,7 @@ class base_excitation(experiment):
         # commented since we don't have a crystallizing beam yet
         #self.pulser.switch_manual('crystallization',  False)
         #switch off 729 at the beginning
-        self.pulser.output('729DP', False)
+        self.pulser.output('729local', False)
     
     def plot_current_sequence(self, cxn):
         from common.okfpgaservers.pulser.pulse_sequences.plot_sequence import SequencePlotter

@@ -1,0 +1,129 @@
+2016-08-25 15:17:47-0700 [-] Log opened.
+2016-08-25 15:17:47-0700 [-] Starting factory <__main__.ScriptScanner instance at 0x370ed88>
+2016-08-25 15:17:47-0700 [Uninitialized] connected to 127.0.0.1:7682
+2016-08-25 15:17:47-0700 [ServerProtocol,client] ScriptScanner starting...
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/matplotlib/__init__.py:889: exceptions.UserWarning: Duplicate key in file "/home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/matplotlib/mpl-data/matplotlibrc", line #469
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/lmfit/ui/__init__.py:23: exceptions.UserWarning: lmfit.Fitter will use basic mode, not IPython: need IPython2.
+2016-08-25 15:17:47-0700 [ServerProtocol,client] space_time.scripts.experiments.CalibrationScans.calibrate_heating_rates
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] Script Control Error importing:  cannot import name scan_methods
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] ScriptScanner now serving
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] space_time.scripts.experiments.CalibrationScans.calibrate_heating_rates
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] Script Control Error importing:  cannot import name scan_methods
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:17:47-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:18:01-0700 [-] Received SIGINT, shutting down.
+2016-08-25 15:18:01-0700 [ServerProtocol,client] There was an error: Connection to the other side was lost in a non-clean fashion: Connection lost.
+2016-08-25 15:18:01-0700 [ServerProtocol,client] Stopping factory <__main__.ScriptScanner instance at 0x370ed88>
+2016-08-25 15:18:01-0700 [-] Main loop terminated.
+2016-08-25 15:22:15-0700 [-] Log opened.
+2016-08-25 15:22:15-0700 [-] Starting factory <__main__.ScriptScanner instance at 0x2f0fd88>
+2016-08-25 15:22:15-0700 [Uninitialized] connected to 127.0.0.1:7682
+2016-08-25 15:22:15-0700 [ServerProtocol,client] ScriptScanner starting...
+2016-08-25 15:22:15-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:22:15-0700 [ServerProtocol,client] /home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/matplotlib/__init__.py:889: exceptions.UserWarning: Duplicate key in file "/home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/matplotlib/mpl-data/matplotlibrc", line #469
+2016-08-25 15:22:16-0700 [ServerProtocol,client] /home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/lmfit/ui/__init__.py:23: exceptions.UserWarning: lmfit.Fitter will use basic mode, not IPython: need IPython2.
+2016-08-25 15:22:16-0700 [ServerProtocol,client] There was an error: list.remove(x): x not in list
+2016-08-25 15:22:16-0700 [ServerProtocol,client] Stopping factory <__main__.ScriptScanner instance at 0x2f0fd88>
+2016-08-25 15:22:16-0700 [-] Main loop terminated.
+2016-08-25 15:23:14-0700 [-] Log opened.
+2016-08-25 15:23:14-0700 [-] Starting factory <__main__.ScriptScanner instance at 0x3070d40>
+2016-08-25 15:23:14-0700 [Uninitialized] connected to 127.0.0.1:7682
+2016-08-25 15:23:14-0700 [ServerProtocol,client] ScriptScanner starting...
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/matplotlib/__init__.py:889: exceptions.UserWarning: Duplicate key in file "/home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/matplotlib/mpl-data/matplotlibrc", line #469
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/lmfit/ui/__init__.py:23: exceptions.UserWarning: lmfit.Fitter will use basic mode, not IPython: need IPython2.
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:23:14-0700 [ServerProtocol,client] ScriptScanner now serving
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:23:14-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:23:18-0700 [-] Received SIGINT, shutting down.
+2016-08-25 15:23:18-0700 [ServerProtocol,client] There was an error: Connection to the other side was lost in a non-clean fashion: Connection lost.
+2016-08-25 15:23:18-0700 [ServerProtocol,client] Stopping factory <__main__.ScriptScanner instance at 0x3070d40>
+2016-08-25 15:23:18-0700 [-] Main loop terminated.
+2016-08-25 15:25:59-0700 [-] Log opened.
+2016-08-25 15:25:59-0700 [-] Starting factory <__main__.ScriptScanner instance at 0x3980d88>
+2016-08-25 15:25:59-0700 [Uninitialized] connected to 127.0.0.1:7682
+2016-08-25 15:25:59-0700 [ServerProtocol,client] ScriptScanner starting...
+2016-08-25 15:25:59-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:25:59-0700 [ServerProtocol,client] /home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/matplotlib/__init__.py:889: exceptions.UserWarning: Duplicate key in file "/home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/matplotlib/mpl-data/matplotlibrc", line #469
+2016-08-25 15:25:59-0700 [ServerProtocol,client] /home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/lmfit/ui/__init__.py:23: exceptions.UserWarning: lmfit.Fitter will use basic mode, not IPython: need IPython2.
+2016-08-25 15:25:59-0700 [ServerProtocol,client] There was an error: list.remove(x): x not in list
+2016-08-25 15:25:59-0700 [ServerProtocol,client] Stopping factory <__main__.ScriptScanner instance at 0x3980d88>
+2016-08-25 15:25:59-0700 [-] Main loop terminated.
+2016-08-25 15:27:16-0700 [-] Log opened.
+2016-08-25 15:27:16-0700 [-] Starting factory <__main__.ScriptScanner instance at 0x2231dd0>
+2016-08-25 15:27:16-0700 [Uninitialized] connected to 127.0.0.1:7682
+2016-08-25 15:27:16-0700 [ServerProtocol,client] ScriptScanner starting...
+2016-08-25 15:27:16-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:27:16-0700 [ServerProtocol,client] /home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/matplotlib/__init__.py:889: exceptions.UserWarning: Duplicate key in file "/home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/matplotlib/mpl-data/matplotlibrc", line #469
+2016-08-25 15:27:16-0700 [ServerProtocol,client] /home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/lmfit/ui/__init__.py:23: exceptions.UserWarning: lmfit.Fitter will use basic mode, not IPython: need IPython2.
+2016-08-25 15:27:16-0700 [ServerProtocol,client] There was an error: list.remove(x): x not in list
+2016-08-25 15:27:16-0700 [ServerProtocol,client] Stopping factory <__main__.ScriptScanner instance at 0x2231dd0>
+2016-08-25 15:27:16-0700 [-] Main loop terminated.
+2016-08-25 15:29:31-0700 [-] Log opened.
+2016-08-25 15:29:31-0700 [-] Starting factory <__main__.ScriptScanner instance at 0x1c58d88>
+2016-08-25 15:29:31-0700 [Uninitialized] connected to 127.0.0.1:7682
+2016-08-25 15:29:31-0700 [ServerProtocol,client] ScriptScanner starting...
+2016-08-25 15:29:31-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:29:31-0700 [ServerProtocol,client] /home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/matplotlib/__init__.py:889: exceptions.UserWarning: Duplicate key in file "/home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/matplotlib/mpl-data/matplotlibrc", line #469
+2016-08-25 15:29:31-0700 [ServerProtocol,client] /home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/lmfit/ui/__init__.py:23: exceptions.UserWarning: lmfit.Fitter will use basic mode, not IPython: need IPython2.
+2016-08-25 15:29:31-0700 [ServerProtocol,client] There was an error: list.remove(x): x not in list
+2016-08-25 15:29:31-0700 [ServerProtocol,client] Stopping factory <__main__.ScriptScanner instance at 0x1c58d88>
+2016-08-25 15:29:31-0700 [-] Main loop terminated.
+2016-08-25 15:29:45-0700 [-] Log opened.
+2016-08-25 15:29:45-0700 [-] Starting factory <__main__.ScriptScanner instance at 0x327ed40>
+2016-08-25 15:29:45-0700 [Uninitialized] connected to 127.0.0.1:7682
+2016-08-25 15:29:45-0700 [ServerProtocol,client] ScriptScanner starting...
+2016-08-25 15:29:45-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:29:45-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:29:45-0700 [ServerProtocol,client] /home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/matplotlib/__init__.py:889: exceptions.UserWarning: Duplicate key in file "/home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/matplotlib/mpl-data/matplotlibrc", line #469
+2016-08-25 15:29:45-0700 [ServerProtocol,client] /home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/lmfit/ui/__init__.py:23: exceptions.UserWarning: lmfit.Fitter will use basic mode, not IPython: need IPython2.
+2016-08-25 15:29:45-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:29:45-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:29:45-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:29:45-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:29:45-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:29:45-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:29:45-0700 [ServerProtocol,client] ScriptScanner now serving
+2016-08-25 15:29:46-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:29:46-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:29:46-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:29:46-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:29:46-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:29:46-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:29:46-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:29:46-0700 [ServerProtocol,client] /home/space-time/LabRAD:/home/space-time/LabRAD
+2016-08-25 15:29:53-0700 [-] Received SIGINT, shutting down.
+2016-08-25 15:29:53-0700 [ServerProtocol,client] There was an error: Connection to the other side was lost in a non-clean fashion: Connection lost.
+2016-08-25 15:29:53-0700 [ServerProtocol,client] Stopping factory <__main__.ScriptScanner instance at 0x327ed40>
+2016-08-25 15:29:53-0700 [-] Main loop terminated.
