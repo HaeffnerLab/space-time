@@ -27,6 +27,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         script_scanner = self.makeScriptControlWidget(reactor, cxn)
         histogram = self.make_histogram_widget(reactor, cxn)
         drift_tracker = self.makeDriftTrackerWidget(reactor, cxn)
+        config_editor = self.make_config_editor_widget(reactor, cxn)
         
         self.tabWidget = QtGui.QTabWidget()
         self.tabWidget.addTab(laser_room,'&Laser Room')
@@ -34,7 +35,8 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         self.tabWidget.addTab(script_scanner, '&Script Scanner')
         self.tabWidget.addTab(histogram, '&Readout Histogram')
         self.tabWidget.addTab(drift_tracker, '&Drift Tracker')
-        
+        self.tabWidget.addTab(config_editor, 'Config &Editor')
+
         layout.addWidget(self.tabWidget)
         centralWidget.setLayout(layout)
         self.setCentralWidget(centralWidget)
@@ -78,7 +80,14 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         tracker = drift_tracker(reactor, cxn)
         dt_tab.addTab(tracker,"Drift Tracker")
         return dt_tab
-        
+ 
+    def make_config_editor_widget(self, reactor, cxn):
+        config_editor_tab = QtGui.QTabWidget()
+        from common.clients.CONFIG_EDITOR import CONFIG_EDITOR
+        config_editor = CONFIG_EDITOR(reactor, cxn)
+        config_editor_tab.addTab(config_editor,"Config Editor")
+        return config_editor_tab
+       
     
     def makeControlWidget(self, reactor, cxn):
         widget = QtGui.QWidget()
