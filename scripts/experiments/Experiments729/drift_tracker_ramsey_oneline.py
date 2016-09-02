@@ -43,7 +43,6 @@ class drift_tracker_ramsey_oneline(experiment):
         parameters.remove(('TrapFrequencies','radial_frequency_2')),
         parameters.remove(('TrapFrequencies','rf_drive_frequency')),
         #will be disabling sideband cooling automatically
-        parameters.remove(('SidebandCooling','sideband_cooling_enable')),
         parameters.remove(('SidebandCooling','frequency_selection')),
         parameters.remove(('SidebandCooling','manual_frequency_729')),
         parameters.remove(('SidebandCooling','line_selection')),
@@ -64,7 +63,8 @@ class drift_tracker_ramsey_oneline(experiment):
         parameters.remove(('SidebandCoolingPulsed','sideband_cooling_pulsed_duration_additional_866')),
         parameters.remove(('SidebandCoolingPulsed','sideband_cooling_pulsed_duration_between_pulses')),                          
         #will be enable optical pumping automatically
-        parameters.remove(('OpticalPumping', 'optical_pumping_enable'))
+        parameters.remove(('StatePreparation', 'optical_pumping_enable'))
+        parameters.remove(('StatePreparation', 'sideband_cooling_enable'))
         return parameters
     
     def initialize(self, cxn, context, ident):
@@ -86,7 +86,7 @@ class drift_tracker_ramsey_oneline(experiment):
         directory.extend(dirappend)
         self.dv.cd(directory ,True)
         #try opening the existing dataset
-        datasetname = 'RameyDriftTrack {}'.format(line_name)
+        datasetname = 'RamseyDriftTrack {}'.format(line_name)
         datasets_in_folder = self.dv.dir()[1]
         names = sorted([name for name in datasets_in_folder if datasetname in name])
         if names:

@@ -1,7 +1,7 @@
 import labrad
 import numpy as np
 from common.abstractdevices.script_scanner.scan_methods import experiment
-from cct.scripts.PulseSequences.subsequences.RecordTimeTags import record_timetags
+from space_time.scripts.PulseSequences.subsequences.RecordTimeTags import record_timetags
 from processFFT import processFFT
 from treedict import TreeDict
 
@@ -16,12 +16,6 @@ class fft_spectrum(experiment):
                            ('FFT','record_time'),
                            ]
     
-    @classmethod
-    def all_required_parameters(cls):
-        parameters = set(cls.required_parameters)
-        parameters = list(parameters)
-        return parameters     
-    
     def initialize(self, cxn, context, ident):
         self.ident = ident
         self.processor = processFFT()
@@ -31,14 +25,11 @@ class fft_spectrum(experiment):
         self.freq_offset = self.parameters.FFT.frequency_offset
         self.dv = cxn.data_vault
         self.pulser = cxn.pulser
-
-        
-    def setup_parameters(self):
         center_freq = self.parameters.TrapFrequencies.rf_drive_frequency
         self.time_resolution = self.pulser.get_timetag_resolution()
         self.freqs = self.processor.computeFreqDomain(self.record_time['s'], self.freq_span['Hz'],  self.freq_offset['Hz'], center_freq['Hz'])
         self.programPulseSequence(self.record_time)
-        
+    
     def programPulseSequence(self, record_time):
         seq = record_timetags(TreeDict.fromdict({'RecordTimetags.record_timetags_duration': record_time}))
         seq.programSequence(self.pulser)
@@ -58,11 +49,8 @@ class fft_spectrum(experiment):
         return peakArea
 
     def run(self, cxn, context):
-        self.setup_parameters()
-        print self.parameters.TrapFrequencies.rf_drive_frequency
         pwr = self.getPowerSpectrum()
-        print pwr
-        self.saveData(pwr)  ##put back in later
+        self.saveData(pwr)
     
     def getPowerSpectrum(self):
         pwr = np.zeros_like(self.freqs)
@@ -74,14 +62,7 @@ class fft_spectrum(experiment):
             self.pulser.wait_sequence_done()
             self.pulser.stop_sequence()
             timetags = self.pulser.get_timetags().asarray
-            exporttags = True
-            print timetags
-            if exporttags:
-                np.savetxt("tags"+str(i)+".csv",timetags,delimiter=",") 
             pwr += self.processor.getPowerSpectrum(self.freqs, timetags, self.record_time['s'], self.time_resolution)
-            #put back in later
-            #import IPython
-            #IPython.embed()
             progress = self.min_progress + (self.max_progress - self.min_progress) * (i + 1) / float(self.average)
             self.sc.script_set_progress(self.ident,  progress)
         pwr = pwr / float(self.average)

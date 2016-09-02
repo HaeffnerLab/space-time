@@ -16,8 +16,8 @@ class spectrum(experiment):
                            ('Spectrum','normal'),
                            ('Spectrum','fine'),
                            ('Spectrum','ultimate'),
-                           #('Spectrum','car1_sensitivity'),
-                           #('Spectrum','car2_sensitivity'),
+                           ('Spectrum','car1_sensitivity'),
+                           ('Spectrum','car2_sensitivity'),
                            
                            ('Spectrum','line_selection'),
                            ('Spectrum','manual_amplitude_729'),
@@ -41,8 +41,8 @@ class spectrum(experiment):
                            ('Crystallization', 'pmt_record_duration'),
                            ('Crystallization', 'pmt_threshold'),
                            ('Crystallization', 'use_camera'),
-]
-                           #('Display', 'relative_frequencies'),                           ]
+
+                           ('Display', 'relative_frequencies'),                           ]
     
     spectrum_optional_parmeters = [
                           ('Spectrum', 'window_name')
@@ -130,10 +130,9 @@ class spectrum(experiment):
         #self.dv.add_parameter('plotLive', False, context = self.spectrum_save_context)
         self.save_parameters(self.dv, self.cxn, self.cxnlab, self.spectrum_save_context)
         sc = []
-        #if self.parameters.Display.relative_frequencies:
-        #    sc =[x - self.carrier_frequency for x in self.scan]
-        #else: 
-	sc = self.scan
+        if self.parameters.Display.relative_frequencies:
+            sc =[x - self.carrier_frequency for x in self.scan]
+        else: sc = self.scan
         if self.grapher is not None:
             self.grapher.plot_with_axis(ds, window_name, sc, False)
         

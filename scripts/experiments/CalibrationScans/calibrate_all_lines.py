@@ -90,7 +90,7 @@ class calibrate_all_lines(experiment):
         #self.spectrum.excite.output_size = 1
         self.fitter = peak_fitter()
         self.pv = cxn.parametervault
-        self.dds_cw = cxn.dds_cw
+        #self.dds_cw = cxn.dds_cw
 
         
     def run(self, cxn, context):
@@ -98,10 +98,10 @@ class calibrate_all_lines(experiment):
         dt = self.parameters.DriftTracker
         
         # save original state of DDS 5
-        dds5_state = self.dds_cw.output('5')
+        #dds5_state = self.dds_cw.output('5')
 
-        self.dds_cw.output('5', True)
-        time.sleep(1)
+        #self.dds_cw.output('5', True)
+        #time.sleep(1)
         ### RUN THE FIRST CARRIER
         
         replace = TreeDict.fromdict({
@@ -222,11 +222,11 @@ class calibrate_all_lines(experiment):
            if self.parameters.CalibrationScans.feedback_sidebands:
               self.submit_trap_frequencies(sb_1, sb_2)
         
-        # resetting DDS5 state
-        time.sleep(1)
-        #self.dds_cw.output('5', False)
-        self.dds_cw.output('5', dds5_state)
-        time.sleep(1)
+        ## resetting DDS5 state
+        #time.sleep(1)
+        ##self.dds_cw.output('5', False)
+        #self.dds_cw.output('5', dds5_state)
+        #time.sleep(1)
 
     def submit_dt(self, f1, line1, f2, line2):
         submission = [

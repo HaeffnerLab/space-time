@@ -53,10 +53,7 @@ class calibrate_temperature(experiment):
         parameters = parameters.union(set(spectrum.all_required_parameters()))
         parameters = list(parameters)
         for p in cls.remove_parameters:
-	    try:
-             parameters.remove(p)
-	    except:
-	     print p
+            parameters.remove(p)
         #will be disabling sideband cooling automatically
         parameters.remove(('SidebandCooling','frequency_selection'))
         parameters.remove(('SidebandCooling','manual_frequency_729'))
@@ -145,10 +142,10 @@ class calibrate_temperature(experiment):
         ex = np.array(ex)
         ex = ex.flatten()
 
-        ## take the maximum of the line excitation
+        # take the maximum of the line excitation
         #rsb_ex = np.max(ex)
 
-        fit_pos, rsb_ex, fit_width = self.fitter.fit(fr, ex, return_all_params = True)
+        fit_center, rsb_ex, fit_width = self.fitter.fit(fr, ex, return_all_params = True)
         #sb_1 = WithUnit(abs(sb_1), 'MHz')
 
         #### RUN THE BLUE SIDEBAND
@@ -182,12 +179,12 @@ class calibrate_temperature(experiment):
         # take the maximum of the line excitation
         #bsb_ex = np.max(ex)
 
-        fit_pos, bsb_ex, fit_width = self.fitter.fit(fr, ex, return_all_params = True)
+        fit_center, bsb_ex, fit_width = self.fitter.fit(fr, ex, return_all_params = True)
         #sb_2 = WithUnit(abs(sb_2), 'MHz')
              
         # resetting DDS5 state
-        time.sleep(1)
-        #self.dds_cw.output('5', False)
+        #time.sleep(1)
+        ##self.dds_cw.output('5', False)
         #self.dds_cw.output('5', dds5_state)
         #time.sleep(1)
 

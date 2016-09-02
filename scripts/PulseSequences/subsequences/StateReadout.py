@@ -40,4 +40,3 @@ class state_readout(pulse_sequence):
         self.addTTL('ReadoutCount', self.start, st.state_readout_duration)
         if st.use_camera_for_readout:
             self.addTTL('camera', self.start, st.camera_trigger_width)
-        self.end = self.start + st.state_readout_duration

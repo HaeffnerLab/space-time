@@ -4,7 +4,7 @@ class excitation_729(base_excitation):
     from space_time.scripts.PulseSequences.spectrum_rabi import spectrum_rabi
     name = 'Excitation729'
     pulse_sequence = spectrum_rabi
-    
+
 class excitation_729_with_multipole_ramp(base_excitation):
     from space_time.scripts.PulseSequences.spectrum_rabi_with_multipole_ramp import spectrum_rabi_with_multipole_ramp
     name = 'excitation_729_with_multipole_ramp'
@@ -45,6 +45,11 @@ class excitation_ramsey_with_heating(base_excitation):
     from space_time.scripts.PulseSequences.ramsey_with_heating import ramsey_with_heating
     name = 'RamseyHeating'
     pulse_sequence = ramsey_with_heating
+    
+class ramsey_with_stark(base_excitation):
+    from space_time.scripts.PulseSequences.stark_shift_global import stark_shift_global
+    name = 'StarkShiftGlobal'
+    pulse_sequence = stark_shift_global 
     
 if __name__ == '__main__':
     import labrad

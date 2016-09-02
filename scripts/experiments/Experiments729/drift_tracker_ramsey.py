@@ -35,13 +35,13 @@ class drift_tracker_ramsey(experiment):
         self.drift_tracker = cxn.sd_tracker
         self.ramsey_dt = self.make_experiment(drift_tracker_ramsey_oneline)
         self.ramsey_dt.initialize(cxn, context, ident)
-        #self.dds_cw = cxn.dds_cw
+        self.dds_cw = cxn.dds_cw
         
     def run(self, cxn, context):
         import time
-        #dds5_state = self.dds_cw.output('5')
+        dds5_state = self.dds_cw.output('5')
 
-        #self.dds_cw.output('5', True)
+        self.dds_cw.output('5', True)
         time.sleep(1)
         dt = self.parameters.DriftTracker
         ramsey_dt = self.parameters.DriftTrackerRamsey
@@ -78,7 +78,7 @@ class drift_tracker_ramsey(experiment):
         # resetting DDS5 state
         time.sleep(1)
         #self.dds_cw.output('5', False)
-        #self.dds_cw.output('5', dds5_state)
+        self.dds_cw.output('5', dds5_state)
         time.sleep(1)
 
     def submit_centers(self, replace_1, center1, replace_2, center2):     
