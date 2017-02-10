@@ -1,6 +1,7 @@
 from common.okfpgaservers.pulser.pulse_sequences.pulse_sequence import pulse_sequence
 from OpticalPumpingContinuous import optical_pumping_continuous
 from OpticalPumpingPulsed import optical_pumping_pulsed
+from OpticalPumping397Sigma import optical_pumping_397sigma
 from treedict import TreeDict
 
 class optical_pumping(pulse_sequence):
@@ -16,7 +17,7 @@ class optical_pumping(pulse_sequence):
                   ('OpticalPumping','optical_pumping_amplitude_866')
                   ]
     
-    required_subsequences = [optical_pumping_continuous, optical_pumping_pulsed]
+    required_subsequences = [optical_pumping_continuous, optical_pumping_pulsed,optical_pumping_397sigma]
     replaced_parameters = {
                            optical_pumping_continuous:[
                                                        ('OpticalPumpingContinuous','optical_pumping_continuous_frequency_854'),
@@ -40,12 +41,6 @@ class optical_pumping(pulse_sequence):
         op = self.parameters.OpticalPumping
         
         if op.optical_pumping_type == 'continuous':
-            continuous = True
-        elif op.optical_pumping_type == 'pulsed':
-            continuous = False
-        else:
-            raise Exception ('Incorrect optical pumping type {0}'.format(op.optical_pumping_type))
-        if continuous:
             replace = {
                        'OpticalPumpingContinuous.optical_pumping_continuous_frequency_854':op.optical_pumping_frequency_854,
                        'OpticalPumpingContinuous.optical_pumping_continuous_amplitude_854':op.optical_pumping_amplitude_854,
@@ -55,7 +50,7 @@ class optical_pumping(pulse_sequence):
                        'OpticalPumpingContinuous.optical_pumping_continuous_amplitude_866':op.optical_pumping_amplitude_866,
                        }
             self.addSequence(optical_pumping_continuous, TreeDict.fromdict(replace))
-        else:
+        elif op.optical_pumping_type == 'pulsed':
             #pulsed
             replace = {
                        'OpticalPumpingPulsed.optical_pumping_pulsed_frequency_854':op.optical_pumping_frequency_854,
@@ -66,3 +61,9 @@ class optical_pumping(pulse_sequence):
                        'OpticalPumpingPulsed.optical_pumping_pulsed_amplitude_866':op.optical_pumping_amplitude_866,
                        }
             self.addSequence(optical_pumping_pulsed, TreeDict.fromdict(replace))
+        elif op.optical_pumping_type == '397sigma':
+            replace = {
+                       }
+            self.addSequence(optical_pumping_397sigma, TreeDict.fromdict(replace))            
+        else:
+            raise Exception ('Incorrect optical pumping type {0}'.format(op.optical_pumping_type))

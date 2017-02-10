@@ -33,6 +33,7 @@ class base_excitation(experiment):
                             #('StateReadout', 'state_readout_duration'),
                             ('StateReadout', 'pmt_readout_duration'),
                             ('StateReadout', 'camera_readout_duration'),
+                            ('StateReadout', 'excitation_prob'),
                             
                             ('IonsOnCamera','ion_number'),
                             ('IonsOnCamera','vertical_min'),
@@ -61,7 +62,7 @@ class base_excitation(experiment):
         params.remove(('SidebandCooling', 'sideband_cooling_frequency_729'))
         params.remove(('OpticalPumpingAux', 'aux_optical_frequency_729'))
         params.remove(('StateReadout', 'state_readout_duration'))
-        params.remove(('SequentialSBCooling', 'frequency'))
+        #params.remove(('SequentialSBCooling', 'frequency'))
         return params
     
     def initialize(self, cxn, context, ident, use_camera_override=None):
@@ -74,6 +75,7 @@ class base_excitation(experiment):
         self.readout_save_iteration = 0
         
         self.use_camera = self.parameters.StateReadout.use_camera_for_readout
+        self.excitation_prob = self.parameters.StateReadout.excitation_prob
         
         self.setup_sequence_parameters()
         self.setup_initial_switches()
@@ -141,8 +143,9 @@ class base_excitation(experiment):
         self.parameters['OpticalPumpingAux.aux_optical_frequency_729'] = aux_optical_pumping_frequency
         sc = self.parameters.SidebandCooling
         sideband_cooling_frequency = cm.frequency_from_line_selection(sc.frequency_selection, sc.manual_frequency_729, sc.line_selection, self.drift_tracker, sp.sideband_cooling_enable)
+        trap = self.parameters.TrapFrequencies
         if sc.frequency_selection == 'auto': 
-            trap = self.parameters.TrapFrequencies
+            #trap = self.parameters.TrapFrequencies
             sideband_cooling_frequency = cm.add_sidebands(sideband_cooling_frequency, sc.sideband_selection, trap)
         self.parameters['SidebandCooling.sideband_cooling_frequency_729'] = sideband_cooling_frequency
         print "sbc"
@@ -169,8 +172,8 @@ class base_excitation(experiment):
         from common.okfpgaservers.pulser.pulse_sequences.plot_sequence import SequencePlotter
         dds = cxn.pulser.human_readable_dds()
         ttl = cxn.pulser.human_readable_ttl()
-        channels = cxn.pulser.get_channels().asarray
-        sp = SequencePlotter(ttl.asarray, dds.aslist, channels)
+        channels = cxn.pulser.get_channels()
+        sp = SequencePlotter(ttl, dds.aslist, channels)
         sp.makePlot()
         
     def run(self, cxn, context):
@@ -203,7 +206,7 @@ class base_excitation(experiment):
         if not self.use_camera:
             print "not using camera!"
             #get percentage of the excitation using the PMT threshold
-            readouts = self.pulser.get_readout_counts().asarray
+            readouts = self.pulser.get_readout_counts()
             
            
         
@@ -213,7 +216,11 @@ class base_excitation(experiment):
             else:
                 #got no readouts
                 perc_excited = -1.0
-            ion_state = [perc_excited]
+            
+            if self.excitation_prob:
+                ion_state = [perc_excited]
+            else:
+                ion_state = [numpy.sum(readouts) / float(len(readouts))]
 #             print readouts
         else:
             #get the percentage of excitation using the camera state readout
@@ -223,7 +230,7 @@ class base_excitation(experiment):
                 
                 self.finalize(cxn, context)
                 raise Exception ("Did not get all kinetic images from camera")
-            images = self.camera.get_acquired_data(repetitions).asarray
+            images = self.camera.get_acquired_data(repetitions)
             self.camera.abort_acquisition()
             x_pixels = int( (self.image_region[3] - self.image_region[2] + 1.) / (self.image_region[0]) )
             y_pixels = int(self.image_region[5] - self.image_region[4] + 1.) / (self.image_region[1])

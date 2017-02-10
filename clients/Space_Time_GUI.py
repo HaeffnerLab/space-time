@@ -15,7 +15,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         cxn = connection()
         yield cxn.connect()
         self.create_layout(cxn)
-    
+
     def create_layout(self, cxn):
 
 
@@ -57,7 +57,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         widget = QtGui.QWidget()
  
         #from common.clients.CAVITY_CONTROL import cavityWidget
-	from common.clients.LASERDAC_CONTROL import DAC_Control as laserdac_control_widget
+        from common.clients.LASERDAC_CONTROL import DAC_Control as laserdac_control_widget
         from common.clients.multiplexer.MULTIPLEXER_CONTROL import multiplexerWidget
         gridLayout = QtGui.QGridLayout()
 
@@ -107,7 +107,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         gridLayout.addWidget(actions_widget(reactor, cxn),      3,3,2,1)
         gridLayout.addWidget(DAC_Control(reactor),              0,0,7,3)
         gridLayout.addWidget(linetriggerWidget(reactor),        2,3,1,1)
-        
+
         widget.setLayout(gridLayout)
         return widget
 
