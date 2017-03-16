@@ -53,8 +53,8 @@ class calibrate_heating_rates(experiment):
         self.save_context = cxn.context()
         self.dv = cxn.data_vault
         self.pv = cxn.parametervault
-        self.dds_cw = cxn.dds_cw
-        self.cxnlab = labrad.connect('192.168.169.49') #connection to labwide network
+        #self.dds_cw = cxn.dds_cw
+        self.cxnlab = labrad.connect('192.168.169.49', password='lab', tls_mode='off') #connection to labwide network
         
     def run(self, cxn, context):
 
@@ -89,7 +89,7 @@ class calibrate_heating_rates(experiment):
 
             submission = [heat_time['us']]
             submission.extend([nbar])
-            print nbar
+            #print nbar
             self.dv.add(submission, context = self.save_context)
    
     def finalize(self, cxn, context):

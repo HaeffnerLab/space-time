@@ -22,5 +22,5 @@ class optical_pumping_397sigma(pulse_sequence):
         repump_dur_866 = ops.optical_pumping_397sigma_duration + ops.optical_pumping_397sigma_repump_additional
         self.end = self.start + repump_dur_866
         self.addDDS(channel_397, self.start, ops.optical_pumping_397sigma_duration, ops.optical_pumping_397sigma_frequency_397, ops.optical_pumping_397sigma_amplitude_397)
-        print 'op:', ops.optical_pumping_397sigma_frequency_397
+        #print 'op:', ops.optical_pumping_397sigma_frequency_397
         self.addDDS('866', self.start, repump_dur_866, ops.optical_pumping_397sigma_frequency_866, ops.optical_pumping_397sigma_amplitude_866)

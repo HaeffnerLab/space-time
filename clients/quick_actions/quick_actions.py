@@ -12,8 +12,8 @@ class actions_widget(QtGui.QWidget):
         QtGui.QDialog.__init__(self)
         self.use_second_397 = False
 
-        self.second_397_DC_box = QtGui.QCheckBox('Second 397 DC')
-        self.second_397_SD_box = QtGui.QCheckBox('Second 397 SD')
+        #self.second_397_DC_box = QtGui.QCheckBox('Second 397 DC') #used if there are two doppler cooling beams
+        #self.second_397_SD_box = QtGui.QCheckBox('Second 397 SD')
         self.loading_button = QtGui.QPushButton('Loading')
     	self.fromdc_button = QtGui.QPushButton('From Doppler Cooling')
     	self.fromstate_button = QtGui.QPushButton('From State Detection')
@@ -30,8 +30,8 @@ class actions_widget(QtGui.QWidget):
     	layout.addWidget(self.todc_button, 1, 1)
     	layout.addWidget(self.fromstate_button, 2, 0)
     	layout.addWidget(self.tostate_button, 2, 1)
-        layout.addWidget(self.second_397_DC_box, 3, 0)
-        layout.addWidget(self.second_397_SD_box, 3, 1)
+        #layout.addWidget(self.second_397_DC_box, 3, 0) #used if there are two doppler cooling beams
+        #layout.addWidget(self.second_397_SD_box, 3, 1)
     
     	self.setLayout(layout)
 
@@ -61,16 +61,16 @@ class actions_widget(QtGui.QWidget):
         self.fromstate_button.pressed.connect(self.on_from_state)
         self.todc_button.pressed.connect(self.on_to_dc)
         self.tostate_button.pressed.connect(self.on_to_state)
-        self.second_397_DC_box.stateChanged.connect(self.include_second_397_DC)   
-        self.second_397_SD_box.stateChanged.connect(self.include_second_397_SD)   
+        #self.second_397_DC_box.stateChanged.connect(self.include_second_397_DC) #used if there are two doppler cooling beams   
+        #self.second_397_SD_box.stateChanged.connect(self.include_second_397_SD)   
         
     @inlineCallbacks
     def initialize_check_boxes(self):
         pv = yield self.cxn.get_server('ParameterVault')
-        DC_state = yield pv.get_parameter(('DopplerCooling','doppler_cooling_include_second_397'))
-        SD_state = yield pv.get_parameter(('StateReadout','state_readout_include_second_397'))
-        yield self.second_397_DC_box.setChecked(DC_state)   
-        yield self.second_397_SD_box.setChecked(SD_state)             
+        #DC_state = yield pv.get_parameter(('DopplerCooling','doppler_cooling_include_second_397')) #used if there are two doppler cooling beams
+        #SD_state = yield pv.get_parameter(('StateReadout','state_readout_include_second_397'))
+        #yield self.second_397_DC_box.setChecked(DC_state)   
+        #yield self.second_397_SD_box.setChecked(SD_state)             
     
     @inlineCallbacks
     def loading(self):
@@ -79,8 +79,8 @@ class actions_widget(QtGui.QWidget):
         ampl397 = self.WithUnit(-5.0, 'dBm')
         ampl397Extra = self.WithUnit(-7.0, 'dBm')
         ampl866 = self.WithUnit(-5.0, 'dBm')
-        freq397 = self.WithUnit(190.0, 'MHz')
-        freq397Extra = self.WithUnit(193.0, 'MHz')
+        freq397 = self.WithUnit(180.0, 'MHz')
+        freq397Extra = self.WithUnit(183.0, 'MHz')
         freq866 = self.WithUnit(80.0, 'MHz')
         yield pulser.frequency('866DP', freq866)
         yield pulser.amplitude('866DP', ampl866)
@@ -94,94 +94,102 @@ class actions_widget(QtGui.QWidget):
     @inlineCallbacks
     def on_to_state(self):
         pv = yield self.cxn.get_server('ParameterVault')
+        linear_397 = yield pv.get_parameter(('StatePreparation','channel_397_linear'))
         pulser = yield self.cxn.get_server('Pulser')
-        ampl397 = yield pulser.amplitude('397DP')
-        ampl397Extra = yield pulser.amplitude('397Extra')
+        ampl397 = yield pulser.amplitude(linear_397)
+        #ampl397 = yield pulser.amplitude('397DP')
+        #ampl397Extra = yield pulser.amplitude('397Extra')
         ampl866 = yield pulser.amplitude('866DP')
-        freq397 = yield pulser.frequency('397DP')
-        freq397Extra = yield pulser.frequency('397Extra')
+        freq397 = yield pulser.frequency(linear_397)
+        #freq397 = yield pulser.frequency('397DP')
+        #freq397Extra = yield pulser.frequency('397Extra')
         freq866 = yield pulser.frequency('866DP')
-        use_second_397_SD = yield pv.get_parameter(('StateReadout','state_readout_include_second_397'))
+        #use_second_397_SD = yield pv.get_parameter(('StateReadout','state_readout_include_second_397'))
         yield pv.set_parameter('StateReadout','state_readout_amplitude_397',ampl397)
         yield pv.set_parameter('StateReadout','state_readout_amplitude_866',ampl866)
         yield pv.set_parameter('StateReadout','state_readout_frequency_397',freq397)
         yield pv.set_parameter('StateReadout','state_readout_frequency_866',freq866)
-        if use_second_397_SD:
-            yield pv.set_parameter('StateReadout','state_readout_amplitude_397Extra',ampl397Extra)
-            yield pv.set_parameter('StateReadout','state_readout_frequency_397Extra',freq397Extra)
+        #if use_second_397_SD:   #used if there are two doppler cooling beams
+        #    yield pv.set_parameter('StateReadout','state_readout_amplitude_397Extra',ampl397Extra)
+        #    yield pv.set_parameter('StateReadout','state_readout_frequency_397Extra',freq397Extra)
     
     @inlineCallbacks
     def on_to_dc(self):
         pv = yield self.cxn.get_server('ParameterVault')
+        linear_397 = yield pv.get_parameter(('StatePreparation','channel_397_linear'))
         pulser = yield self.cxn.get_server('Pulser')
-        ampl397 = yield pulser.amplitude('397DP')
-        ampl397Extra = yield pulser.amplitude('397Extra')
+        ampl397 = yield pulser.amplitude(linear_397)        
+        #ampl397 = yield pulser.amplitude('397DP')
+        #ampl397Extra = yield pulser.amplitude('397Extra')
         ampl866 = yield pulser.amplitude('866DP')
-        freq397 = yield pulser.frequency('397DP')
-        freq397Extra = yield pulser.frequency('397Extra')
+        freq397 = yield pulser.frequency(linear_397)       
+        #freq397 = yield pulser.frequency('397DP')
+        #freq397Extra = yield pulser.frequency('397Extra')
         freq866 = yield pulser.frequency('866DP')
-        use_second_397_DC = yield pv.get_parameter(('DopplerCooling','doppler_cooling_include_second_397'))
+        #use_second_397_DC = yield pv.get_parameter(('DopplerCooling','doppler_cooling_include_second_397'))
         yield pv.set_parameter('DopplerCooling','doppler_cooling_amplitude_397',ampl397)
-        yield pv.set_parameter('DopplerCooling','doppler_cooling_amplitude_397Extra',ampl397Extra)
+        #yield pv.set_parameter('DopplerCooling','doppler_cooling_amplitude_397Extra',ampl397Extra)
         yield pv.set_parameter('DopplerCooling','doppler_cooling_amplitude_866',ampl866)
         yield pv.set_parameter('DopplerCooling','doppler_cooling_frequency_397',freq397)
-        yield pv.set_parameter('DopplerCooling','doppler_cooling_frequency_397Extra',freq397Extra)
+        #yield pv.set_parameter('DopplerCooling','doppler_cooling_frequency_397Extra',freq397Extra)
         yield pv.set_parameter('DopplerCooling','doppler_cooling_frequency_866',freq866)
-        if use_second_397_DC:
-            yield pv.set_parameter('DopplerCooling','doppler_cooling_amplitude_397Extra',ampl397Extra)
-            yield pv.set_parameter('DopplerCooling','doppler_cooling_frequency_397Extra',freq397Extra)
+        #if use_second_397_DC:   #used if there are two doppler cooling beams
+        #    yield pv.set_parameter('DopplerCooling','doppler_cooling_amplitude_397Extra',ampl397Extra)
+        #    yield pv.set_parameter('DopplerCooling','doppler_cooling_frequency_397Extra',freq397Extra)
 
 
         
     @inlineCallbacks
     def on_from_dc(self):
         pv = yield self.cxn.get_server('ParameterVault')
+        linear_397 = yield pv.get_parameter(('StatePreparation','channel_397_linear'))
         pulser = yield self.cxn.get_server('Pulser')
         ampl397 = yield pv.get_parameter(('DopplerCooling','doppler_cooling_amplitude_397'))
-        ampl397Extra = yield pv.get_parameter(('DopplerCooling','doppler_cooling_amplitude_397Extra'))
+        #ampl397Extra = yield pv.get_parameter(('DopplerCooling','doppler_cooling_amplitude_397Extra'))
         ampl866 = yield pv.get_parameter(('DopplerCooling','doppler_cooling_amplitude_866'))
         freq397 = yield pv.get_parameter(('DopplerCooling','doppler_cooling_frequency_397'))
-        freq397Extra = yield pv.get_parameter(('DopplerCooling','doppler_cooling_frequency_397Extra'))
+        #freq397Extra = yield pv.get_parameter(('DopplerCooling','doppler_cooling_frequency_397Extra'))
         freq866 = yield pv.get_parameter(('DopplerCooling','doppler_cooling_frequency_866'))
-        doppler_cooling_with_second_397 = yield pv.get_parameter(('DopplerCooling','doppler_cooling_include_second_397'))
+        #doppler_cooling_with_second_397 = yield pv.get_parameter(('DopplerCooling','doppler_cooling_include_second_397'))
         yield pulser.frequency('866DP', freq866)
         yield pulser.amplitude('866DP', ampl866)
-        yield pulser.frequency('397DP', freq397)
-        yield pulser.amplitude('397DP', ampl397)
-        if doppler_cooling_with_second_397:
-            yield pulser.frequency('397Extra', freq397Extra)
-            yield pulser.amplitude('397Extra', ampl397Extra)
+        yield pulser.frequency(linear_397, freq397)
+        yield pulser.amplitude(linear_397, ampl397)
+        #if doppler_cooling_with_second_397: #used if there are two doppler cooling beams
+        #    yield pulser.frequency('397Extra', freq397Extra)
+        #    yield pulser.amplitude('397Extra', ampl397Extra)
     
     @inlineCallbacks
     def on_from_state(self):
         pv = yield self.cxn.get_server('ParameterVault')
+        linear_397 = yield pv.get_parameter(('StatePreparation','channel_397_linear'))
         pulser = yield self.cxn.get_server('Pulser')
         ampl397 = yield pv.get_parameter(('StateReadout','state_readout_amplitude_397'))
-        ampl397Extra = yield pv.get_parameter(('StateReadout','state_readout_amplitude_397Extra'))
+        #ampl397Extra = yield pv.get_parameter(('StateReadout','state_readout_amplitude_397Extra'))
         ampl866 = yield pv.get_parameter(('StateReadout','state_readout_amplitude_866'))
         freq397 = yield pv.get_parameter(('StateReadout','state_readout_frequency_397'))
-        freq397Extra = yield pv.get_parameter(('StateReadout','state_readout_frequency_397Extra'))
+        #freq397Extra = yield pv.get_parameter(('StateReadout','state_readout_frequency_397Extra'))
         freq866 = yield pv.get_parameter(('StateReadout','state_readout_frequency_866'))
         state_readout_with_second_397 = yield pv.get_parameter(('StateReadout','state_readout_include_second_397'))
         yield pulser.frequency('866DP', freq866)
         yield pulser.amplitude('866DP', ampl866)
-        yield pulser.frequency('397DP', freq397)
-        yield pulser.amplitude('397DP', ampl397)
-        if state_readout_with_second_397:
-            yield pulser.frequency('397Extra', freq397Extra)
-            yield pulser.amplitude('397Extra', ampl397Extra)
+        yield pulser.frequency(linear_397, freq397)
+        yield pulser.amplitude(linear_397, ampl397)
+        #if state_readout_with_second_397: #used if there are two doppler cooling beams
+        #    yield pulser.frequency('397Extra', freq397Extra)
+        #    yield pulser.amplitude('397Extra', ampl397Extra)
         
-    @inlineCallbacks
-    def include_second_397_DC(self, event):
-        pv = yield self.cxn.get_server('ParameterVault')
-        self.use_second_397_DC = yield self.second_397_DC_box.isChecked()
-        yield pv.set_parameter('DopplerCooling','doppler_cooling_include_second_397', self.use_second_397_DC)
+    #@inlineCallbacks   
+    #def include_second_397_DC(self, event):    #used if there are two doppler cooling beams
+    #    pv = yield self.cxn.get_server('ParameterVault')
+    #    self.use_second_397_DC = yield self.second_397_DC_box.isChecked()
+    #    yield pv.set_parameter('DopplerCooling','doppler_cooling_include_second_397', self.use_second_397_DC)
         
-    @inlineCallbacks
-    def include_second_397_SD(self, event):
-        pv = yield self.cxn.get_server('ParameterVault')
-        self.use_second_397_SD = yield self.second_397_SD_box.isChecked()
-        yield pv.set_parameter('StateReadout','state_readout_include_second_397', self.use_second_397_SD)
+    #@inlineCallbacks
+    #def include_second_397_SD(self, event):
+    #    pv = yield self.cxn.get_server('ParameterVault')
+    #    self.use_second_397_SD = yield self.second_397_SD_box.isChecked()
+    #    yield pv.set_parameter('StateReadout','state_readout_include_second_397', self.use_second_397_SD)
     
     @inlineCallbacks
     def disable(self):

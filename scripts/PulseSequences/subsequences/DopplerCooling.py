@@ -5,6 +5,7 @@ class doppler_cooling(pulse_sequence):
     
     required_parameters = [
                            ('StatePreparation','channel_397_linear'),
+                           ('StatePreparation','channel_397_sigma'),
                            
                            ('DopplerCooling','doppler_cooling_frequency_397'), 
                            ('DopplerCooling','doppler_cooling_amplitude_397'), 
@@ -29,3 +30,4 @@ class doppler_cooling(pulse_sequence):
         if p.doppler_cooling_include_second_397:
             self.addDDS (sigma_397,self.start, p.doppler_cooling_duration, p.doppler_cooling_frequency_397Extra, p.doppler_cooling_amplitude_397Extra)
         self.end = self.start + repump_duration
+

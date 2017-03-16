@@ -7,9 +7,9 @@ def measureParameters(cxn, cxnlab, specified = None):
     """Measures parameters in the list and returns the dictionary containing these"""
     d = {}
     local = {
-            'endcaps':measure_endcaps,
-            'compensation':measure_compensation,
-            'dds_cw':measure_dds_cw_frequencies,
+#            'endcaps':measure_endcaps,
+#            'compensation':measure_compensation,
+#            'dds_cw':measure_dds_cw_frequencies,
             'line_trigger':measure_linetrigger,
             'dds_gui':measure_dds_gui_values,
             'drift_tracker':measure_drifttracker
@@ -92,16 +92,16 @@ def measure_dcoffsetonrf(cxn , d):
     d['dconrf1'] = server.get_voltage('dconrf1')
     d['dconrf2'] = server.get_voltage('dconrf2')
 
-def measure_cavity(wavelegnth):
+def measure_cavity(wavelength):
     def func(cxnlab ,d):
         server = cxnlab.laserdac
-        d['cavity{}'.format(wavelegnth)] = server.getvoltage(wavelegnth)
+        d['cavity{}'.format(wavelength)] = server.getvoltage(wavelength)
     return func
 
-def measure_multiplexer(wavelegnth):
+def measure_multiplexer(wavelength):
     def func(cxnlab ,d):
         server = cxnlab.multiplexer_server
-        d['multiplexer{}'.format(wavelegnth)] = server.get_frequency(wavelegnth)
+        d['multiplexer{}'.format(wavelength)] = server.get_frequency(wavelength)
     return func
 
 

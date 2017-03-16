@@ -100,16 +100,27 @@ class calibrate_temperature(experiment):
         #dds5_state = self.dds_cw.output('5')
 
         #self.dds_cw.output('5', True)
-        #time.sleep(1)
+        
+        time.sleep(2)
 
+       
         sb_red = self.parameters.Spectrum.sideband_selection
-        sb_blue = sb_red[:]
-
+        
+        sb_blue = []
+        sb_blue.extend(sb_red)
+        
         for k in range(len(sb_red)):
-            sb_blue[k] = -sb_red[k]
+            if sb_red[k] > 0.0:
+                # in case the sideband selection is set to the blue sideband we need to flip the arrays
+                sb_blue[k] = sb_red[k]
+                sb_red[k] = -sb_red[k]
+            else:
+                sb_blue[k] = -sb_red[k]
 
+        print "Running scans on the following sidebands:"
         print sb_blue
         print sb_red
+
 
         no_of_repeats = 50
         relative_frequencies = True
@@ -143,10 +154,11 @@ class calibrate_temperature(experiment):
         ex = ex.flatten()
 
         # take the maximum of the line excitation
-        #rsb_ex = np.max(ex)
 
-        fit_center, rsb_ex, fit_width = self.fitter.fit(fr, ex, return_all_params = True)
-        #sb_1 = WithUnit(abs(sb_1), 'MHz')
+        try:
+            fit_center, rsb_ex, fit_width = self.fitter.fit(fr, ex, return_all_params = True)
+        except:
+            rsb_ex = np.max(ex)
 
         #### RUN THE BLUE SIDEBAND
 
@@ -177,17 +189,11 @@ class calibrate_temperature(experiment):
         ex = ex.flatten()
 
         # take the maximum of the line excitation
-        #bsb_ex = np.max(ex)
-
-        fit_center, bsb_ex, fit_width = self.fitter.fit(fr, ex, return_all_params = True)
-        #sb_2 = WithUnit(abs(sb_2), 'MHz')
-             
-        # resetting DDS5 state
-        #time.sleep(1)
-        ##self.dds_cw.output('5', False)
-        #self.dds_cw.output('5', dds5_state)
-        #time.sleep(1)
-
+        try:        
+            fit_center, bsb_ex, fit_width = self.fitter.fit(fr, ex, return_all_params = True)
+        except:
+            bsb_ex = np.max(ex)
+            
         return (rsb_ex, bsb_ex)
 
     def finalize(self, cxn, context):

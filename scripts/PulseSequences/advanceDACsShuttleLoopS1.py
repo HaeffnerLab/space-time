@@ -14,5 +14,5 @@ class advance_DACs_shuttle(pulse_sequence):
 		N = self.parameters.advanceDACs.steps
 		times = [T/(2*math.pi)*math.acos(1 - 4.*(x)/(N)) for x in range(N/2)] + [T/(2*math.pi)*(math.pi + math.acos(1 - 4.*(x+1)/(N)) )for x in range(N/2)]
 		for t in times:
-			print t.value
+			#print t.value
 			self.addTTL('adv', t, pl)

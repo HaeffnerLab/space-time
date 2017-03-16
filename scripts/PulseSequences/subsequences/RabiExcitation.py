@@ -17,7 +17,7 @@ class rabi_excitation(pulse_sequence):
         frequency_advance_duration = WithUnit(6, 'us')
         ampl_off = WithUnit(-63.0, 'dBm')
         self.end = self.start + frequency_advance_duration + p.rabi_excitation_duration
-        print p.channel_729
+        #print p.channel_729
 
         #first advance the frequency but keep amplitude low        
         self.addDDS(p.channel_729, self.start, frequency_advance_duration, p.rabi_excitation_frequency, ampl_off)
@@ -79,6 +79,7 @@ class rabi_excitation_select_channel(pulse_sequence):
     def sequence(self):
         #this hack will be not needed with the new dds parsing methods
         p = self.parameters.Excitation_729
+
         #q = self.parameters.LocalStarkShift
         frequency_advance_duration = WithUnit(6, 'us')
         ampl_off = WithUnit(-63.0, 'dBm')
@@ -96,7 +97,7 @@ class rabi_excitation_select_channel(pulse_sequence):
         #    self.addDDS('stark_shift', self.start + frequency_advance_duration, p.rabi_excitation_duration, f0 + q.detuning, q.amplitude)
         #    self.addDDS('729DP_1', self.start + frequency_advance_duration, p.rabi_excitation_duration, p.rabi_excitation_frequency, WithUnit(-12, 'dBm'))
         #    self.addTTL('bichromatic_2', self.start, + p.rabi_excitation_duration + frequency_advance_duration) # REMOVE THIS LATER
-        print p.rabi_excitation_amplitude
+        #print p.rabi_excitation_amplitude
         if p.bichro:
             pl = self.parameters.LocalStarkShift
             f = WithUnit(80. - 0.2, 'MHz') + pl.detuning

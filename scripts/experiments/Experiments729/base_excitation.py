@@ -148,13 +148,13 @@ class base_excitation(experiment):
             #trap = self.parameters.TrapFrequencies
             sideband_cooling_frequency = cm.add_sidebands(sideband_cooling_frequency, sc.sideband_selection, trap)
         self.parameters['SidebandCooling.sideband_cooling_frequency_729'] = sideband_cooling_frequency
-        print "sbc"
-        print sideband_cooling_frequency
+        #print "sbc"
+        #print sideband_cooling_frequency
         sc2 = self.parameters.SequentialSBCooling
         sc2freq = cm.frequency_from_line_selection(sc.frequency_selection, sc.manual_frequency_729, sc.line_selection, self.drift_tracker, sp.sideband_cooling_enable)
         sc2freq = cm.add_sidebands(sc2freq, sc2.sideband_selection, trap)
         self.parameters['SequentialSBCooling.frequency'] = sc2freq
-        print sc2freq
+        #print sc2freq
 
         # set state readout time
         if self.use_camera:
@@ -188,7 +188,7 @@ class base_excitation(experiment):
                 
         pulse_sequence.programSequence(self.pulser)
         self.use_camera = self.parameters.StateReadout.use_camera_for_readout
-        print self.use_camera
+        #print self.use_camera
         #self.plot_current_sequence(cxn)
         if self.use_camera:
             #print 'starting acquisition'
@@ -204,7 +204,7 @@ class base_excitation(experiment):
         
         
         if not self.use_camera:
-            print "not using camera!"
+            #print "not using camera!"
             #get percentage of the excitation using the PMT threshold
             readouts = self.pulser.get_readout_counts()
             
@@ -221,7 +221,7 @@ class base_excitation(experiment):
                 ion_state = [perc_excited]
             else:
                 ion_state = [numpy.sum(readouts) / float(len(readouts))]
-#             print readouts
+                # print readouts
         else:
             #get the percentage of excitation using the camera state readout
             proceed = self.camera.wait_for_kinetic()
