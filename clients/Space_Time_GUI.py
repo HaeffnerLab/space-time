@@ -98,6 +98,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         #from common.clients.DAC_CONTROL    import DAC_Control
         from common.clients.NEW_DAC_CONTROL import DAC_Control
         from quick_actions.quick_actions import actions_widget
+        from rotation.rotation_control import rotation_widget
         from common.clients.LINETRIGGER_CONTROL import linetriggerWidget
         gridLayout = QtGui.QGridLayout()
 
@@ -105,6 +106,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         gridLayout.addWidget(pmtWidget(reactor),                0,4,1,1)
         gridLayout.addWidget(DDS_CONTROL(reactor, cxn),         2,4,4,2)
         gridLayout.addWidget(actions_widget(reactor, cxn),      3,3,2,1)
+        gridLayout.addWidget(rotation_widget(reactor, cxn),     4,3,2,1)
         gridLayout.addWidget(DAC_Control(reactor),              0,0,7,3)
         gridLayout.addWidget(linetriggerWidget(reactor),        2,3,1,1)
 

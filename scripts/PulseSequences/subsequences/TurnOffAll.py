@@ -7,4 +7,5 @@ class turn_off_all(pulse_sequence):
         dur = WithUnit(50, 'us')
         for channel in ['729local','397DP','854DP','866DP','397Extra']:
             self.addDDS(channel, self.start, dur, WithUnit(0, 'MHz'), WithUnit(0, 'dBm') )
+        self.addTTL('start_exp',self.start,dur)
         self.end = self.start + dur

@@ -21,7 +21,8 @@ nodeDict = {
 				'Pulser', 
 				'ParameterVault',
 				'SD Tracker',
-				'ScriptScanner'
+				'ScriptScanner',
+				'RIGOL_DG4062'
 				]
 	}
 

@@ -37,7 +37,7 @@ class actions_widget(QtGui.QWidget):
 
         self.connect()   
         
-        self.initialize_check_boxes()        
+        #self.initialize_check_boxes()        
     
     @inlineCallbacks
     def connect(self):
@@ -74,14 +74,15 @@ class actions_widget(QtGui.QWidget):
     
     @inlineCallbacks
     def loading(self):
-        
+
         pulser = yield self.cxn.get_server('Pulser')
         ampl397 = self.WithUnit(-5.0, 'dBm')
         ampl397Extra = self.WithUnit(-7.0, 'dBm')
-        ampl866 = self.WithUnit(-5.0, 'dBm')
+        ampl866 = self.WithUnit(-7.0, 'dBm')
         freq397 = self.WithUnit(180.0, 'MHz')
         freq397Extra = self.WithUnit(183.0, 'MHz')
         freq866 = self.WithUnit(80.0, 'MHz')
+        
         yield pulser.frequency('866DP', freq866)
         yield pulser.amplitude('866DP', ampl866)
         yield pulser.frequency('397DP', freq397)

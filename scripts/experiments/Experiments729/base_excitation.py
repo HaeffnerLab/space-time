@@ -34,6 +34,8 @@ class base_excitation(experiment):
                             ('StateReadout', 'pmt_readout_duration'),
                             ('StateReadout', 'camera_readout_duration'),
                             ('StateReadout', 'excitation_prob'),
+                            ('StateReadout', 'pmt_mode'),
+                            ('StateReadout', 'threshold_list'),
                             
                             ('IonsOnCamera','ion_number'),
                             ('IonsOnCamera','vertical_min'),
@@ -84,6 +86,8 @@ class base_excitation(experiment):
             self.use_camera=use_camera_override
         if self.use_camera:
             self.initialize_camera(cxn)
+
+        self.plotted_seq = False
             
     def initialize_camera(self, cxn):
         self.total_camera_confidences = []
@@ -183,45 +187,96 @@ class base_excitation(experiment):
         else:
             self.parameters['StateReadout.state_readout_duration'] = self.parameters.StateReadout.pmt_readout_duration
         threshold = int(self.parameters.StateReadout.state_readout_threshold)
+        
+        self.pmt_mode = self.parameters.StateReadout.pmt_mode
+        
         repetitions = int(self.parameters.StateReadout.repeat_each_measurement)
         pulse_sequence = self.pulse_sequence(self.parameters)
                 
         pulse_sequence.programSequence(self.pulser)
         self.use_camera = self.parameters.StateReadout.use_camera_for_readout
-        #print self.use_camera
-        #self.plot_current_sequence(cxn)
+
         if self.use_camera:
-            #print 'starting acquisition'
             self.camera.set_number_kinetics(repetitions)
             self.camera.start_acquisition()
             
-        
+ 
+ 
+        ########################
+
+        #print "test"
+        #
+        #if self.plotted_seq == False:
+        #    self.plot_current_sequence(cxn)
+        #    self.plotted_seq = True
+
+        #ttl = cxn.pulser.human_readable_ttl()
+        #dds = cxn.pulser.human_readable_dds()
+
+        #for k in ttl:
+        #    print k
+        #    #print(k + "\n")
+
+        #for k in dds:
+        #    print k
+
+
+        #######################
+
+
         self.pulser.start_number(repetitions)
         
         self.pulser.wait_sequence_done()
         
         self.pulser.stop_sequence()
+
+
+       
         
-        
+#original code       
+#        if not self.use_camera:
+#            #print "not using camera!"
+#            #get percentage of the excitation using the PMT threshold
+#            readouts = self.pulser.get_readout_counts()
+#            
+#           
+#        
+#            self.save_data(readouts)            
+#            if len(readouts):
+#                perc_excited = numpy.count_nonzero(readouts <= threshold) / float(len(readouts))
+#            else:
+#                #got no readouts
+#                perc_excited = -1.0
+ #           
+  #          if self.excitation_prob:
+   #             ion_state = [perc_excited]
+    #        else:
+    #            ion_state = [numpy.sum(readouts) / float(len(readouts))]
+     #           # print readouts
+      #          
+       #         
+       
+#code for multiple ions
         if not self.use_camera:
-            #print "not using camera!"
             #get percentage of the excitation using the PMT threshold
             readouts = self.pulser.get_readout_counts()
-            
-           
-        
             self.save_data(readouts)            
             if len(readouts):
-                perc_excited = numpy.count_nonzero(readouts <= threshold) / float(len(readouts))
+                if self.pmt_mode == 'simple': exci = numpy.count_nonzero(readouts <= threshold) / float(len(readouts))
+                if self.pmt_mode == 'number_dark': exci, states = self.count_dark(readouts)
+                #print self.pmt_mode
             else:
                 #got no readouts
-                perc_excited = -1.0
-            
+                exci = -1.0
+                
+                
             if self.excitation_prob:
-                ion_state = [perc_excited]
+                ion_state = [exci]
             else:
                 ion_state = [numpy.sum(readouts) / float(len(readouts))]
-                # print readouts
+                # print readouts         
+                
+        
         else:
             #get the percentage of excitation using the camera state readout
             proceed = self.camera.wait_for_kinetic()
@@ -251,6 +306,24 @@ class base_excitation(experiment):
         else:
             return 1
 
+    def count_dark(self, readouts):
+#        import IPython
+        thresholds = self.parameters.StateReadout.threshold_list
+        thresholds = thresholds[1]
+        #thresholds.append(0)
+        thresholds = sorted(thresholds)
+        #print numpy.array(readouts)
+        num_ions = len(thresholds)
+        print thresholds
+        binned = numpy.histogram(readouts, bins=[0]+thresholds + [5000])[0]
+        #IPython.embed()
+        #print binned
+        N = float(len(readouts))
+        binned = binned/N
+        print binned, range(num_ions+1)
+        mean = (1-numpy.dot(binned, range(num_ions+1))/2) # avg number of excited ions
+        return mean, binned
+    
     
     def finalize(self, cxn, context):
         if self.use_camera:

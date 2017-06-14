@@ -5,6 +5,11 @@ class excitation_729(base_excitation):
     name = 'Excitation729'
     pulse_sequence = spectrum_rabi
 
+class excitation_729_after_pi(base_excitation):
+    from space_time.scripts.PulseSequences.spectrum_rabi_after_pi import spectrum_rabi_after_pi
+    name = 'Excitation729_after_pi'
+    pulse_sequence = spectrum_rabi_after_pi
+
 class excitation_729_with_multipole_ramp(base_excitation):
     from space_time.scripts.PulseSequences.spectrum_rabi_with_multipole_ramp import spectrum_rabi_with_multipole_ramp
     name = 'excitation_729_with_multipole_ramp'

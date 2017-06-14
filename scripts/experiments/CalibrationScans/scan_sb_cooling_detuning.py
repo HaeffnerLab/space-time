@@ -28,13 +28,14 @@ class scan_sb_cooling_detuning(experiment):
         self.rabi_flop.initialize(cxn, context, ident)
         self.save_context = cxn.context()
         self.dv = cxn.data_vault
-        self.cxnlab = labrad.connect('192.168.169.49') #connection to labwide network
+        #self.cxnlab = labrad.connect('192.168.169.49') #connection to labwide network
+        self.cxnlab = labrad.connect('192.168.169.49', password='lab', tls_mode='off') #connection to labwide network
         
     def run(self, cxn, context):
         
         dv_args = {'output_size':self.rabi_flop.excite.output_size,
                    'experiment_name': self.name,
-                   'window_name': 'current',
+                   'window_name': 'other_det',
                    'dataset_name': 'det_scan'
                    }
         scan_methods.setup_data_vault(cxn, self.save_context, dv_args)
