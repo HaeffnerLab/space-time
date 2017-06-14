@@ -1,0 +1,26 @@
+
+(labrad)space-time@spacetime-exp-control:~/LabRAD/space_time/scripts/experiments/Spectroscopy397$ pip install --upgrade lmfit
+/home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/pip/_vendor/requests/packages/urllib3/util/ssl_.py:318: SNIMissingWarning: An HTTPS request has been made, but the SNI (Subject Name Indication) extension to TLS is not available on this platform. This may cause the server to present an incorrect TLS certificate, which can cause validation failures. You can upgrade to a newer version of Python to solve this. For more information, see https://urllib3.readthedocs.org/en/latest/security.html#snimissingwarning.
+SNIMissingWarning
+/home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/pip/_vendor/requests/packages/urllib3/util/ssl_.py:122: InsecurePlatformWarning: A true SSLContext object is not available. This prevents urllib3 from configuring SSL appropriately and may cause certain SSL connections to fail. You can upgrade to a newer version of Python to solve this. For more information, see https://urllib3.readthedocs.org/en/latest/security.html#insecureplatformwarning.
+InsecurePlatformWarning
+	Requirement already up-to-date: lmfit in /home/space-time/.virtualenvs/labrad/lib/python2.7/site-packages
+	Collecting scipy (from lmfit)
+Downloading scipy-0.19.0-cp27-cp27mu-manylinux1_x86_64.whl (45.0MB)
+	100% |████████████████████████████████| 45.0MB 33kB/s
+	Collecting numpy (from lmfit)
+Downloading numpy-1.12.0-cp27-cp27mu-manylinux1_x86_64.whl (16.5MB)
+	100% |████████████████████████████████| 16.5MB 87kB/s
+	Installing collected packages: numpy, scipy
+	Found existing installation: numpy 1.11.1
+	Uninstalling numpy-1.11.1:
+	Successfully uninstalled numpy-1.11.1
+	Found existing installation: scipy 0.18.0
+	Uninstalling scipy-0.18.0:
+	Successfully uninstalled scipy-0.18.0
+	Successfully installed numpy-1.12.0 scipy-0.19.0
+	/home/space-time/.virtualenvs/labrad/local/lib/python2.7/site-packages/pip/_vendor/requests/packages/urllib3/util/ssl_.py:122: InsecurePlatformWarning: A true SSLContext object is not available. This prevents urllib3 from configuring SSL appropriately and may cause certain SSL connections to fail. You can upgrade to a newer version of Python to solve this. For more information, see https://urllib3.readthedocs.org/en/latest/security.html#insecureplatformwarning.
+	InsecurePlatformWarning
+	You are using pip version 8.1.2, however version 9.0.1 is available.
+	You should consider upgrading via the 'pip install --upgrade pip' command.
+
