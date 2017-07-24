@@ -32,7 +32,7 @@ class spectrum_with_rotation(experiment):
                            ('TrapFrequencies','radial_frequency_2'),
                            ('TrapFrequencies','rf_drive_frequency'),
                            
-                           ('Rotation','frequency'),
+                           ('Rotation','drive_frequency'),
                            ('Rotation','voltage_pp'),
                            ('Rotation','start_hold'),
                            ('Rotation','frequency_ramp_time'),
@@ -116,7 +116,7 @@ class spectrum_with_rotation(experiment):
         amplitude_ramp_time = rp.amplitude_ramp_time
         end_hold = rp.end_hold
         voltage_pp = rp.voltage_pp
-        frequency = rp.frequency
+        frequency = rp.drive_frequency
         self.awg.program_awf(start_hold['ms'],freq_ramp_time['ms'], amplitude_ramp_time['ms'],end_hold['ms'],voltage_pp['V'],frequency['kHz'])
 
     def get_window_name(self):

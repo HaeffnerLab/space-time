@@ -118,30 +118,63 @@ class rabi_excitation_select_channel(pulse_sequence):
                           ('LocalStarkShift', 'enable'),
                           ('LocalStarkShift','amplitude'),
                           ('LocalStarkShift', 'detuning'), # detuning from the carrier transition
+                          
+                          ('Rotation','spec_phase_locked'),
+                          ('Rotation','spec_phase_offset'),
+                          ('Rotation','spec_phase_duration'),
+                          ('Rotation','drive_frequency'),                          
                           ]
 
     def sequence(self):
         #this hack will be not needed with the new dds parsing methods
         p = self.parameters.Excitation_729
+        rot = self.parameters.Rotation
 
         #q = self.parameters.LocalStarkShift
+        
         frequency_advance_duration = WithUnit(6, 'us')
         ampl_off = WithUnit(-63.0, 'dBm')
+        
         #f0 = WithUnit(80., 'MHz') # base frequency for Stark shift laser
-        self.end = self.start + frequency_advance_duration + p.rabi_excitation_duration
+        
         #first advance the frequency but keep amplitude low        
+        
         self.addDDS(p.channel_729, self.start, frequency_advance_duration, p.rabi_excitation_frequency, ampl_off)
+        
         #if q.enable: # also turn on local stark shift
         #    self.addDDS('stark_shift', self.start, frequency_advance_duration, f0 + q.detuning, ampl_off)
         #    self.addDDS('729DP_1', self.start, frequency_advance_duration, p.rabi_excitation_frequency, ampl_off)
         #turn on
-        self.addDDS(p.channel_729, self.start + frequency_advance_duration, p.rabi_excitation_duration, p.rabi_excitation_frequency, p.rabi_excitation_amplitude, p.rabi_excitation_phase)
+        
+        
+        start_time = WithUnit(1e6*rot.spec_phase_offset/(1e3*rot.drive_frequency['kHz']),'us') #usually you need a factor of two to calculate the time but we also half the frequency to convert from drive frequency to rotaional frequency
+        pulse_duration  = WithUnit(1e6*rot.spec_phase_duration/(1e3*rot.drive_frequency['kHz']),'us')
+        num_pulses = int(p.rabi_excitation_duration['us']/pulse_duration['us'])
+        residual_duration = p.rabi_excitation_duration - num_pulses*pulse_duration
+        
+        #print pulse_duration
+        #print num_pulses
+        #print residual_duration
+        
+        if rot.spec_phase_locked:
+            for i in range(0,num_pulses):
+                self.addDDS(p.channel_729, self.start + frequency_advance_duration + start_time + i/rot.drive_frequency, pulse_duration, p.rabi_excitation_frequency, p.rabi_excitation_amplitude, p.rabi_excitation_phase)
+            if residual_duration != 0:
+                self.addDDS(p.channel_729, self.start + frequency_advance_duration + start_time + num_pulses/rot.drive_frequency, residual_duration, p.rabi_excitation_frequency, p.rabi_excitation_amplitude, p.rabi_excitation_phase)
+            self.end = self.start + frequency_advance_duration + start_time + num_pulses/rot.drive_frequency + residual_duration
+                
+        else:
+            self.addDDS(p.channel_729, self.start + frequency_advance_duration, p.rabi_excitation_duration, p.rabi_excitation_frequency, p.rabi_excitation_amplitude, p.rabi_excitation_phase)
+            self.end = self.start + frequency_advance_duration + p.rabi_excitation_duration
+               
+        
         #self.addDDS('SP_local', self.start + frequency_advance_duration, p.rabi_excitation_duration, WithUnit(80., 'MHz'), WithUnit(-12., 'dBm')  )
         #if q.enable:
         #    self.addDDS('stark_shift', self.start + frequency_advance_duration, p.rabi_excitation_duration, f0 + q.detuning, q.amplitude)
         #    self.addDDS('729DP_1', self.start + frequency_advance_duration, p.rabi_excitation_duration, p.rabi_excitation_frequency, WithUnit(-12, 'dBm'))
         #    self.addTTL('bichromatic_2', self.start, + p.rabi_excitation_duration + frequency_advance_duration) # REMOVE THIS LATER
         #print p.rabi_excitation_amplitude
+        
         if p.bichro:
             pl = self.parameters.LocalStarkShift
             f = WithUnit(80. - 0.2, 'MHz') + pl.detuning

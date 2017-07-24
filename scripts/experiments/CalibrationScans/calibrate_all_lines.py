@@ -39,8 +39,8 @@ class calibrate_all_lines(experiment):
         ('StateReadout', 'repeat_each_measurement'),
         ('StateReadout', 'use_camera_for_readout'),
         
-        ('StatePreparation', 'sideband_cooling_enable'),
-        ('StatePreparation', 'optical_pumping_enable'),
+        #('StatePreparation', 'sideband_cooling_enable'),
+        #('StatePreparation', 'optical_pumping_enable'),
         ('Excitation_729', 'bichro'),
         ('Excitation_729', 'channel_729')
         ]
@@ -109,8 +109,8 @@ class calibrate_all_lines(experiment):
             'Spectrum.scan_selection':'auto',
             'Spectrum.sensitivity_selection': 'car1_sensitivity',
             'Spectrum.sideband_selection':[0,0,0,0],
-            'StatePreparation.sideband_cooling_enable':False,
-            'StatePreparation.optical_pumping_enable':True,
+            #'StatePreparation.sideband_cooling_enable':False,
+            #'StatePreparation.optical_pumping_enable':True,
             'Display.relative_frequencies':False,
             'StateReadout.repeat_each_measurement':100,
             'StateReadout.use_camera_for_readout':False,
@@ -137,8 +137,8 @@ class calibrate_all_lines(experiment):
             'Spectrum.scan_selection':'auto',
             'Spectrum.sensitivity_selection': 'car2_sensitivity',
             'Spectrum.sideband_selection':[0,0,0,0],
-            'StatePreparation.sideband_cooling_enable':False,
-            'StatePreparation.optical_pumping_enable':True,
+            #'StatePreparation.sideband_cooling_enable':False,
+            #'StatePreparation.optical_pumping_enable':True,
             'Display.relative_frequencies':False,
             'StateReadout.repeat_each_measurement':100,
             'StateReadout.use_camera_for_readout':False,

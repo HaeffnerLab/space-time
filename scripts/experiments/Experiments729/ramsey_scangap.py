@@ -45,7 +45,7 @@ class ramsey_scangap(experiment):
         self.scan = []
         self.amplitude = None
         self.duration = None
-        self.cxnlab = labrad.connect('192.168.169.49') #connection to labwide network
+        self.cxnlab = labrad.connect('192.168.169.49', password='lab', tls_mode='off') #connection to labwide network
         self.drift_tracker = cxn.sd_tracker
         self.dv = cxn.data_vault
         self.data_save_context = cxn.context()     
@@ -106,7 +106,7 @@ class ramsey_scangap(experiment):
             sc =[x - self.carrier_frequency for x in self.scan]
         else: sc = self.scan
         
-        print sc
+        #print sc
         
         if self.grapher is not None:
             self.grapher.plot_with_axis(ds, window_name, sc, False)

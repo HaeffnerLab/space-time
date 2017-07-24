@@ -23,6 +23,8 @@ from labrad.server import LabradServer, setting, inlineCallbacks
 import usb
 import usbtmc
 import numpy as np
+from matplotlib import pyplot as plt
+import time
 
 #SERVERNAME = 'RIGOL DG4062'
 #SIGNALID = 190234 ## this needs to change
@@ -159,38 +161,59 @@ class RIGOL_DG4062(LabradServer):
     def make_awf_with_freq_ramp(self, start_hold,freq_ramp_time,amp_ramp_time,end_hold,sin_freq,channel): #in s and Hz
         
         #makes string with values to form arbitrary wave form. 
-        #hold pinned, freq ramp up, amplitude ramp down, hold with no pinning
-
-        num_points = 10000 #(limit ~16000)
+        # freq ramp up,hold spinning, amplitude ramp down, hold with no pinning
+        
+        num_points = 8000 #(limit ~16000)
         total_time = start_hold+freq_ramp_time + amp_ramp_time+end_hold
         
         freq_ramp_points = round(num_points*freq_ramp_time/total_time)
-        amp_ramp_points = round(num_points*amp_ramp_time/total_time)
         start_points = int(round(num_points*start_hold/total_time))
+        amp_ramp_points = round(num_points*amp_ramp_time/total_time)
         end_points = int(round(num_points*end_hold/total_time))
         
+        #define amplitude curve
         awf =[]
         awf = np.ones(start_points+int(freq_ramp_points))
         for i in range(0,int(amp_ramp_points)+1):
             awf = np.append(awf,1.-float(i)/amp_ramp_points)
         awf = np.append(awf, np.zeros(end_points))
-            
+        
+        #definte frequency curve
         frequency = []
-        frequency = np.zeros(start_points)
+        #frequency = np.zeros(start_points)
         for i in range(0,int(freq_ramp_points)+1):
             frequency = np.append(frequency,float(i)*sin_freq/(2.*float(freq_ramp_points)))
-        frequency = np.append(frequency, sin_freq*np.ones(int(amp_ramp_points)+end_points))
+        frequency = np.append(frequency, sin_freq*np.ones(int(amp_ramp_points)+end_points+start_points))
         
         time_step = total_time/float(num_points)              
         for i,el in enumerate(awf):
-            if channel == 1:
-                awf[i] = el*np.sin(2.*np.pi*frequency[i]*i*time_step)
-            if channel == 2:
-                awf[i] = el*np.sin(2.*np.pi*frequency[i]*i*time_step+np.pi/2.)
+            
+            if i<freq_ramp_points:
+                if channel == 1:
+                    awf[i] = el*np.sin(2.*np.pi*frequency[i]*i*time_step)
+                if channel == 2:
+                    awf[i] = el*np.sin(2.*np.pi*frequency[i]*i*time_step+np.pi/2.)
+            else:
+                i_0 = int(freq_ramp_points)
+                #phi_0 = time_step*i_0*frequency[i_0]/2.0
+                
+                phi_0= 2.*np.pi*((frequency[i_0])*(i_0)*time_step)
+                     
+                if channel == 1:
+                    awf[i] = el*np.sin(phi_0+2.*np.pi*frequency[i]*(i-i_0)*time_step)
+                if channel == 2:
+                    awf[i] = el*np.sin(phi_0+2.*np.pi*frequency[i]*(i-i_0)*time_step+np.pi/2.)
         
+        
+        #for i in range(0,len(awf)):
+        #    awf[i] = round(awf[i],8)
+        #plt.plot(awf,'o')
+        #plt.show()
+            
+            
         out_str = ''
         for el in awf:
-            out_str  = out_str + str(el)[:8] +','
+            out_str  = out_str + str(round(el,8)) +','
         out_str = out_str[:-1]
         
         return out_str
@@ -277,21 +300,25 @@ class RIGOL_DG4062(LabradServer):
         total_time = start_hold+freq_ramp_time + amp_ramp_time+end_hold
      
      
+
+        
+        if freq_ramp_time == 0.0:
+            wf_str1 = self.make_awf(start_hold,amp_ramp_time,end_hold,sin_freq,1)
+            wf_str2 = self.make_awf(start_hold,amp_ramp_time,end_hold,sin_freq,2)    
+        else:
+            wf_str1 = self.make_awf_with_freq_ramp(start_hold,freq_ramp_time, amp_ramp_time,end_hold,sin_freq,1)
+            wf_str2 = self.make_awf_with_freq_ramp(start_hold,freq_ramp_time, amp_ramp_time,end_hold,sin_freq,2)        
+
+        #wf_str1 = self.make_awf_freq_ramp_heating(start_hold,freq_ramp_time,end_hold,sin_freq,1)
+        #wf_str2 = self.make_awf_freq_ramp_heating(start_hold,freq_ramp_time,end_hold,sin_freq,2)     
+
         yield self.write(self.instr,':SOUR1:APPL:USER')
         yield self.write(self.instr,':SOUR2:APPL:USER')
-        
-       #if freq_ramp_time == 0.0:
-       #     wf_str1 = self.make_awf(start_hold,amp_ramp_time,end_hold,sin_freq,1)
-       #     wf_str2 = self.make_awf(start_hold,amp_ramp_time,end_hold,sin_freq,2)    
-       #else:
-       #     wf_str1 = self.make_awf_with_freq_ramp(start_hold,freq_ramp_time, amp_ramp_time,end_hold,sin_freq,1)
-       #     wf_str2 = self.make_awf_with_freq_ramp(start_hold,freq_ramp_time, amp_ramp_time,end_hold,sin_freq,2)        
-
-        wf_str1 = self.make_awf_freq_ramp_heating(start_hold,freq_ramp_time,end_hold,sin_freq,1)
-        wf_str2 = self.make_awf_freq_ramp_heating(start_hold,freq_ramp_time,end_hold,sin_freq,2)     
 
         yield self.write(self.instr,':SOUR1:DATA VOLATILE,' + wf_str1)
+        time.sleep(2)
         yield self.write(self.instr,':SOUR2:DATA VOLATILE,' + wf_str2)
+        time.sleep(2)
 
         yield self.set_amplitude(c, 1, vpp)
         yield self.set_amplitude(c, 2, vpp)

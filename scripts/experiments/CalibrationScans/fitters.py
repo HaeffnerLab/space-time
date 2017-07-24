@@ -33,7 +33,7 @@ class peak_fitter():
         '''
         max_index = np.where(p == p.max())[0][0]
         fmax = f[max_index]
-        if (p.max() <= 0.2 and not force_guess):
+        if (p.max() <= 0.1 and not force_guess):
             raise Exception("Peak not found")
         else:
             # center, amplitude, width guesses
