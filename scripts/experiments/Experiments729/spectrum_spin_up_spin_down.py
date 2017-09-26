@@ -8,9 +8,9 @@ import labrad
 from labrad.units import WithUnit
 import numpy as np
 
-class spectrum(experiment):
+class spectrum_spin_up_spin_down(experiment):
     
-    name = 'Spectrum729'
+    name = 'Spectrum729_spin_up_spin_down'
     spectrum_required_parameters = [
                            ('Spectrum','custom'),
                            ('Spectrum','normal'),
@@ -32,6 +32,15 @@ class spectrum(experiment):
                            ('TrapFrequencies','radial_frequency_2'),
                            ('TrapFrequencies','rf_drive_frequency'),
                            
+                           ('Rotation','drive_frequency'),
+                           ('Rotation','voltage_pp'),
+                           #('Rotation','ramp_down_time'),
+                           #('Rotation','start_hold'),
+                           ('Rotation','frequency_ramp_time'),
+                           #('Rotation','end_hold'),
+                           ('Rotation','start_phase'),
+                           ('Rotation','middle_hold'),
+                           
                            ('Crystallization', 'auto_crystallization'),
                            ('Crystallization', 'camera_record_exposure'),
                            ('Crystallization', 'camera_threshold'),
@@ -42,7 +51,16 @@ class spectrum(experiment):
                            ('Crystallization', 'pmt_threshold'),
                            ('Crystallization', 'use_camera'),
 
-                           ('Display', 'relative_frequencies'),                           ]
+                           ('DopplerCooling','doppler_cooling_duration'),
+                           ('SidebandCooling','sideband_cooling_optical_pumping_duration'),
+                           ('SidebandCooling','sideband_cooling_cycles'),
+                           ('SidebandCoolingContinuous','sideband_cooling_continuous_duration'),
+                           ('StateReadout','pmt_readout_duration'),
+                           ('StatePreparation','sideband_cooling_enable'),
+
+                           ('Display', 'relative_frequencies'),
+
+                            ]
     
     spectrum_optional_parmeters = [
                           ('Spectrum', 'window_name')
@@ -57,6 +75,7 @@ class spectrum(experiment):
         parameters.remove(('Excitation_729','rabi_excitation_amplitude'))
         parameters.remove(('Excitation_729','rabi_excitation_duration'))
         parameters.remove(('Excitation_729','rabi_excitation_frequency'))
+        parameters.remove(('Heating','background_heating_time'))
         return parameters
     
     def initialize(self, cxn, context, ident, use_camera_override=None):
@@ -71,8 +90,9 @@ class spectrum(experiment):
         self.duration = None
         self.cxnlab = labrad.connect('192.168.169.49', password='lab', tls_mode='off') #connection to labwide network
         self.drift_tracker = cxn.sd_tracker
-        self.awg_rotation = cxn.keysight_33500b
         self.dv = cxn.data_vault
+        self.awg_rotation = cxn.keysight_33500b
+        self.pv = cxn.parametervault
         self.spectrum_save_context = cxn.context()
         try:
             self.grapher = cxn.grapher
@@ -102,11 +122,29 @@ class spectrum(experiment):
         minim = minim['MHz']; maxim = maxim['MHz']
         self.scan = np.linspace(minim,maxim, steps)
         self.scan = [WithUnit(pt, 'MHz') for pt in self.scan]
+        
+        #set up the timing of the rotation awf
+        rp = self.parameters.Rotation
+        frequency_ramp_time = rp.frequency_ramp_time
 
-        old_freq = self.pv.get_parameter('RotationCW','drive_frequency')['kHz']
-        old_phase = self.pv.get_parameter('RotationCW','start_phase')['deg']
-        old_amp =self.pv.get_parameter('RotationCW','voltage_pp')['V']
-        self.awg_rotation.update_awg(old_freq*1e3,old_amp,old_phase)
+        if self.parameters.StatePreparation.sideband_cooling_enable:
+            sideband_cooling_time  = (self.parameters.SidebandCooling.sideband_cooling_optical_pumping_duration + self.parameters.SidebandCoolingContinuous.sideband_cooling_continuous_duration)*self.parameters.SidebandCooling.sideband_cooling_cycles + WithUnit(1.0,'ms')
+        else:
+            sideband_cooling_time = WithUnit(0,'ms')
+
+        start_hold = self.parameters.DopplerCooling.doppler_cooling_duration + sideband_cooling_time + WithUnit(0.5,'ms')
+        #start_hold = rp.start_hold
+        #ramp_down_time = rp.ramp_down_time
+        start_phase = rp.start_phase
+        middle_hold = rp.middle_hold
+        end_hold = self.parameters.StateReadout.pmt_readout_duration + WithUnit(1,'ms')
+        #end_hold = rp.end_hold
+        voltage_pp = rp.voltage_pp
+        drive_frequency = rp.drive_frequency
+        self.awg_rotation.program_awf(start_phase['deg'],start_hold['ms'],frequency_ramp_time['ms'],middle_hold['ms'],0.0,end_hold['ms'],voltage_pp['V'],drive_frequency['kHz'],'spin_up_spin_down')
+        self.parameters['Heating.background_heating_time'] = 2*frequency_ramp_time + middle_hold + WithUnit(0.5, 'ms')
+        #self.awg_rotation.rotation(frequency['kHz'],voltage_pp['V'])
+        #self.awg_modulation.program_modulation(ramp_up_time['ms'],start_hold['ms'],ramp_down_time['ms'],end_hold['ms'])
 
     def get_window_name(self):
         if self.parameters.Spectrum.scan_selection == 'manual':
@@ -209,6 +247,10 @@ class spectrum(experiment):
             return None
         
     def finalize(self, cxn, context):
+        old_freq = self.pv.get_parameter('RotationCW','drive_frequency')['kHz']
+        old_phase = self.pv.get_parameter('RotationCW','start_phase')['deg']
+        old_amp =self.pv.get_parameter('RotationCW','voltage_pp')['V']
+        self.awg_rotation.update_awg(old_freq*1e3,old_amp,old_phase)
         self.excite.finalize(cxn, context)
         #self.save_parameters(self.dv, cxn, self.cxnlab, self.spectrum_save_context)
 
@@ -225,6 +267,6 @@ class spectrum(experiment):
 if __name__ == '__main__':
     cxn = labrad.connect()
     scanner = cxn.scriptscanner
-    exprt = spectrum(cxn = cxn)
+    exprt = spectrum_spin_up_spin_down(cxn = cxn)
     ident = scanner.register_external_launch(exprt.name)
     exprt.execute(ident)

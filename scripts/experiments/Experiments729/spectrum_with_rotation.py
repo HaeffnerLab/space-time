@@ -34,10 +34,13 @@ class spectrum_with_rotation(experiment):
                            
                            ('Rotation','drive_frequency'),
                            ('Rotation','voltage_pp'),
+                           #('Rotation','ramp_up_time'),
                            ('Rotation','start_hold'),
                            ('Rotation','frequency_ramp_time'),
-                           ('Rotation','amplitude_ramp_time'),
+                           ('Rotation','ramp_down_time'),
                            ('Rotation','end_hold'),
+                           ('Rotation','start_phase'),
+                           ('Rotation','middle_hold'),
                            
                            ('Crystallization', 'auto_crystallization'),
                            ('Crystallization', 'camera_record_exposure'),
@@ -79,7 +82,8 @@ class spectrum_with_rotation(experiment):
         self.cxnlab = labrad.connect('192.168.169.49', password='lab', tls_mode='off') #connection to labwide network
         self.drift_tracker = cxn.sd_tracker
         self.dv = cxn.data_vault
-        self.awg = cxn.rigol_dg4062
+        self.awg_rotation = cxn.keysight_33500b
+        self.pv = cxn.parametervault
         self.spectrum_save_context = cxn.context()
         try:
             self.grapher = cxn.grapher
@@ -111,13 +115,17 @@ class spectrum_with_rotation(experiment):
         self.scan = [WithUnit(pt, 'MHz') for pt in self.scan]
         
         rp = self.parameters.Rotation
+        frequency_ramp_time = rp.frequency_ramp_time
         start_hold = rp.start_hold
-        freq_ramp_time = rp.frequency_ramp_time
-        amplitude_ramp_time = rp.amplitude_ramp_time
+        ramp_down_time = rp.ramp_down_time
+        start_phase = rp.start_phase
+        middle_hold = rp.middle_hold
         end_hold = rp.end_hold
         voltage_pp = rp.voltage_pp
-        frequency = rp.drive_frequency
-        self.awg.program_awf(start_hold['ms'],freq_ramp_time['ms'], amplitude_ramp_time['ms'],end_hold['ms'],voltage_pp['V'],frequency['kHz'])
+        drive_frequency = rp.drive_frequency
+        self.awg_rotation.program_awf(start_phase['deg'],start_hold['ms'],frequency_ramp_time['ms'],middle_hold['ms'],ramp_down_time['ms'],end_hold['ms'],voltage_pp['V'],drive_frequency['kHz'],'free_rotation')
+        #self.awg_rotation.rotation(frequency['kHz'],voltage_pp['V'])
+        #self.awg_modulation.program_modulation(ramp_up_time['ms'],start_hold['ms'],ramp_down_time['ms'],end_hold['ms'])
 
     def get_window_name(self):
         if self.parameters.Spectrum.scan_selection == 'manual':
@@ -220,6 +228,10 @@ class spectrum_with_rotation(experiment):
             return None
         
     def finalize(self, cxn, context):
+        old_freq = self.pv.get_parameter('RotationCW','drive_frequency')['kHz']
+        old_phase = self.pv.get_parameter('RotationCW','start_phase')['deg']
+        old_amp =self.pv.get_parameter('RotationCW','voltage_pp')['V']
+        self.awg_rotation.update_awg(old_freq*1e3,old_amp,old_phase)
         self.excite.finalize(cxn, context)
         #self.save_parameters(self.dv, cxn, self.cxnlab, self.spectrum_save_context)
 

@@ -1,10 +1,10 @@
 '''
 ### BEGIN NODE INFO
 [info]
-name = RIGOL_DG4062
+name = RIGOL_DG1032Z
 version = 1.0
 description =
-instancename = RIGOL_DG4062
+instancename = RIGOL_DG1032Z
 
 [startup]
 cmdline = %PYTHON% %FILE%
@@ -16,12 +16,12 @@ timeout = 20
 ### END NODE INFO
 '''
 
-#instancename = RIGOL_DG4062
+#instancename = RIGOL_DG1032Z
 
 from labrad.server import LabradServer, setting, inlineCallbacks
 
-import usb
-import usbtmc
+from socket import *
+import select
 import numpy as np
 from matplotlib import pyplot as plt
 import time
@@ -30,17 +30,24 @@ import time
 #SIGNALID = 190234 ## this needs to change
 
 
-class RIGOL_DG4062(LabradServer):
-    name = 'RIGOL_DG4062'
+class RIGOL_DG1032Z(LabradServer):
+    name = 'RIGOL_DG1032Z'
     instr = None
     
     @inlineCallbacks
     def initServer(self):
-        idProduct = 0x1ab1
-        idVendor = 0x0641
-        iSerialNumber = 'DG4E170900409'
+        #idProduct = 0x1ab1
+        #idVendor = 0x0642
+        #iSerialNumber = 'DG1ZA192101818'
+        serverHost = '192.168.169.182' #IP address of the awg
+        serverPort = 5555 #random number over 1024
+        self.instr = socket(AF_INET, SOCK_STREAM)
+
+        self.samp_rate = 2e6 #max 2e8 or 2e6 total  points
+
         try:
-            self.instr = usbtmc.Instrument(idProduct,idVendor)
+            self.instr.connect((serverHost, serverPort))
+            self.instr.settimeout(2)
             print "Successfully connected"
         except:
             print "Could not connect"
@@ -52,7 +59,8 @@ class RIGOL_DG4062(LabradServer):
     @inlineCallbacks
     def ask(self, instr, q):
         try:
-            yield instr.ask(q)
+            yield instr.send(q + " \n")
+            data = yield self.instr.recv(50)
         except AttributeError as ex:
             print 'Instrument is not connected... ' + str(ex)
         except ValueError as ex:
@@ -61,7 +69,8 @@ class RIGOL_DG4062(LabradServer):
     @inlineCallbacks
     def write(self, instr, q):
         try:
-            yield instr.write(q)
+            yield instr.send(q+ "\n")
+            #time.sleep(1)
         except AttributeError as ex:
             print 'Instrument is not connected... ' + str(ex)
         except ValueError as ex:
@@ -70,7 +79,7 @@ class RIGOL_DG4062(LabradServer):
     @inlineCallbacks
     def read(self, instr, q):
         try:
-            yield instr.read(q)
+            data = yield instr.recv(50)
         except AttributeError as ex:
             print 'Instrument is not connected... ' + str(ex)
         except ValueError as ex:
@@ -129,8 +138,8 @@ class RIGOL_DG4062(LabradServer):
         #makes string with values to form arbitrary wave form. 
         #hold pinned and rotatings, amp ramp down, hold no rotation
 
-        num_points = 10000 #(limit ~16000)
-        total_time = start_hold+ramp_time+end_hold
+        total_time = start_hold+amp_ramp_time+end_hold
+        num_points = self.samp_rate * total_time #(limit ~16000)
         
         ramp_points = round(num_points*ramp_time/total_time)
         start_points = int(round(num_points*start_hold/total_time))
@@ -163,8 +172,8 @@ class RIGOL_DG4062(LabradServer):
         #makes string with values to form arbitrary wave form. 
         # freq ramp up,hold spinning, amplitude ramp down, hold with no pinning
         
-        num_points = 8000 #(limit ~16000)
         total_time = start_hold+freq_ramp_time + amp_ramp_time+end_hold
+        num_points = self.samp_rate * total_time #(limit ~16000)
         
         freq_ramp_points = round(num_points*freq_ramp_time/total_time)
         start_points = int(round(num_points*start_hold/total_time))
@@ -210,83 +219,33 @@ class RIGOL_DG4062(LabradServer):
         #plt.plot(awf,'o')
         #plt.show()
             
-            
-        out_str = ''
-        for el in awf:
-            out_str  = out_str + str(round(el,8)) +','
-        out_str = out_str[:-1]
         
-        return out_str
-    
-    def make_awf_freq_ramp_heating(self, start_hold,freq_ramp_time,end_hold,sin_freq,channel): #in s and Hz
-        
-        #makes string with values to form arbitrary wave form. 
-        #hold pinned, freq ramp up, then down, then hold pinned
+        #build the string to be sent to the awg
 
-        num_points = 10000 #(limit ~16000)
-        total_time = start_hold+2.*freq_ramp_time +end_hold
-        
-        freq_ramp_points = round(num_points*freq_ramp_time/total_time)
-        start_points = int(round(num_points*start_hold/total_time))
-        end_points = int(round(num_points*end_hold/total_time))
-        
-        awf =[]
-        awf = np.ones(start_points+2*int(freq_ramp_points))
-        awf = np.append(awf, np.ones(end_points))
-            
-        frequency = []
-        
-        frequency = np.zeros(start_points)        
-        for i in range(0,int(freq_ramp_points)+1):
-            frequency = np.append(frequency,float(i)*sin_freq/(float(freq_ramp_points)))
-        for i in range(0,int(freq_ramp_points)+1):
-            frequency = np.append(frequency,(float(freq_ramp_points)-float(i))*sin_freq/(float(freq_ramp_points)))
-        frequency = np.append(frequency, np.zeros(end_points))
-        
-       
-        time_step = total_time/float(num_points)              
-        for i,el in enumerate(awf):
-            if i<start_points:
-                if channel == 1:
-                    awf[i] = el*np.sin(2.*np.pi*frequency[i]*i*time_step)
-                if channel == 2:
-                    awf[i] = el*np.cos(2.*np.pi*frequency[i]*i*time_step)
-            elif i< start_points + int(freq_ramp_points):
-                i_0 = start_points
-                phi_0 = time_step*i_0*frequency[i_0]
-                if channel == 1:
-                    awf[i] = el*np.sin(phi_0 + 2.*np.pi*(frequency[i]*(i-i_0)*time_step/2.0))
-                if channel == 2:
-                    awf[i] = el*np.cos(phi_0 + 2.*np.pi*(frequency[i]*(i-i_0)*time_step/2.0))  
-                
-                phi_next1 = phi_0 + 2.*np.pi*(frequency[i]*(i-i_0)*time_step/2.0)    
-                
-            elif i< start_points + 2*int(freq_ramp_points):
-                i_0 = start_points+int(freq_ramp_points)
-                f_0 = frequency[i_0]
-                phi_0 = phi_next1
-                
-                if channel == 1:
-                    awf[i] = el*np.sin(phi_0 + 2.*np.pi*((f_0+frequency[i])*(i-i_0)*time_step/2.0))
-                if channel == 2:
-                    awf[i] = el*np.cos(phi_0 + 2.*np.pi*((f_0+frequency[i])*(i-i_0)*time_step/2.0))
-                    
-                phi_next2 = phi_0 + 2.*np.pi*((f_0+frequency[i])*(i-i_0)*time_step/2.0)
-            else:
-                i_0 = start_points+2*int(freq_ramp_points)
-                f_0 = frequency[i_0]
-                phi_0 = phi_next2
-                
-                if channel == 1:
-                    awf[i] = el*np.sin(phi_0 + 2.*np.pi*((f_0+frequency[i])*(i-i_0)*time_step/2.0))
-                if channel == 2:
-                    awf[i] = el*np.cos(phi_0 + 2.*np.pi*((f_0+frequency[i])*(i-i_0)*time_step/2.0))
-                                       
-        out_str = ''
-        for el in awf:
-            out_str  = out_str + str(el)[:8] +','
-        out_str = out_str[:-1]
-        
+        packet_length = 1100 #(max 16k)
+        out_str = []
+        num_full_packets = int(len(awf)/float(packet_length))
+
+        for i in range(0,num_full_packets):
+            packet_str = ''
+            for j in range(packet_length*i,packet_length*(i+1)):
+                print j
+                el = awf[j]
+                el = hex(int(16384*el-1)).split('x')[-1]
+                packet_str  = packet_str + el + ','
+                #out_str  = out_str + str(round(el,8)) +','
+            out_str.append((packet_length,packet_str[:-1]))
+
+        for j in range(packet_length*num_full_packets,len(awf)):
+            packet_str = ''
+            print j
+            el = awf[j]
+            el = hex(int(16384*el-1)).split('x')[-1]
+            packet_str  = packet_str + el + ','
+            #out_str  = out_str + str(round(el,8)) +','
+            #print packet_str
+        out_str.append((len(awf)-packet_length*(num_full_packets), packet_str[:-1]))
+
         return out_str
     
     
@@ -298,47 +257,49 @@ class RIGOL_DG4062(LabradServer):
         sin_freq = sin_freq * 1e3
         freq_ramp_time = freq_ramp_time*1e-3
         total_time = start_hold+freq_ramp_time + amp_ramp_time+end_hold
-     
-     
 
-        
-        if freq_ramp_time == 0.0:
-            wf_str1 = self.make_awf(start_hold,amp_ramp_time,end_hold,sin_freq,1)
-            wf_str2 = self.make_awf(start_hold,amp_ramp_time,end_hold,sin_freq,2)    
-        else:
-            wf_str1 = self.make_awf_with_freq_ramp(start_hold,freq_ramp_time, amp_ramp_time,end_hold,sin_freq,1)
-            wf_str2 = self.make_awf_with_freq_ramp(start_hold,freq_ramp_time, amp_ramp_time,end_hold,sin_freq,2)        
-
-        #wf_str1 = self.make_awf_freq_ramp_heating(start_hold,freq_ramp_time,end_hold,sin_freq,1)
-        #wf_str2 = self.make_awf_freq_ramp_heating(start_hold,freq_ramp_time,end_hold,sin_freq,2)     
+        wf_str1 = self.make_awf_with_freq_ramp(start_hold,freq_ramp_time, amp_ramp_time,end_hold,sin_freq,1)
+        wf_str2 = self.make_awf_with_freq_ramp(start_hold,freq_ramp_time, amp_ramp_time,end_hold,sin_freq,2)        
 
         yield self.write(self.instr,':SOUR1:APPL:USER')
         yield self.write(self.instr,':SOUR2:APPL:USER')
 
-        yield self.write(self.instr,':SOUR1:DATA VOLATILE,' + wf_str1)
-        time.sleep(2)
-        yield self.write(self.instr,':SOUR2:DATA VOLATILE,' + wf_str2)
-        time.sleep(2)
+        yield self.write(self.instr,':SOUR1:FUNC:ARB:MODE SRAT')
+        yield self.write(self.instr,':SOUR2:FUNC:ARB:MODE SRAT')
 
-        yield self.set_amplitude(c, 1, vpp)
-        yield self.set_amplitude(c, 2, vpp)
-        yield self.write(self.instr,':SOUR1:FUNC:ARB:FREQ ' +str(1/total_time))
-        yield self.write(self.instr,':SOUR2:FUNC:ARB:FREQ ' +str(1/total_time))
-        yield self.write(self.instr,':SOUR1:BURS ON')
-        yield self.write(self.instr,':SOUR2:BURS ON')
-        yield self.write(self.instr,':SOUR1:BURS:MODE TRIG')
-        yield self.write(self.instr,':SOUR2:BURS:MODE TRIG')        
-        yield self.write(self.instr,':SOUR1:BURS:TRIG:SOUR EXT') 
-        yield self.write(self.instr,':SOUR2:BURS:TRIG:SOUR EXT')
-        yield self.write(self.instr,':SOUR1:BURS:NCYC 1')
-        yield self.write(self.instr,':SOUR2:BURS:NCYC 1')
+        yield self.write(self.instr,':SOUR1:FUNC:ARB:SRAT ' + str(self.samp_rate))
+        yield self.write(self.instr,':SOUR2:FUNC:ARB:SRAT ' + str(self.samp_rate))
+
+        time.sleep(1)
+
+        for i in range(0,len(wf_str1)-1):
+            yield self.write(self.instr,':SOUR1:TRAC:DATA:DAC16 VOLATILE,CON,#' + str(len(str(wf_str1[i][0]))) + str(wf_str1[i][0]) + wf_str1[i][1])
+            print ':SOUR1:TRAC:DATA:DAC16 VOLATILE,CON,#' + str(len(str(wf_str1[i][0]))) + str(wf_str1[i][0]) + wf_str1[i][1]
+        yield self.write(self.instr,':SOUR1:TRAC:DATA:DAC16 VOLATILE,END,#' + str(len(str(wf_str1[-1][0]))) + str(wf_str1[-1][0]) + wf_str1[-1][1])
+        
+        #for i in range(0,len(wf_str2)-1):
+        #    yield self.write(self.instr,':SOUR2:TRAC:DATA:DAC16 VOLATILE,CON,#' + str(len(str(wf_str2[i][0]))) + str(wf_str2[i][0]) + wf_str2[i][1])
+        #yield self.write(self.instr,':SOUR2:TRAC:DATA:DAC16 VOLATILE,END,#' + str(len(str(wf_str2[-1][0]))) + str(wf_str2[-1][0]) + wf_str2[-1][1])    
+
+        #yield self.set_amplitude(c, 1, vpp)
+        #yield self.set_amplitude(c, 2, vpp)
+            #yield self.write(self.instr,':SOUR1:FUNC:ARB:FREQ ' +str(1/total_time))
+            #yield self.write(self.instr,':SOUR2:FUNC:ARB:FREQ ' +str(1/total_time))
+        #yield self.write(self.instr,':SOUR1:BURS ON')
+        #yield self.write(self.instr,':SOUR2:BURS ON')
+        #yield self.write(self.instr,':SOUR1:BURS:MODE TRIG')
+        #yield self.write(self.instr,':SOUR2:BURS:MODE TRIG')        
+        #yield self.write(self.instr,':SOUR1:BURS:TRIG:SOUR EXT') 
+        #yield self.write(self.instr,':SOUR2:BURS:TRIG:SOUR EXT')
+        #yield self.write(self.instr,':SOUR1:BURS:NCYC 1')
+        #yield self.write(self.instr,':SOUR2:BURS:NCYC 1')
         yield self.set_state(c,1,1)
         yield self.set_state(c,2,1)
         yield self.sync_phases(c)
         
 
         
-__server__ = RIGOL_DG4062()
+__server__ = RIGOL_DG1032Z()
         
 if __name__ == '__main__':
     from labrad import util

@@ -14,7 +14,8 @@ except:
 	raise()
 
 nodeDict = {
-			'node spacetime-exp-control':
+			#'node spacetime-exp-control':
+			'node space-time-exp-comp':
 				['NormalPMTFlow',
 				'Data Vault', 
 				'DAC Server', 

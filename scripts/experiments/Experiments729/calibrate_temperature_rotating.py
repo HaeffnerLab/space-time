@@ -1,17 +1,17 @@
 from common.abstractdevices.script_scanner.scan_methods import experiment
-from space_time.scripts.experiments.Experiments729.spectrum import spectrum
+from space_time.scripts.experiments.Experiments729.spectrum_spin_up_spin_down import spectrum_spin_up_spin_down
 from space_time.scripts.scriptLibrary import scan_methods
 from space_time.scripts.scriptLibrary import dvParameters
-from fitters import peak_fitter
+from space_time.scripts.experiments.CalibrationScans.fitters import peak_fitter
 from labrad.units import WithUnit
 from treedict import TreeDict
 import time
 import numpy as np
 import labrad
 
-class calibrate_all_lines(experiment):
+class calibrate_temperature_rotating(experiment):
 
-    name = 'CalibAllLines'
+    name = 'CalibTemperatureRotating'
 
     required_parameters = [('DriftTracker', 'line_selection_1'),
                            ('DriftTracker', 'line_selection_2'),
@@ -32,15 +32,14 @@ class calibrate_all_lines(experiment):
         ('Spectrum','manual_scan'),
         ('Spectrum','scan_selection'),
         ('Spectrum','sensitivity_selection'),
-        ('Spectrum','sideband_selection'),
 
         ('Display', 'relative_frequencies'),
 
         ('StateReadout', 'repeat_each_measurement'),
         ('StateReadout', 'use_camera_for_readout'),
         
-        #('StatePreparation', 'sideband_cooling_enable'),
-        #('StatePreparation', 'optical_pumping_enable'),
+        ('StatePreparation', 'sideband_cooling_enable'),
+        ('StatePreparation', 'optical_pumping_enable'),
         ('Excitation_729', 'bichro'),
         ('Excitation_729', 'channel_729')
         ]
@@ -51,7 +50,7 @@ class calibrate_all_lines(experiment):
     @classmethod
     def all_required_parameters(cls):
         parameters = set(cls.required_parameters)
-        parameters = parameters.union(set(spectrum.all_required_parameters()))
+        parameters = parameters.union(set(spectrum_spin_up_spin_down.all_required_parameters()))
         parameters = list(parameters)
         for p in cls.remove_parameters:
             parameters.remove(p)
@@ -66,6 +65,7 @@ class calibrate_all_lines(experiment):
         parameters.remove(('SidebandCooling','sideband_cooling_frequency_854'))
         parameters.remove(('SidebandCooling','sideband_cooling_amplitude_854'))
         parameters.remove(('SidebandCooling','sideband_cooling_frequency_866'))
+
         parameters.remove(('SidebandCooling','sideband_cooling_amplitude_866'))
         parameters.remove(('SidebandCooling','sideband_cooling_amplitude_729'))
         parameters.remove(('SidebandCooling','sideband_cooling_optical_pumping_duration'))
@@ -82,8 +82,7 @@ class calibrate_all_lines(experiment):
 
         self.ident = ident
         self.drift_tracker = cxn.sd_tracker
-        self.spectrum = self.make_experiment(spectrum)
-        
+        self.spectrum = self.make_experiment(spectrum_spin_up_spin_down)
         
         #self.spectrum.set_parameters(TreeDict.fromdict({'IonsOnCamera.ion_number':1}))
         self.spectrum.initialize(cxn, context, ident,use_camera_override = False)
@@ -101,25 +100,52 @@ class calibrate_all_lines(experiment):
         #dds5_state = self.dds_cw.output('5')
 
         #self.dds_cw.output('5', True)
-        #time.sleep(1)
-        ### RUN THE FIRST CARRIER
         
+        time.sleep(2)
+
+       
+        sb_red = self.parameters.Spectrum.sideband_selection
+        
+        sb_blue = []
+        sb_blue.extend(sb_red)
+        
+        for k in range(len(sb_red)):
+            if sb_red[k] > 0.0:
+                # in case the sideband selection is set to the blue sideband we need to flip the arrays
+                sb_blue[k] = sb_red[k]
+                sb_red[k] = -sb_red[k]
+            else:
+                sb_blue[k] = -sb_red[k]
+
+        print "Running scans on the following sidebands:"
+        print sb_blue
+        print sb_red
+
+
+        no_of_repeats = 50
+        relative_frequencies = True
+
+        #### RUN THE RED SIDEBAND
+
         replace = TreeDict.fromdict({
-            'Spectrum.line_selection':dt.line_selection_1,
+            'Spectrum.line_selection':self.parameters.Spectrum.line_selection,
             'Spectrum.scan_selection':'auto',
-            'Spectrum.sensitivity_selection': 'car1_sensitivity',
-            'Spectrum.sideband_selection':[0,0,0,0],
-            'StatePreparation.sideband_cooling_enable':False,
+            'Spectrum.sensitivity_selection': 'normal',
+            'Spectrum.sideband_selection':sb_red,
+            'SidebandCooling.sideband_selection':sb_red,
+            'StatePreparation.sideband_cooling_enable':True,
             'StatePreparation.optical_pumping_enable':True,
-            'Display.relative_frequencies':False,
-            'StateReadout.repeat_each_measurement':100,
+            'Display.relative_frequencies':relative_frequencies,
+            'StateReadout.repeat_each_measurement':no_of_repeats,
             'StateReadout.use_camera_for_readout':False,
             'Excitation_729.bichro':False,
             'Excitation_729.channel_729':self.parameters.CalibrationScans.calibration_channel_729,
-            'Spectrum.window_name':['car1']})
+            'StatePreparation.channel_729':self.parameters.CalibrationScans.calibration_channel_729,
+            'Spectrum.window_name':['radial1']})
 
+        self.spectrum.set_parameters(self.parameters)
         self.spectrum.set_parameters(replace)
-        self.spectrum.set_progress_limits(0, 25.0)
+        self.spectrum.set_progress_limits(0.0, 50.0)
         
         fr, ex = self.spectrum.run(cxn, context)
 
@@ -127,27 +153,34 @@ class calibrate_all_lines(experiment):
         ex = np.array(ex)
         ex = ex.flatten()
 
-        carr_1 = self.fitter.fit(fr, ex)
-        carr_1 = WithUnit(carr_1, 'MHz')
+        # take the maximum of the line excitation
 
-        ### RUN THE SECOND CARRIER
+        try:
+            fit_center, rsb_ex, fit_width = self.fitter.fit(fr, ex, return_all_params = True)
+        except:
+            rsb_ex = np.max(ex)
+
+        #### RUN THE BLUE SIDEBAND
 
         replace = TreeDict.fromdict({
-            'Spectrum.line_selection':dt.line_selection_2,
+            'Spectrum.line_selection':self.parameters.Spectrum.line_selection,
             'Spectrum.scan_selection':'auto',
-            'Spectrum.sensitivity_selection': 'car2_sensitivity',
-            'Spectrum.sideband_selection':[0,0,0,0],
-            'StatePreparation.sideband_cooling_enable':False,
+            'Spectrum.sensitivity_selection': 'normal',
+            'Spectrum.sideband_selection':sb_blue,
+            'SidebandCooling.sideband_selection':sb_red,
+            'StatePreparation.sideband_cooling_enable':True,
             'StatePreparation.optical_pumping_enable':True,
-            'Display.relative_frequencies':False,
-            'StateReadout.repeat_each_measurement':100,
+            'Display.relative_frequencies':relative_frequencies,
+            'StateReadout.repeat_each_measurement':no_of_repeats,
             'StateReadout.use_camera_for_readout':False,
             'Excitation_729.bichro':False,
             'Excitation_729.channel_729':self.parameters.CalibrationScans.calibration_channel_729,
-            'Spectrum.window_name':['car2']})
+            'StatePreparation.channel_729':self.parameters.CalibrationScans.calibration_channel_729,
+            'Spectrum.window_name':['radial2']})
 
+        self.spectrum.set_parameters(self.parameters)
         self.spectrum.set_parameters(replace)
-        self.spectrum.set_progress_limits(25.0, 50.0)
+        self.spectrum.set_progress_limits(50.0, 100.0)
         
         fr, ex = self.spectrum.run(cxn, context)
 
@@ -155,88 +188,13 @@ class calibrate_all_lines(experiment):
         ex = np.array(ex)
         ex = ex.flatten()
 
-        carr_2 = self.fitter.fit(fr, ex)
-        carr_2 = WithUnit(carr_2, 'MHz')
-
-        self.submit_dt(carr_1, dt.line_selection_1, carr_2, dt.line_selection_2)
-        
-
-        if self.parameters.CalibrationScans.calibrate_sidebands:
-   
-           #### RUN THE FIRST SIDEBAND
-   
-           replace = TreeDict.fromdict({
-               'Spectrum.line_selection':dt.line_selection_1,
-               'Spectrum.scan_selection':'auto',
-               'Spectrum.sensitivity_selection': 'normal',
-               'Spectrum.sideband_selection':[-1,0,0,0],
-               'StatePreparation.sideband_cooling_enable':False,
-               'StatePreparation.optical_pumping_enable':True,
-               'Display.relative_frequencies':True,
-               'StateReadout.repeat_each_measurement':100,
-               'StateReadout.use_camera_for_readout':False,
-               'Excitation_729.bichro':False,
-               'Excitation_729.channel_729':self.parameters.CalibrationScans.calibration_channel_729,
-               'Spectrum.window_name':['radial1']})
-   
-           self.spectrum.set_parameters(replace)
-           self.spectrum.set_progress_limits(50.0, 75.0)
-           
-           fr, ex = self.spectrum.run(cxn, context)
-   
-           fr = np.array(fr)
-           ex = np.array(ex)
-           ex = ex.flatten()
-   
-           sb_1 = self.fitter.fit(fr, ex)
-           sb_1 = WithUnit(abs(sb_1), 'MHz')
-   
-           #### SECOND SIDEBAND
-   
-           replace = TreeDict.fromdict({
-               'Spectrum.line_selection':dt.line_selection_1,
-               'Spectrum.scan_selection':'auto',
-               'Spectrum.sensitivity_selection': 'normal',
-               'Spectrum.sideband_selection':[0,-1,0,0],
-               'StatePreparation.sideband_cooling_enable':False,
-               'StatePreparation.optical_pumping_enable':True,
-               'Display.relative_frequencies':True,
-               'StateReadout.repeat_each_measurement':100,
-               'StateReadout.use_camera_for_readout':False,
-               'Excitation_729.bichro':False,
-               'Excitation_729.channel_729':self.parameters.CalibrationScans.calibration_channel_729,
-               'Spectrum.window_name':['radial2']})
-   
-           self.spectrum.set_parameters(replace)
-           self.spectrum.set_progress_limits(75.0, 100.0)
-           
-           fr, ex = self.spectrum.run(cxn, context)
-   
-           fr = np.array(fr)
-           ex = np.array(ex)
-           ex = ex.flatten()
-   
-           sb_2 = self.fitter.fit(fr, ex)
-           sb_2 = WithUnit(abs(sb_2), 'MHz')
-   
-           if self.parameters.CalibrationScans.feedback_sidebands:
-              self.submit_trap_frequencies(sb_1, sb_2)
-        
-        ## resetting DDS5 state
-        #time.sleep(1)
-        ##self.dds_cw.output('5', False)
-        #self.dds_cw.output('5', dds5_state)
-        #time.sleep(1)
-
-    def submit_dt(self, f1, line1, f2, line2):
-        submission = [
-            (line1, f1), (line2, f2) ]
-
-        self.drift_tracker.set_measurements(submission)
-
-    def submit_trap_frequencies(self, f1, f2):
-        self.pv.set_parameter('TrapFrequencies', 'radial_frequency_1', f1)
-        self.pv.set_parameter('TrapFrequencies', 'radial_frequency_2', f2)
+        # take the maximum of the line excitation
+        try:        
+            fit_center, bsb_ex, fit_width = self.fitter.fit(fr, ex, return_all_params = True)
+        except:
+            bsb_ex = np.max(ex)
+            
+        return (rsb_ex, bsb_ex)
 
     def finalize(self, cxn, context):
         self.spectrum.finalize(cxn, context)
@@ -244,6 +202,6 @@ class calibrate_all_lines(experiment):
 if __name__ == '__main__':
     cxn = labrad.connect()
     scanner = cxn.scriptscanner
-    exprt = calibrate_all_lines(cxn = cxn)
+    exprt = calibrate_temperature_rotating(cxn = cxn)
     ident = scanner.register_external_launch(exprt.name)
     exprt.execute(ident)

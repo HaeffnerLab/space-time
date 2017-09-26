@@ -59,9 +59,11 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         #from common.clients.CAVITY_CONTROL import cavityWidget
         from common.clients.LASERDAC_CONTROL import DAC_Control as laserdac_control_widget
         from common.clients.multiplexer.MULTIPLEXER_CONTROL import multiplexerWidget
+        from common.clients.InjectionLock_GUI_new import InjectionLock_Control
         gridLayout = QtGui.QGridLayout()
 
         gridLayout.addWidget(laserdac_control_widget(reactor),             0,0)
+        gridLayout.addWidget(InjectionLock_Control(reactor),    1,0)
         gridLayout.addWidget(multiplexerWidget(reactor),        0,1)
 
         widget.setLayout(gridLayout)

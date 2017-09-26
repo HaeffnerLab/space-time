@@ -9,9 +9,9 @@ from labrad.units import WithUnit
 from numpy import linspace
 import numpy as np
 
-class rabi_flopping(experiment):
+class rabi_flopping_with_rotation(experiment):
     
-    name = 'RabiFlopping'
+    name = 'RabiFlopping_rotating'
     trap_frequencies = [
                         ('TrapFrequencies','axial_frequency'),
                         ('TrapFrequencies','radial_frequency_1'),
@@ -26,6 +26,13 @@ class rabi_flopping(experiment):
                            ('RabiFlopping','rabi_amplitude_729'),
                            ('RabiFlopping','frequency_selection'),
                            ('RabiFlopping','sideband_selection'),
+                           
+                           ('Rotation','frequency'),
+                           ('Rotation','voltage_pp'),
+                           ('Rotation','start_hold'),
+                           ('Rotation','frequency_ramp_time'),
+                           ('Rotation','amplitude_ramp_time'),
+                           ('Rotation','end_hold'),
                            
                            ('Crystallization', 'auto_crystallization'),
                            ('Crystallization', 'camera_record_exposure'),
@@ -63,6 +70,7 @@ class rabi_flopping(experiment):
         self.cxnlab = labrad.connect('192.168.169.49', password='lab', tls_mode='off') #connection to labwide network
         self.drift_tracker = cxn.sd_tracker
         self.dv = cxn.data_vault
+        self.awg = cxn.rigol_dg4062
         self.rabi_flop_save_context = cxn.context()
         self.grapher = cxn.grapher
     
@@ -74,6 +82,15 @@ class rabi_flopping(experiment):
         minim = minim['us']; maxim = maxim['us']
         self.scan = linspace(minim,maxim, steps)
         self.scan = [WithUnit(pt, 'us') for pt in self.scan]
+
+        rp = self.parameters.Rotation
+        start_hold = rp.start_hold
+        freq_ramp_time = rp.frequency_ramp_time
+        amplitude_ramp_time = rp.amplitude_ramp_time
+        end_hold = rp.end_hold
+        voltage_pp = rp.voltage_pp
+        frequency = rp.frequency
+        self.awg.program_awf(start_hold['ms'],freq_ramp_time['ms'], amplitude_ramp_time['ms'],end_hold['ms'],voltage_pp['V'],frequency['kHz'])
         
     def setup_data_vault(self):
         localtime = time.localtime()
@@ -87,7 +104,7 @@ class rabi_flopping(experiment):
         dependants = [('Excitation','Ion {}'.format(ion),'Probability') for ion in range(output_size)]
         ds = self.dv.new('Rabi Flopping {}'.format(datasetNameAppend),[('Excitation', 'us')], dependants , context = self.rabi_flop_save_context)
         self.dv.add_parameter('Window', ['Rabi Flopping'], context = self.rabi_flop_save_context)
-        self.dv.add_parameter('plotLive', True, context = self.rabi_flop_save_context)
+        #self.dv.add_parameter('plotLive', True, context = self.rabi_flop_save_context)
         if self.grapher is not None:
             self.grapher.plot_with_axis(ds, 'rabi', self.scan)
     
