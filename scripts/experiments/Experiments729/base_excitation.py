@@ -20,7 +20,10 @@ class base_excitation(experiment):
                             ('SidebandCooling','line_selection'),
                             ('SidebandCooling','sideband_selection'),
                             
-                            ('SequentialSBCooling', 'sideband_selection'),
+                            ('SequentialSBCooling', 'stage2_sideband_selection'),
+                            ('SequentialSBCooling', 'stage3_sideband_selection'),
+                            ('SequentialSBCooling', 'stage4_sideband_selection'),
+                            ('SequentialSBCooling', 'stage5_sideband_selection'),
                             
                             ('TrapFrequencies','axial_frequency'),
                             ('TrapFrequencies','radial_frequency_1'),
@@ -62,6 +65,10 @@ class base_excitation(experiment):
         params = list(params)
         params.remove(('OpticalPumping', 'optical_pumping_frequency_729'))
         params.remove(('SidebandCooling', 'sideband_cooling_frequency_729'))
+        params.remove(('SequentialSBCooling', 'stage2_frequency_729'))
+        params.remove(('SequentialSBCooling', 'stage3_frequency_729'))
+        params.remove(('SequentialSBCooling', 'stage4_frequency_729'))
+        params.remove(('SequentialSBCooling', 'stage5_frequency_729'))
         params.remove(('OpticalPumpingAux', 'aux_optical_frequency_729'))
         params.remove(('StateReadout', 'state_readout_duration'))
         #params.remove(('SequentialSBCooling', 'frequency'))
@@ -140,11 +147,14 @@ class base_excitation(experiment):
     def setup_sequence_parameters(self):
         op = self.parameters.OpticalPumping
         sp = self.parameters.StatePreparation
+
         optical_pumping_frequency = cm.frequency_from_line_selection(op.frequency_selection, op.manual_frequency_729, op.line_selection, self.drift_tracker, sp.optical_pumping_enable)
         self.parameters['OpticalPumping.optical_pumping_frequency_729'] = optical_pumping_frequency
+
         aux = self.parameters.OpticalPumpingAux
         aux_optical_pumping_frequency = cm.frequency_from_line_selection('auto', WithUnit(0,'MHz'),  aux.aux_op_line_selection, self.drift_tracker, aux.aux_op_enable)
         self.parameters['OpticalPumpingAux.aux_optical_frequency_729'] = aux_optical_pumping_frequency
+
         sc = self.parameters.SidebandCooling
         sideband_cooling_frequency = cm.frequency_from_line_selection(sc.frequency_selection, sc.manual_frequency_729, sc.line_selection, self.drift_tracker, sp.sideband_cooling_enable)
         trap = self.parameters.TrapFrequencies
@@ -154,11 +164,18 @@ class base_excitation(experiment):
         self.parameters['SidebandCooling.sideband_cooling_frequency_729'] = sideband_cooling_frequency
         #print "sbc"
         #print sideband_cooling_frequency
+
         sc2 = self.parameters.SequentialSBCooling
         sc2freq = cm.frequency_from_line_selection(sc.frequency_selection, sc.manual_frequency_729, sc.line_selection, self.drift_tracker, sp.sideband_cooling_enable)
-        sc2freq = cm.add_sidebands(sc2freq, sc2.sideband_selection, trap)
-        self.parameters['SequentialSBCooling.frequency'] = sc2freq
-        #print sc2freq
+        stage2_freq = cm.add_sidebands(sc2freq, sc2.stage2_sideband_selection, trap)
+        stage3_freq = cm.add_sidebands(sc2freq, sc2.stage3_sideband_selection, trap)
+        stage4_freq = cm.add_sidebands(sc2freq, sc2.stage4_sideband_selection, trap)
+        stage5_freq = cm.add_sidebands(sc2freq, sc2.stage5_sideband_selection, trap)
+        self.parameters['SequentialSBCooling.stage2_frequency_729'] = stage2_freq
+        self.parameters['SequentialSBCooling.stage3_frequency_729'] = stage3_freq
+        self.parameters['SequentialSBCooling.stage4_frequency_729'] = stage4_freq
+        self.parameters['SequentialSBCooling.stage5_frequency_729'] = stage5_freq
+
 
         # set state readout time
         if self.use_camera:
@@ -169,8 +186,8 @@ class base_excitation(experiment):
     def setup_initial_switches(self):
         #self.pulser.switch_manual('crystallization',  False)
         #switch off 729 at the beginning
-        #self.pulser.output('729global', False)
-        self.pulser.output('729local', False)
+        self.pulser.output('729horiz', False)
+        self.pulser.output('729vert', False)
     
     def plot_current_sequence(self, cxn):
         from common.okfpgaservers.pulser.pulse_sequences.plot_sequence import SequencePlotter

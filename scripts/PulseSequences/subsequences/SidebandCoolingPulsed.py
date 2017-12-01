@@ -32,6 +32,8 @@ class sideband_cooling_pulsed(pulse_sequence):
                                                    ('OpticalPumpingPulsed','optical_pumping_pulsed_amplitude_729'),
                                                    ('OpticalPumpingPulsed','optical_pumping_pulsed_frequency_866'),
                                                    ('OpticalPumpingPulsed','optical_pumping_pulsed_amplitude_866'),
+
+                                                   ('StatePreparation', 'channel_729')
                                                    ]
                            }
     
@@ -53,5 +55,6 @@ class sideband_cooling_pulsed(pulse_sequence):
                    'OpticalPumpingPulsed.optical_pumping_pulsed_amplitude_729':scp.sideband_cooling_pulsed_amplitude_729,
                    'OpticalPumpingPulsed.optical_pumping_pulsed_frequency_866':scp.sideband_cooling_pulsed_frequency_866,
                    'OpticalPumpingPulsed.optical_pumping_pulsed_amplitude_866':scp.sideband_cooling_pulsed_amplitude_866,
+                   'StatePreparation.channel_729':scp.sideband_cooling_pulsed_channel_729
                   }
         return replace

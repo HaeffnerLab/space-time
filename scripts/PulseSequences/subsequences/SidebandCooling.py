@@ -18,24 +18,29 @@ class sideband_cooling(pulse_sequence):
                            ('SidebandCooling', 'sideband_cooling_frequency_866'),
                            ('SidebandCooling', 'sideband_cooling_frequency_729'),
                            ('SidebandCooling', 'stark_shift'),
+                           ('SidebandCooling', 'channel_729'),
                            ('SidebandCoolingContinuous','sideband_cooling_continuous_duration'),
                            ('SidebandCoolingPulsed','sideband_cooling_pulsed_duration_729'),
                            
                            ('SequentialSBCooling','enable'),
                            ('SequentialSBCooling','additional_stages'),
-                           ('SequentialSBCooling', 'interleave'),
+                           ('SequentialSBCooling','interleave'),
                            ('SequentialSBCooling','stage2_amplitude_729'),
                            ('SequentialSBCooling','stage2_amplitude_854'),
                            ('SequentialSBCooling','stage2_frequency_729'),
+                           ('SequentialSBCooling','stage2_channel_729'),
                            ('SequentialSBCooling','stage3_amplitude_729'),
                            ('SequentialSBCooling','stage3_amplitude_854'),
                            ('SequentialSBCooling','stage3_frequency_729'),
+                           ('SequentialSBCooling','stage3_channel_729'),
                            ('SequentialSBCooling','stage4_amplitude_729'),
                            ('SequentialSBCooling','stage4_amplitude_854'),
                            ('SequentialSBCooling','stage4_frequency_729'),
+                           ('SequentialSBCooling','stage4_channel_729'),
                            ('SequentialSBCooling','stage5_amplitude_729'),
                            ('SequentialSBCooling','stage5_amplitude_854'),
                            ('SequentialSBCooling','stage5_frequency_729'),
+                           ('SequentialSBCooling','stage5_channel_729'),
                            ]
     
     required_subsequences = [sideband_cooling_continuous, sideband_cooling_pulsed, optical_pumping]
@@ -48,6 +53,7 @@ class sideband_cooling(pulse_sequence):
                                                         ('SidebandCoolingContinuous','sideband_cooling_continuous_amplitude_854'),
                                                         ('SidebandCoolingContinuous','sideband_cooling_continuous_amplitude_729'),
                                                         ('SidebandCoolingContinuous','sideband_cooling_continuous_amplitude_866'),
+                                                        ('SidebandCoolingContinuous','sideband_cooling_continuous_channel_729'),
                                                         ],
                             sideband_cooling_pulsed:[
                                                         ('SidebandCoolingPulsed','sideband_cooling_pulsed_duration_729'),
@@ -57,6 +63,7 @@ class sideband_cooling(pulse_sequence):
                                                         ('SidebandCoolingPulsed','sideband_cooling_pulsed_amplitude_729'),
                                                         ('SidebandCoolingPulsed','sideband_cooling_pulsed_frequency_866'),
                                                         ('SidebandCoolingPulsed','sideband_cooling_pulsed_amplitude_866'),
+                                                        ('SidebandCoolingPulsed','sideband_cooling_pulsed_channel_729'),
                                                         ],
                            optical_pumping:[
                                             ('OpticalPumping','optical_pumping_continuous'),
@@ -91,27 +98,32 @@ class sideband_cooling(pulse_sequence):
                                'SidebandCoolingContinuous.sideband_cooling_continuous_amplitude_854':sc.sideband_cooling_amplitude_854,
                                'SidebandCoolingContinuous.sideband_cooling_continuous_amplitude_729':sc.sideband_cooling_amplitude_729,
                                'SidebandCoolingContinuous.sideband_cooling_continuous_amplitude_866':sc.sideband_cooling_amplitude_866,
+                               'SidebandCoolingContinuous.sideband_cooling_continuous_channel_729':sc.channel_729,
                                }
             
             cooling_replace_2 = cooling_replace.copy()
             cooling_replace_2['SidebandCoolingContinuous.sideband_cooling_continuous_frequency_729'] = sc2.stage2_frequency_729 + sc.stark_shift
             cooling_replace_2['SidebandCoolingContinuous.sideband_cooling_continuous_amplitude_729'] = sc2.stage2_amplitude_729      
-            cooling_replace_2['SidebandCoolingContinuous.sideband_cooling_continuous_amplitude_854'] = sc2.stage2_amplitude_854              
+            cooling_replace_2['SidebandCoolingContinuous.sideband_cooling_continuous_amplitude_854'] = sc2.stage2_amplitude_854
+            cooling_replace_2['SidebandCoolingContinuous.sideband_cooling_continuous_channel_729'] = sc2.stage2_channel_729             
             
             cooling_replace_3 = cooling_replace.copy()
             cooling_replace_3['SidebandCoolingContinuous.sideband_cooling_continuous_frequency_729'] = sc2.stage3_frequency_729 + sc.stark_shift
             cooling_replace_3['SidebandCoolingContinuous.sideband_cooling_continuous_amplitude_729'] = sc2.stage3_amplitude_729      
-            cooling_replace_3['SidebandCoolingContinuous.sideband_cooling_continuous_amplitude_854'] = sc2.stage3_amplitude_854 
+            cooling_replace_3['SidebandCoolingContinuous.sideband_cooling_continuous_amplitude_854'] = sc2.stage3_amplitude_854
+            cooling_replace_3['SidebandCoolingContinuous.sideband_cooling_continuous_channel_729'] = sc2.stage3_channel_729  
             
             cooling_replace_4 = cooling_replace.copy()
             cooling_replace_4['SidebandCoolingContinuous.sideband_cooling_continuous_frequency_729'] = sc2.stage4_frequency_729 + sc.stark_shift
             cooling_replace_4['SidebandCoolingContinuous.sideband_cooling_continuous_amplitude_729'] = sc2.stage4_amplitude_729      
             cooling_replace_4['SidebandCoolingContinuous.sideband_cooling_continuous_amplitude_854'] = sc2.stage4_amplitude_854             
+            cooling_replace_4['SidebandCoolingContinuous.sideband_cooling_continuous_channel_729'] = sc2.stage4_channel_729 
             
             cooling_replace_5 = cooling_replace.copy()        
             cooling_replace_5['SidebandCoolingContinuous.sideband_cooling_continuous_frequency_729'] = sc2.stage5_frequency_729 + sc.stark_shift
             cooling_replace_5['SidebandCoolingContinuous.sideband_cooling_continuous_amplitude_729'] = sc2.stage5_amplitude_729      
-            cooling_replace_5['SidebandCoolingContinuous.sideband_cooling_continuous_amplitude_854'] = sc2.stage5_amplitude_854     
+            cooling_replace_5['SidebandCoolingContinuous.sideband_cooling_continuous_amplitude_854'] = sc2.stage5_amplitude_854   
+            cooling_replace_5['SidebandCoolingContinuous.sideband_cooling_continuous_channel_729'] = sc2.stage5_channel_729   
             
         else:
             #pulsed
@@ -125,27 +137,32 @@ class sideband_cooling(pulse_sequence):
                                 'SidebandCoolingPulsed.sideband_cooling_pulsed_amplitude_729':sc.sideband_cooling_amplitude_729,
                                 'SidebandCoolingPulsed.sideband_cooling_pulsed_frequency_866':sc.sideband_cooling_frequency_866,
                                 'SidebandCoolingPulsed.sideband_cooling_pulsed_amplitude_866':sc.sideband_cooling_amplitude_866,
+                                'SidebandCoolingPulsed.sideband_cooling_pulsed_channel_729':sc.channel_729,
                                }
             
             cooling_replace_2 = cooling_replace.copy()
             cooling_replace_2['SidebandCoolingPulsed.sideband_cooling_pulsed_frequency_729'] = sc2.stage2_frequency_729 + sc.stark_shift
             cooling_replace_2['SidebandCoolingPulsed.sideband_cooling_pulsed_amplitude_729'] = sc2.stage2_amplitude_729      
-            cooling_replace_2['SidebandCoolingPulsed.sideband_cooling_pulsed_amplitude_854'] = sc2.stage2_amplitude_854              
+            cooling_replace_2['SidebandCoolingPulsed.sideband_cooling_pulsed_amplitude_854'] = sc2.stage2_amplitude_854
+            cooling_replace_2['SidebandCoolingPulsed.sideband_cooling_pulsed_channel_729'] = sc2.stage2_channel_729             
             
             cooling_replace_3 = cooling_replace.copy()
             cooling_replace_3['SidebandCoolingPulsed.sideband_cooling_pulsed_frequency_729'] = sc2.stage3_frequency_729 + sc.stark_shift
             cooling_replace_3['SidebandCoolingPulsed.sideband_cooling_pulsed_amplitude_729'] = sc2.stage3_amplitude_729      
-            cooling_replace_3['SidebandCoolingPulsed.sideband_cooling_pulsed_amplitude_854'] = sc2.stage3_amplitude_854 
+            cooling_replace_3['SidebandCoolingPulsed.sideband_cooling_pulsed_amplitude_854'] = sc2.stage3_amplitude_854
+            cooling_replace_3['SidebandCoolingPulsed.sideband_cooling_pulsed_channel_729'] = sc2.stage3_channel_729    
             
             cooling_replace_4 = cooling_replace.copy()
             cooling_replace_4['SidebandCoolingPulsed.sideband_cooling_pulsed_frequency_729'] = sc2.stage4_frequency_729 + sc.stark_shift
             cooling_replace_4['SidebandCoolingPulsed.sideband_cooling_pulsed_amplitude_729'] = sc2.stage4_amplitude_729      
-            cooling_replace_4['SidebandCoolingPulsed.sideband_cooling_pulsed_amplitude_854'] = sc2.stage4_amplitude_854             
+            cooling_replace_4['SidebandCoolingPulsed.sideband_cooling_pulsed_amplitude_854'] = sc2.stage4_amplitude_854
+            cooling_replace_4['SidebandCoolingPulsed.sideband_cooling_pulsed_channel_729'] = sc2.stage4_channel_729                
             
             cooling_replace_5 = cooling_replace.copy()        
             cooling_replace_5['SidebandCoolingPulsed.sideband_cooling_pulsed_frequency_729'] = sc2.stage5_frequency_729 + sc.stark_shift
             cooling_replace_5['SidebandCoolingPulsed.sideband_cooling_pulsed_amplitude_729'] = sc2.stage5_amplitude_729      
-            cooling_replace_5['SidebandCoolingPulsed.sideband_cooling_pulsed_amplitude_854'] = sc2.stage5_amplitude_854     
+            cooling_replace_5['SidebandCoolingPulsed.sideband_cooling_pulsed_amplitude_854'] = sc2.stage5_amplitude_854
+            cooling_replace_5['SidebandCoolingPulsed.sideband_cooling_pulsed_channel_729'] = sc2.stage5_channel_729        
             
             
         optical_pump_replace = {

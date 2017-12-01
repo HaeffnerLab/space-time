@@ -5,33 +5,29 @@ from space_time.scripts.scriptLibrary import dvParameters
 from space_time.scripts.experiments.Crystallization.crystallization import crystallization
 import time
 import labrad
+from numpy import linspace
 from labrad.units import WithUnit
 import numpy as np
 
-class spectrum_spin_up_spin_down(experiment):
+class rabi_flop_spin_up_spin_down(experiment):
     
-    name = 'Spectrum729_spin_up_spin_down'
-    spectrum_required_parameters = [
-                           ('Spectrum','custom'),
-                           ('Spectrum','normal'),
-                           ('Spectrum','fine'),
-                           ('Spectrum','ultimate'),
-                           ('Spectrum','car1_sensitivity'),
-                           ('Spectrum','car2_sensitivity'),
-                           
-                           ('Spectrum','line_selection'),
-                           ('Spectrum','manual_amplitude_729'),
-                           ('Spectrum','manual_excitation_time'),
-                           ('Spectrum','manual_scan'),
-                           ('Spectrum','scan_selection'),
-                           ('Spectrum','sensitivity_selection'),
-                           ('Spectrum','sideband_selection'),
+    name = 'rabi_flop_spin_up_spin_down'
+    trap_frequencies = [
+                        ('TrapFrequencies','axial_frequency'),
+                        ('TrapFrequencies','radial_frequency_1'),
+                        ('TrapFrequencies','radial_frequency_2'),
+                        ('TrapFrequencies','rf_drive_frequency'), 
+                        ]
 
-                           ('TrapFrequencies','axial_frequency'),
-                           ('TrapFrequencies','radial_frequency_1'),
-                           ('TrapFrequencies','radial_frequency_2'),
-                           ('TrapFrequencies','rf_drive_frequency'),
-                           
+    rabi_required_parameters = [
+                      
+                           ('RabiFlopping','frequency_selection'),
+                           ('RabiFlopping','line_selection'),
+                           ('RabiFlopping','manual_frequency_729'),
+                           ('RabiFlopping','manual_scan'),
+                           ('RabiFlopping','rabi_amplitude_729'),
+                           ('RabiFlopping','sideband_selection'),
+
                            ('Rotation','drive_frequency'),
                            ('Rotation','voltage_pp'),
                            #('Rotation','ramp_down_time'),
@@ -62,13 +58,10 @@ class spectrum_spin_up_spin_down(experiment):
 
                             ]
     
-    spectrum_optional_parmeters = [
-                          ('Spectrum', 'window_name')
-                          ]
     
     @classmethod
     def all_required_parameters(cls):
-        parameters = set(cls.spectrum_required_parameters)
+        parameters = set(cls.rabi_required_parameters)
         parameters = parameters.union(set(excitation_729.all_required_parameters()))
         parameters = list(parameters)
         #removing parameters we'll be overwriting, and they do not need to be loaded
@@ -93,42 +86,29 @@ class spectrum_spin_up_spin_down(experiment):
         self.dv = cxn.data_vault
         self.awg_rotation = cxn.keysight_33500b
         self.pv = cxn.parametervault
-        self.spectrum_save_context = cxn.context()
+        self.rabi_save_context = cxn.context()
         try:
             self.grapher = cxn.grapher
         except: self.grapher = None
         self.cxn = cxn
         
     def setup_sequence_parameters(self):
-        sp = self.parameters.Spectrum
-        if sp.scan_selection == 'manual':
-            minim,maxim,steps = sp.manual_scan
-            duration = sp.manual_excitation_time
-            amplitude = sp.manual_amplitude_729
-            self.carrier_frequency = WithUnit(0.0, 'MHz')
-        elif sp.scan_selection == 'auto':
-            center_frequency = cm.frequency_from_line_selection(sp.scan_selection, None , sp.line_selection, self.drift_tracker)
-            self.carrier_frequency = center_frequency
-            center_frequency = cm.add_sidebands(center_frequency, sp.sideband_selection, self.parameters.TrapFrequencies)
-            span, resolution, duration, amplitude = sp[sp.sensitivity_selection]
-            minim = center_frequency - span / 2.0
-            maxim = center_frequency + span / 2.0
-            steps = int(span / resolution )
-        else:
-            raise Exception("Incorrect Spectrum Scan Type")
         #making the scan
-        self.parameters['Excitation_729.rabi_excitation_duration'] = duration
-        self.parameters['Excitation_729.rabi_excitation_amplitude'] = amplitude
-        minim = minim['MHz']; maxim = maxim['MHz']
-        self.scan = np.linspace(minim,maxim, steps)
-        self.scan = [WithUnit(pt, 'MHz') for pt in self.scan]
-        
+        self.load_frequency()
+        flop = self.parameters.RabiFlopping
+        self.parameters['Excitation_729.rabi_excitation_amplitude'] = flop.rabi_amplitude_729
+        minim,maxim,steps = flop.manual_scan
+        minim = minim['us']; maxim = maxim['us']
+        self.scan = linspace(minim,maxim, steps)
+        self.scan = [WithUnit(pt, 'us') for pt in self.scan]
+
+
         #set up the timing of the rotation awf
         rp = self.parameters.Rotation
         frequency_ramp_time = rp.frequency_ramp_time
 
         if self.parameters.StatePreparation.sideband_cooling_enable:
-            sideband_cooling_time  = 2*(self.parameters.SidebandCooling.sideband_cooling_optical_pumping_duration + self.parameters.SidebandCoolingContinuous.sideband_cooling_continuous_duration)*self.parameters.SidebandCooling.sideband_cooling_cycles + WithUnit(1.0,'ms')
+            sideband_cooling_time  = (self.parameters.SidebandCooling.sideband_cooling_optical_pumping_duration + self.parameters.SidebandCoolingContinuous.sideband_cooling_continuous_duration)*self.parameters.SidebandCooling.sideband_cooling_cycles + WithUnit(1.0,'ms')
         else:
             sideband_cooling_time = WithUnit(0,'ms')
 
@@ -137,25 +117,14 @@ class spectrum_spin_up_spin_down(experiment):
         #ramp_down_time = rp.ramp_down_time
         start_phase = rp.start_phase
         middle_hold = rp.middle_hold
-        end_hold = self.parameters.StateReadout.pmt_readout_duration + WithUnit(1,'ms')
+        end_hold = self.parameters.StateReadout.pmt_readout_duration #+ WithUnit(1,'ms')
         #end_hold = rp.end_hold
         voltage_pp = rp.voltage_pp
         drive_frequency = rp.drive_frequency
         self.awg_rotation.program_awf(start_phase['deg'],start_hold['ms'],frequency_ramp_time['ms'],middle_hold['ms'],0.0,end_hold['ms'],voltage_pp['V'],drive_frequency['kHz'],'spin_up_spin_down')
-        self.parameters['Heating.background_heating_time'] = 2*frequency_ramp_time + middle_hold + WithUnit(1.0, 'ms')
+        self.parameters['Heating.background_heating_time'] = 2*frequency_ramp_time + middle_hold + WithUnit(1.5, 'ms')
         #self.awg_rotation.rotation(frequency['kHz'],voltage_pp['V'])
         #self.awg_modulation.program_modulation(ramp_up_time['ms'],start_hold['ms'],ramp_down_time['ms'],end_hold['ms'])
-
-    def get_window_name(self):
-        if self.parameters.Spectrum.scan_selection == 'manual':
-            return ['spectrum']
-        else:
-            car = self.parameters.Spectrum.line_selection
-            sb = self.parameters.Spectrum.sideband_selection
-            window_name = car
-            if sb != [0, 0, 0, 0]: # the scan is some kind of sideband scan
-                window_name = window_name + str(sb)
-            return [window_name]
         
     def setup_data_vault(self):
         localtime = time.localtime()
@@ -164,55 +133,50 @@ class spectrum_spin_up_spin_down(experiment):
         directory = ['','Experiments']
         directory.extend([self.name])
         directory.extend(dirappend)
-        self.dv.cd(directory ,True, context = self.spectrum_save_context)
+        self.dv.cd(directory ,True, context = self.rabi_save_context)
         output_size = self.excite.output_size
         dependants = [('Excitation','Ion {}'.format(ion),'Probability') for ion in range(output_size)]
-        ds = self.dv.new('Spectrum {}'.format(datasetNameAppend),[('Excitation', 'us')], dependants , context = self.spectrum_save_context)
-        window_name = self.parameters.get('Spectrum.window_name', ['spectrum'])[0]
-        #window_name = self.get_window_name()
-        self.dv.add_parameter('Window', [window_name], context = self.spectrum_save_context)
-        #self.dv.add_parameter('plotLive', False, context = self.spectrum_save_context)
-        self.save_parameters(self.dv, self.cxn, self.cxnlab, self.spectrum_save_context)
-        sc = []
-        if self.parameters.Display.relative_frequencies:
-            sc =[x - self.carrier_frequency for x in self.scan]
-        else: sc = self.scan
+        ds = self.dv.new('Rabi Flopping {}'.format(datasetNameAppend),[('Excitation', 'us')], dependants , context = self.rabi_save_context)
+        self.dv.add_parameter('Window', ['Rabi Flopping'], context = self.rabi_save_context)
+        self.dv.add_parameter('plotLive', True, context = self.rabi_save_context)
         if self.grapher is not None:
-            self.grapher.plot_with_axis(ds, window_name, sc, False)
+            self.grapher.plot_with_axis(ds, 'rabi', self.scan)
         
+    def load_frequency(self):
+        #reloads trap frequencies and gets the latest information from the drift tracker
+        self.reload_some_parameters(self.trap_frequencies) 
+        flop = self.parameters.RabiFlopping
+        frequency = cm.frequency_from_line_selection(flop.frequency_selection, flop.manual_frequency_729, flop.line_selection, self.drift_tracker)
+        trap = self.parameters.TrapFrequencies
+        if flop.frequency_selection == 'auto':
+            frequency = cm.add_sidebands(frequency, flop.sideband_selection, trap)
+        self.parameters['Excitation_729.rabi_excitation_frequency'] = frequency
+
     def run(self, cxn, context):
-        import time
-        #t0 = time.time()
-        
         self.setup_sequence_parameters()
         self.setup_data_vault()
-        
-
-        fr = []
-        exci = []
-        
-        for i,freq in enumerate(self.scan):
+        t = []
+        ex = []
+        for i,duration in enumerate(self.scan):
             should_stop = self.pause_or_stop()
             if should_stop: break
-            excitation = self.get_excitation_crystallizing(cxn, context, freq)
-            if excitation is None: break
-            if self.parameters.Display.relative_frequencies:
-                submission = [freq['MHz'] - self.carrier_frequency['MHz']]
-            else:
-                submission = [freq['MHz']]
+            excitation = self.get_excitation_crystallizing(cxn, context, duration)
+            if excitation is None: break 
+            submission = [duration['us']]
             submission.extend(excitation)
-            self.dv.add(submission, context = self.spectrum_save_context)
+            t.append(duration['us'])
+            ex.append(excitation)
+            self.dv.add(submission, context = self.rabi_save_context)
             self.update_progress(i)
-            fr.append(submission[0])
-            exci.append(excitation)
+        return np.array(t), np.array(ex)
             
         #t1 = time.time()
         
         #print t1 - t0    
         return fr, exci
     
-    def get_excitation_crystallizing(self, cxn, context, freq):
-        excitation = self.do_get_excitation(cxn, context, freq)
+    def get_excitation_crystallizing(self, cxn, context, duration):
+        excitation = self.do_get_excitation(cxn, context, duration)
         if self.parameters.Crystallization.auto_crystallization:
             initally_melted, got_crystallized = self.crystallizer.run(cxn, context)
             #if initially melted, redo the point
@@ -222,29 +186,16 @@ class spectrum_spin_up_spin_down(experiment):
                     self.cxn.scriptscanner.pause_script(self.ident, True)
                     should_stop = self.pause_or_stop()
                     if should_stop: return None
-                excitation = self.do_get_excitation(cxn, context, freq)
+                excitation = self.do_get_excitation(cxn, context, duration)
                 initally_melted, got_crystallized = self.crystallizer.run(cxn, context)
         return excitation
     
-    def do_get_excitation(self, cxn, context, freq):
-        self.parameters['Excitation_729.rabi_excitation_frequency'] = freq
+    def do_get_excitation(self, cxn, context, duration):
+        self.load_frequency()
+        self.parameters['Excitation_729.rabi_excitation_duration'] = duration
         self.excite.set_parameters(self.parameters)
         excitation, readouts = self.excite.run(cxn, context)
         return excitation
-    
-    def fit_lorentzian(self, timeout):
-        #for lorentzian format is FWHM, center, height, offset
-        scan = np.array([pt['MHz'] for pt in self.scan])
-        
-        fwhm_guess = (scan.max() - scan.min()) / 10.0
-        center_guess = np.average(scan)
-        self.dv.add_parameter('Fit', ['0', 'Lorentzian', '[{0}, {1}, {2}, {3}]'
-                                      .format(fwhm_guess, center_guess, 0.5, 0.0)], context = self.spectrum_save_context)
-        submitted = self.cxn.data_vault.wait_for_parameter('Accept-0', timeout, context = self.spectrum_save_context)
-        if submitted:
-            return self.cxn.data_vault.get_parameter('Solutions-0-Lorentzian', context = self.spectrum_save_context)
-        else:
-            return None
         
     def finalize(self, cxn, context):
         old_freq = self.pv.get_parameter('RotationCW','drive_frequency')['kHz']
@@ -252,7 +203,7 @@ class spectrum_spin_up_spin_down(experiment):
         old_amp =self.pv.get_parameter('RotationCW','voltage_pp')['V']
         self.awg_rotation.update_awg(old_freq*1e3,old_amp,old_phase)
         self.excite.finalize(cxn, context)
-        #self.save_parameters(self.dv, cxn, self.cxnlab, self.spectrum_save_context)
+        self.save_parameters(self.dv, cxn, self.cxnlab, self.rabi_save_context)
 
     def update_progress(self, iteration):
         progress = self.min_progress + (self.max_progress - self.min_progress) * float(iteration + 1.0) / len(self.scan)
@@ -267,6 +218,6 @@ class spectrum_spin_up_spin_down(experiment):
 if __name__ == '__main__':
     cxn = labrad.connect()
     scanner = cxn.scriptscanner
-    exprt = spectrum_spin_up_spin_down(cxn = cxn)
+    exprt = rabi_flop_spin_up_spin_down(cxn = cxn)
     ident = scanner.register_external_launch(exprt.name)
     exprt.execute(ident)

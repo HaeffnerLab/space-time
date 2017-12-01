@@ -39,14 +39,14 @@ class KEYSIGHT_33500B(LabradServer):
     
     def initServer(self):
         serverHost = '192.168.169.182' #IP address of the awg
-        serverPort = 5025 #random number over 1024
+        serverPort = 5025 #random number over 1024, #5025
         self.instr = socket(AF_INET, SOCK_STREAM)
 
         self.samp_rate = 1e7 #max 2e8 or 2e6 total  points
 
         try:
             self.instr.connect((serverHost, serverPort))
-            self.instr.settimeout(2)
+            self.instr.settimeout(10)
             print "Successfully connected" 
         except:
             print "Could not connect"

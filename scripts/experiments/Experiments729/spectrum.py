@@ -106,7 +106,7 @@ class spectrum(experiment):
         old_freq = self.pv.get_parameter('RotationCW','drive_frequency')['kHz']
         old_phase = self.pv.get_parameter('RotationCW','start_phase')['deg']
         old_amp =self.pv.get_parameter('RotationCW','voltage_pp')['V']
-        self.awg_rotation.update_awg(old_freq*1e3,old_amp,old_phase)
+        #self.awg_rotation.update_awg(old_freq*1e3,old_amp,old_phase)
 
     def get_window_name(self):
         if self.parameters.Spectrum.scan_selection == 'manual':
