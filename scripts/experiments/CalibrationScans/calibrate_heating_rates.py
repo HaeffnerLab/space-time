@@ -60,7 +60,7 @@ class calibrate_heating_rates(experiment):
 
         dv_args = {'output_size': 1,
                     'experiment_name' : self.name,
-                    'window_name': 'current',
+                    'window_name': 'nbar',
                     'dataset_name' : 'Heating_Rate'
                     }
 

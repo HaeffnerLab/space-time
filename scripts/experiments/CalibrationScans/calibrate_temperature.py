@@ -139,9 +139,9 @@ class calibrate_temperature(experiment):
             'StateReadout.repeat_each_measurement':no_of_repeats,
             'StateReadout.use_camera_for_readout':False,
             'Excitation_729.bichro':False,
-            'Excitation_729.channel_729':self.parameters.CalibrationScans.calibration_channel_729,
-            'StatePreparation.channel_729':self.parameters.CalibrationScans.calibration_channel_729,
-            'Spectrum.window_name':['radial1']})
+            # 'Excitation_729.channel_729':self.parameters.CalibrationScans.calibration_channel_729,
+            # 'StatePreparation.channel_729':self.parameters.CalibrationScans.calibration_channel_729,
+            'Spectrum.window_name':['temp_rsb']})
 
         self.spectrum.set_parameters(self.parameters)
         self.spectrum.set_parameters(replace)
@@ -174,9 +174,9 @@ class calibrate_temperature(experiment):
             'StateReadout.repeat_each_measurement':no_of_repeats,
             'StateReadout.use_camera_for_readout':False,
             'Excitation_729.bichro':False,
-            'Excitation_729.channel_729':self.parameters.CalibrationScans.calibration_channel_729,
-            'StatePreparation.channel_729':self.parameters.CalibrationScans.calibration_channel_729,
-            'Spectrum.window_name':['radial2']})
+            # 'Excitation_729.channel_729':self.parameters.CalibrationScans.calibration_channel_729,
+            # 'StatePreparation.channel_729':self.parameters.CalibrationScans.calibration_channel_729,
+            'Spectrum.window_name':['temp_bsb']})
 
         self.spectrum.set_parameters(self.parameters)
         self.spectrum.set_parameters(replace)

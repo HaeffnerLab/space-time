@@ -27,6 +27,7 @@ class spectrum(experiment):
                            ('Spectrum','sensitivity_selection'),
                            ('Spectrum','sideband_selection'),
 
+                           ('TrapFrequencies','rotation_frequency'),
                            ('TrapFrequencies','axial_frequency'),
                            ('TrapFrequencies','radial_frequency_1'),
                            ('TrapFrequencies','radial_frequency_2'),

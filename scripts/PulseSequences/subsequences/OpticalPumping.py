@@ -39,7 +39,6 @@ class optical_pumping(pulse_sequence):
     
     def sequence(self):
         op = self.parameters.OpticalPumping
-        
         if op.optical_pumping_type == 'continuous':
             replace = {
                        'OpticalPumpingContinuous.optical_pumping_continuous_frequency_854':op.optical_pumping_frequency_854,

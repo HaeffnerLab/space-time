@@ -166,8 +166,8 @@ class sideband_cooling(pulse_sequence):
             
             
         optical_pump_replace = {
-                                #'OpticalPumping.optical_pumping_continuous':True,
-                                #'OpticalPumpingContinuous.optical_pumping_continuous_duration':sc.sideband_cooling_optical_pumping_duration,
+                                # 'OpticalPumping.optical_pumping_continuous':True,
+                                # 'OpticalPumpingContinuous.optical_pumping_continuous_duration':sc.sideband_cooling_optical_pumping_duration,
                                 }
         Nc = int(sc.sideband_cooling_cycles)
         sequential_cooling_replacements = [cooling_replace_2,cooling_replace_3,cooling_replace_4,cooling_replace_5]
@@ -176,21 +176,23 @@ class sideband_cooling(pulse_sequence):
                 #each cycle, increment the 729 duration
                 cooling_replace[duration_key] +=  sc.sideband_cooling_duration_729_increment_per_cycle
                 self.addSequence(cooling, TreeDict.fromdict(cooling_replace))
+                self.addSequence(optical_pumping, TreeDict.fromdict(optical_pump_replace))
                 for j in range(1,5):
                     if sc2.enable and j <= sc2.additional_stages:
                         cooling_stage_replace = sequential_cooling_replacements[j-1]
                         self.addSequence(cooling, TreeDict.fromdict(cooling_stage_replace))
                         cooling_stage_replace[duration_key] +=  sc.sideband_cooling_duration_729_increment_per_cycle
-                self.addSequence(optical_pumping, TreeDict.fromdict(optical_pump_replace))
+                        self.addSequence(optical_pumping, TreeDict.fromdict(optical_pump_replace))
         if not sc2.interleave:
             for i in range(int(sc.sideband_cooling_cycles)):
                 #each cycle, increment the 729 duration
                 cooling_replace[duration_key] +=  sc.sideband_cooling_duration_729_increment_per_cycle
                 self.addSequence(cooling, TreeDict.fromdict(cooling_replace))
+                self.addSequence(optical_pumping, TreeDict.fromdict(optical_pump_replace)) 
             for j in range(1,5):
                 for i in range(int(sc.sideband_cooling_cycles)):
                     if sc2.enable and j <= sc2.additional_stages:
                         cooling_stage_replace = sequential_cooling_replacements[j-1]
                         self.addSequence(cooling, TreeDict.fromdict(cooling_stage_replace))
                         cooling_stage_replace[duration_key] +=  sc.sideband_cooling_duration_729_increment_per_cycle
-            self.addSequence(optical_pumping, TreeDict.fromdict(optical_pump_replace))           
+                        self.addSequence(optical_pumping, TreeDict.fromdict(optical_pump_replace)) 

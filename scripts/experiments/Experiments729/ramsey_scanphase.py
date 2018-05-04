@@ -19,6 +19,12 @@ class ramsey_scanphase(experiment):
                            ('RabiFlopping','rabi_amplitude_729'),
                            ('RabiFlopping','frequency_selection'),
                            ('RabiFlopping','sideband_selection'),
+
+                           ('Ramsey','echo_frequency_selection'),
+                           ('Ramsey','echo_manual_frequency_729'),
+                           ('Ramsey','echo_line_selection'),
+                           ('Ramsey','echo_sideband_selection'),
+                           ('Ramsey','echo_frequency'),
                            
                            ('TrapFrequencies','axial_frequency'),
                            ('TrapFrequencies','radial_frequency_1'),
@@ -35,6 +41,7 @@ class ramsey_scanphase(experiment):
         parameters.remove(('Excitation_729','rabi_excitation_amplitude'))
         parameters.remove(('Excitation_729','rabi_excitation_frequency'))
         parameters.remove(('Ramsey','second_pulse_phase'))
+        parameters.remove(('Ramsey','echo_frequency'))
         return parameters
     
     def initialize(self, cxn, context, ident):
@@ -44,11 +51,11 @@ class ramsey_scanphase(experiment):
         self.scan = []
         self.amplitude = None
         self.duration = None
-        self.cxnlab = labrad.connect('192.168.169.49') #connection to labwide network
+        self.cxnlab = labrad.connect('192.168.169.49', password='lab', tls_mode='off') #connection to labwide network
         self.drift_tracker = cxn.sd_tracker
         self.dv = cxn.data_vault
         self.data_save_context = cxn.context()
-        self.setup_data_vault()
+        self.grapher = cxn.grapher
     
     def setup_sequence_parameters(self):
         flop = self.parameters.RabiFlopping
@@ -65,8 +72,13 @@ class ramsey_scanphase(experiment):
         #self.parameters['Ramsey.first_pulse_duration'] = self.parameters.Ramsey.rabi_pi_time / 2.0
         #self.parameters['Ramsey.second_pulse_duration'] = self.parameters.Ramsey.rabi_pi_time / 2.0
         
-        
-        
+        r = self.parameters.Ramsey
+        echo_frequency = cm.frequency_from_line_selection(r.echo_frequency_selection, r.echo_manual_frequency_729, r.echo_line_selection, self.drift_tracker)
+        trap = self.parameters.TrapFrequencies
+        if r.frequency_selection == 'auto':
+            echo_frequency = cm.add_sidebands(echo_frequency, r.echo_sideband_selection, trap)   
+        self.parameters['Ramsey.echo_frequency'] = echo_frequency
+
         minim,maxim,steps = self.parameters.RamseyScanPhase.scanphase
         minim = minim['deg']; maxim = maxim['deg']
         self.scan = linspace(minim,maxim, steps)
@@ -80,14 +92,18 @@ class ramsey_scanphase(experiment):
         directory.extend([self.name])
         directory.extend(dirappend)
         output_size = self.excite.output_size
+
         dependants = [('Excitation','Ion {}'.format(ion),'Probability') for ion in range(output_size)]
-        self.dv.new('{0} {1}'.format(self.name, datasetNameAppend),[('Second pulse phase', 'deg')], dependants , context = self.data_save_context)
-        window_name = self.parameters.get('RamseyScanPhase.window_name', ['Ramsey Phase Scan'])
+        self.dv.cd(directory, True,context = self.data_save_context)
+        ds = self.dv.new('{0} {1}'.format(self.name, datasetNameAppend),[('Second pulse phase', 'deg')], dependants , context = self.data_save_context)
+        window_name = self.parameters.get('RamseyScanPhase.window_name', ['ramsey'])[0]
         self.dv.add_parameter('Window', window_name, context = self.data_save_context)
         self.dv.add_parameter('plotLive', True, context = self.data_save_context)
+        self.grapher.plot_with_axis(ds,window_name,self.scan,False)
         
     def run(self, cxn, context):
         self.setup_sequence_parameters()
+        self.setup_data_vault()
         for i,duration in enumerate(self.scan):
             should_stop = self.pause_or_stop()
             if should_stop: break

@@ -74,6 +74,9 @@ class excitation_397(experiment):
         dds = cxn.pulser.human_readable_dds()
         ttl = cxn.pulser.human_readable_ttl()
         channels = cxn.pulser.get_channels()
+        # dds = cxn.pulser.humanReadableDDS()
+        # ttl = cxn.pulser.humanReadableTTL()
+        # channels = cxn.pulser.getChannels()
         sp = SequencePlotter(ttl, dds.aslist, channels)
         sp.makePlot()
         
@@ -126,3 +129,12 @@ class excitation_397(experiment):
             self.dv.add_parameter('Histogram729', True, context = self.histogram_save_context )
             self.total_readouts = []
     
+
+if __name__ == '__main__':
+    import labrad
+    cxn = labrad.connect()
+    scanner = cxn.scriptscanner
+    exprt = excitation_397(cxn = cxn)
+    ident = scanner.register_external_launch(exprt.name)
+    exprt.execute(ident)
+    exprt.plot_current_sequence(cxn)

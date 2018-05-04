@@ -17,11 +17,12 @@ class rabi_excitation(pulse_sequence):
         frequency_advance_duration = WithUnit(6, 'us')
         ampl_off = WithUnit(-63.0, 'dBm')
         self.end = self.start + frequency_advance_duration + p.rabi_excitation_duration
-        #print p.channel_729
+        #parsingt p.channel_729
 
         #first advance the frequency but keep amplitude low        
         self.addDDS(p.channel_729, self.start, frequency_advance_duration, p.rabi_excitation_frequency, ampl_off)
         self.addDDS(p.channel_729, self.start + frequency_advance_duration, p.rabi_excitation_duration, p.rabi_excitation_frequency, p.rabi_excitation_amplitude, p.rabi_excitation_phase)
+        print("Excitation Parameters:", p.rabi_excitation_duration,p.rabi_excitation_frequency,p.rabi_excitation_amplitude,p.rabi_excitation_phase)
 
 class rabi_excitation_with_sigma(pulse_sequence):
     
@@ -104,6 +105,7 @@ class rabi_excitation_no_offset(pulse_sequence):
         p = self.parameters.Excitation_729
         self.end = self.start + p.rabi_excitation_duration
         self.addDDS(p.channel_729, self.start, p.rabi_excitation_duration, p.rabi_excitation_frequency, p.rabi_excitation_amplitude, p.rabi_excitation_phase)
+        print("Excitation Parameters No Off:", p.rabi_excitation_duration,p.rabi_excitation_frequency,p.rabi_excitation_amplitude,p.rabi_excitation_phase)
     
 class rabi_excitation_select_channel(pulse_sequence):
     
@@ -147,22 +149,21 @@ class rabi_excitation_select_channel(pulse_sequence):
         #turn on
         
         
-        start_time = WithUnit(1e6*rot.spec_phase_offset/(1e3*rot.drive_frequency['kHz']),'us') #usually you need a factor of two to calculate the time but we also half the frequency to convert from drive frequency to rotaional frequency
-        pulse_duration  = WithUnit(1e6*rot.spec_phase_duration/(1e3*rot.drive_frequency['kHz']),'us')
+        start_time = WithUnit(1e6*rot.spec_phase_offset/(1e3*0.5*rot.drive_frequency['kHz']),'us') # 0  to 1
+        pulse_duration  = WithUnit(1e6*rot.spec_phase_duration/(1e3*0.5*rot.drive_frequency['kHz']),'us') # 0 to 1
         num_pulses = int(p.rabi_excitation_duration['us']/pulse_duration['us'])
         residual_duration = p.rabi_excitation_duration - num_pulses*pulse_duration
         
-        #print pulse_duration
-        #print num_pulses
+        # print p.rabi_excitation_duration['us']
+        # print num_pulses
         #print residual_duration
         
         if rot.spec_phase_locked:
             for i in range(0,num_pulses):
-                self.addDDS(p.channel_729, self.start + frequency_advance_duration + start_time + i/rot.drive_frequency, pulse_duration, p.rabi_excitation_frequency, p.rabi_excitation_amplitude, p.rabi_excitation_phase)
-            if residual_duration != 0:
-                self.addDDS(p.channel_729, self.start + frequency_advance_duration + start_time + num_pulses/rot.drive_frequency, residual_duration, p.rabi_excitation_frequency, p.rabi_excitation_amplitude, p.rabi_excitation_phase)
-            self.end = self.start + frequency_advance_duration + start_time + num_pulses/rot.drive_frequency + residual_duration
-                
+                self.addDDS(p.channel_729, self.start + frequency_advance_duration + start_time + 2.*i/rot.drive_frequency, pulse_duration, p.rabi_excitation_frequency, p.rabi_excitation_amplitude, p.rabi_excitation_phase)
+            if residual_duration['us'] != 0:
+                self.addDDS(p.channel_729, self.start + frequency_advance_duration + start_time + 2.*num_pulses/rot.drive_frequency, residual_duration, p.rabi_excitation_frequency, p.rabi_excitation_amplitude, p.rabi_excitation_phase)
+            self.end = self.start + frequency_advance_duration + start_time + 2.*num_pulses/rot.drive_frequency + residual_duration
         else:
             self.addDDS(p.channel_729, self.start + frequency_advance_duration, p.rabi_excitation_duration, p.rabi_excitation_frequency, p.rabi_excitation_amplitude, p.rabi_excitation_phase)
             self.end = self.start + frequency_advance_duration + p.rabi_excitation_duration

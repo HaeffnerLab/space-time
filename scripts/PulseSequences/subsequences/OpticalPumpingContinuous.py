@@ -23,9 +23,11 @@ class optical_pumping_continuous(pulse_sequence):
                   ]
 
     def sequence(self):
+
         gap_time = WithUnit(1.0, 'us')
         
         opc = self.parameters.OpticalPumpingContinuous
+        # print "OP Duration: ", opc.optical_pumping_continuous_duration
         channel_729 = self.parameters.StatePreparation.channel_729
         
         #repump_dur_854 = opc.optical_pumping_continuous_duration + opc.optical_pumping_continuous_repump_additional

@@ -1,5 +1,5 @@
 from common.abstractdevices.script_scanner.scan_methods import experiment
-from excitations import excitation_ramsey
+from excitations import excitation_ramsey_two_mode
 from space_time.scripts.scriptLibrary.common_methods_729 import common_methods_729 as cm
 from space_time.scripts.scriptLibrary import dvParameters
 import time
@@ -7,9 +7,9 @@ import labrad
 from labrad.units import WithUnit
 from numpy import linspace
 
-class ramsey_scangap(experiment):
+class ramsey_scangap_two_modes(experiment):
     
-    name = 'RamseyScanGap'
+    name = 'RamseyScanGap_TwoModes'
     ramsey_required_parameters = [
                            ('RamseyScanGap', 'detuning'),
                            ('RamseyScanGap', 'scangap'),
@@ -36,18 +36,19 @@ class ramsey_scangap(experiment):
     @classmethod
     def all_required_parameters(cls):
         parameters = set(cls.ramsey_required_parameters)
-        parameters = parameters.union(set(excitation_ramsey.all_required_parameters()))
+        parameters = parameters.union(set(excitation_ramsey_two_mode.all_required_parameters()))
         parameters = list(parameters)
         #removing parameters we'll be overwriting, and they do not need to be loaded
         parameters.remove(('Excitation_729','rabi_excitation_amplitude'))
-        parameters.remove(('Excitation_729','rabi_excitation_frequency'))
-        parameters.remove(('Ramsey','ramsey_time'))
+        parameters.remove(('Ramsey','first_pulse_frequency'))
+        parameters.remove(('Ramsey','second_pulse_frequency'))
+        parameters.remove(('Ramsey','second_pulse_phase'))
         parameters.remove(('Ramsey','echo_frequency'))
         return parameters
     
     def initialize(self, cxn, context, ident):
         self.ident = ident
-        self.excite = self.make_experiment(excitation_ramsey)
+        self.excite = self.make_experiment(excitation_ramsey_two_mode)
         self.excite.initialize(cxn, context, ident)
         self.scan = []
         self.amplitude = None
@@ -65,14 +66,18 @@ class ramsey_scangap(experiment):
         self.setup_data_vault()
     
     def setup_sequence_parameters(self):
+        r = self.parameters.Ramsey
         flop = self.parameters.RabiFlopping
-        frequency = cm.frequency_from_line_selection(flop.frequency_selection, flop.manual_frequency_729, flop.line_selection, self.drift_tracker)
+        first_pulse_frequency = cm.frequency_from_line_selection(r.frequency_selection, r.first_pulse_manual_frequency_729, r.first_pulse_line, self.drift_tracker)
+        second_pulse_frequency = cm.frequency_from_line_selection(r.frequency_selection, r.second_pulse_manual_frequency_729, r.second_pulse_line, self.drift_tracker)
         trap = self.parameters.TrapFrequencies
-        if flop.frequency_selection == 'auto':
-            frequency = cm.add_sidebands(frequency, flop.sideband_selection, trap)   
-        frequency += self.parameters.RamseyScanGap.detuning
-        #print frequency
-        self.parameters['Excitation_729.rabi_excitation_frequency'] = frequency
+        if r.frequency_selection == 'auto':
+            first_pulse_frequency = cm.add_sidebands(first_pulse_frequency, r.first_pulse_sideband_selection, trap)   
+            second_pulse_frequency = cm.add_sidebands(second_pulse_frequency, r.second_pulse_sideband_selection, trap)   
+        first_pulse_frequency += self.parameters.RamseyScanGap.detuning 
+        second_pulse_frequency += self.parameters.RamseyScanGap.detuning
+        self.parameters['Ramsey.second_pulse_frequency'] = second_pulse_frequency
+        self.parameters['Ramsey.first_pulse_frequency'] = first_pulse_frequency
         self.parameters['Excitation_729.rabi_excitation_amplitude'] = flop.rabi_amplitude_729
 
         r = self.parameters.Ramsey
@@ -81,6 +86,16 @@ class ramsey_scangap(experiment):
         if r.frequency_selection == 'auto':
             echo_frequency = cm.add_sidebands(echo_frequency, r.echo_sideband_selection, trap)   
         self.parameters['Ramsey.echo_frequency'] = echo_frequency
+
+        # flop = self.parameters.RabiFlopping
+        # frequency = cm.frequency_from_line_selection(flop.frequency_selection, flop.manual_frequency_729, flop.line_selection, self.drift_tracker)
+        # trap = self.parameters.TrapFrequencies
+        # if flop.frequency_selection == 'auto':
+        #     frequency = cm.add_sidebands(frequency, flop.sideband_selection, trap)   
+        # frequency += self.parameters.RamseyScanGap.detuning
+        # #print frequency
+        # self.parameters['Excitation_729.rabi_excitation_frequency'] = frequency
+        # self.parameters['Excitation_729.rabi_excitation_amplitude'] = flop.rabi_amplitude_729
         
         minim,maxim,steps = self.parameters.RamseyScanGap.scangap
         minim = minim['us']; maxim = maxim['us']
@@ -107,7 +122,7 @@ class ramsey_scangap(experiment):
         #self.dv.add_parameter('plotLive', True, context = self.data_save_context)
         
         
-        ds = self.dv.new('RamseyScanGap {}'.format(datasetNameAppend),[('Excitation', 'us')], dependants , context = self.data_save_context)
+        ds = self.dv.new('Ramsey {}'.format(datasetNameAppend),[('Excitation', 'us')], dependants , context = self.data_save_context)
         #window_name = self.parameters.get('RamseyScanGap.window_name', ['Ramsey Gap Scan'])[0]
         window_name = 'ramsey'
                
@@ -130,7 +145,7 @@ class ramsey_scangap(experiment):
   
         
     def run(self, cxn, context):
-        self.setup_sequence_parameters()
+        #self.setup_sequence_parameters()
         for i,duration in enumerate(self.scan):
             should_stop = self.pause_or_stop()
             if should_stop: break
@@ -143,7 +158,7 @@ class ramsey_scangap(experiment):
             self.update_progress(i)
      
     def finalize(self, cxn, context):
-        # self.save_parameters(self.dv, cxn, self.cxnlab, self.data_save_context)
+        #self.save_parameters(self.dv, cxn, self.cxnlab, self.data_save_context)
         pass
     
     def update_progress(self, iteration):
@@ -158,6 +173,6 @@ class ramsey_scangap(experiment):
 if __name__ == '__main__':
     cxn = labrad.connect()
     scanner = cxn.scriptscanner
-    exprt = ramsey_scangap(cxn = cxn)
+    exprt = ramsey_scangap_two_modes(cxn = cxn)
     ident = scanner.register_external_launch(exprt.name)
     exprt.execute(ident)

@@ -25,6 +25,11 @@ class excitation_ramsey(base_excitation):
     name = 'ExcitationRamsey'
     pulse_sequence = ramsey
     
+class excitation_ramsey_two_mode(base_excitation):
+    from space_time.scripts.PulseSequences.ramsey_twomode import ramsey_twomode
+    name = 'ExcitationRamsey_TwoMode'
+    pulse_sequence = ramsey_twomode
+    
 class excitation_ramsey_spectrum(base_excitation):
     from space_time.scripts.PulseSequences.pulsed_scan_ramsey import pulsed_scan_ramsey
     name = 'ExcitationRamsey'

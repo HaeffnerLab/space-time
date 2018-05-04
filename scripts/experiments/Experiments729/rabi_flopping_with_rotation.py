@@ -13,6 +13,7 @@ class rabi_flopping_with_rotation(experiment):
     
     name = 'RabiFlopping_rotating'
     trap_frequencies = [
+                        ('TrapFrequencies','rotation_frequency'),
                         ('TrapFrequencies','axial_frequency'),
                         ('TrapFrequencies','radial_frequency_1'),
                         ('TrapFrequencies','radial_frequency_2'),
@@ -26,6 +27,7 @@ class rabi_flopping_with_rotation(experiment):
                            ('RabiFlopping','rabi_amplitude_729'),
                            ('RabiFlopping','frequency_selection'),
                            ('RabiFlopping','sideband_selection'),
+                           ('RabiFlopping','rabi_stark_shift'),
                            
                            ('Rotation','drive_frequency'),
                            ('Rotation','voltage_pp'),
@@ -130,6 +132,7 @@ class rabi_flopping_with_rotation(experiment):
         trap = self.parameters.TrapFrequencies
         if flop.frequency_selection == 'auto':
             frequency = cm.add_sidebands(frequency, flop.sideband_selection, trap)
+        frequency += flop.rabi_stark_shift
         self.parameters['Excitation_729.rabi_excitation_frequency'] = frequency
         
     def run(self, cxn, context):
@@ -173,6 +176,10 @@ class rabi_flopping_with_rotation(experiment):
         return excitation
      
     def finalize(self, cxn, context):
+        old_freq = self.pv.get_parameter('RotationCW','drive_frequency')['kHz']
+        old_phase = self.pv.get_parameter('RotationCW','start_phase')['deg']
+        old_amp =self.pv.get_parameter('RotationCW','voltage_pp')['V']
+        self.awg_rotation.update_awg(old_freq*1e3,old_amp,old_phase)
         self.save_parameters(self.dv, cxn, self.cxnlab, self.rabi_flop_save_context)
         self.excite.finalize(cxn, context)
 
@@ -189,6 +196,6 @@ class rabi_flopping_with_rotation(experiment):
 if __name__ == '__main__':
     cxn = labrad.connect()
     scanner = cxn.scriptscanner
-    exprt = rabi_flopping(cxn = cxn)
+    exprt = rabi_flopping_with_rotation(cxn = cxn)
     ident = scanner.register_external_launch(exprt.name)
     exprt.execute(ident)

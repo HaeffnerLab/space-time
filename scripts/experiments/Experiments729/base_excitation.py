@@ -24,7 +24,13 @@ class base_excitation(experiment):
                             ('SequentialSBCooling', 'stage3_sideband_selection'),
                             ('SequentialSBCooling', 'stage4_sideband_selection'),
                             ('SequentialSBCooling', 'stage5_sideband_selection'),
+
+                            ('RotationalPumping','frequency_selection'),
+                            ('RotationalPumping','manual_frequency_729'),
+                            ('RotationalPumping','line_selection'),
+                            ('RotationalPumping','sideband_selection'),
                             
+                            ('TrapFrequencies','rotation_frequency'),
                             ('TrapFrequencies','axial_frequency'),
                             ('TrapFrequencies','radial_frequency_1'),
                             ('TrapFrequencies','radial_frequency_2'),
@@ -69,6 +75,7 @@ class base_excitation(experiment):
         params.remove(('SequentialSBCooling', 'stage3_frequency_729'))
         params.remove(('SequentialSBCooling', 'stage4_frequency_729'))
         params.remove(('SequentialSBCooling', 'stage5_frequency_729'))
+        #params.remove(('RotationalPumping','rotational_pumping_frequency_729'))
         params.remove(('OpticalPumpingAux', 'aux_optical_frequency_729'))
         params.remove(('StateReadout', 'state_readout_duration'))
         #params.remove(('SequentialSBCooling', 'frequency'))
@@ -164,6 +171,13 @@ class base_excitation(experiment):
         self.parameters['SidebandCooling.sideband_cooling_frequency_729'] = sideband_cooling_frequency
         #print "sbc"
         #print sideband_cooling_frequency
+
+        rp = self.parameters.RotationalPumping
+        rotational_pumping_frequency = cm.frequency_from_line_selection(rp.frequency_selection, rp.manual_frequency_729, rp.line_selection, self.drift_tracker, sp.rotational_sideband_cooling_enable)
+        trap = self.parameters.TrapFrequencies
+        if rp.frequency_selection == 'auto': 
+            rotational_pumping_frequency = cm.add_sidebands(rotational_pumping_frequency, rp.sideband_selection, trap)
+        self.parameters['RotationalPumping.rotational_pumping_frequency_729'] = rotational_pumping_frequency
 
         sc2 = self.parameters.SequentialSBCooling
         sc2freq = cm.frequency_from_line_selection(sc.frequency_selection, sc.manual_frequency_729, sc.line_selection, self.drift_tracker, sp.sideband_cooling_enable)
@@ -281,6 +295,7 @@ class base_excitation(experiment):
             if len(readouts):
                 if self.pmt_mode == 'simple': exci = numpy.count_nonzero(readouts <= threshold) / float(len(readouts))
                 if self.pmt_mode == 'number_dark': exci, states = self.count_dark(readouts)
+                if self.pmt_mode == 'calc_parity': exci, states = self.calc_parity(readouts)
                 #print self.pmt_mode
             else:
                 #got no readouts
@@ -340,6 +355,24 @@ class base_excitation(experiment):
         print binned, range(num_ions+1)
         mean = (1-numpy.dot(binned, range(num_ions+1))/2) # avg number of excited ions
         return mean, binned
+
+    def calc_parity(self, readouts):
+#        import IPython
+        thresholds = self.parameters.StateReadout.threshold_list
+        thresholds = thresholds[1]
+        #thresholds.append(0)
+        thresholds = sorted(thresholds)
+        #print numpy.array(readouts)
+        num_ions = len(thresholds)
+        print thresholds
+        binned = numpy.histogram(readouts, bins=[0]+thresholds + [5000])[0]
+        #IPython.embed()
+        #print binned
+        N = float(len(readouts))
+        binned = binned/N
+        print binned, range(num_ions+1)
+        parity = numpy.dot(binned, [1,-1,1]) #
+        return parity, binned
     
     
     def finalize(self, cxn, context):

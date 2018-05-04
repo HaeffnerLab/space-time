@@ -41,7 +41,7 @@ class scan_micromotion(experiment):
         
         dv_args = {'output_size': 3, #self.rabi_flop.excite.output_size,
                    'experiment_name': self.name,
-                   'window_name': 'other',
+                   'window_name': 'scan_Efields',
                    'dataset_name': 'det_scan'
                    }
         scan_methods.setup_data_vault(cxn, self.save_context, dv_args)

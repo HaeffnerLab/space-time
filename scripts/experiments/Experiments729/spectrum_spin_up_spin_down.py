@@ -35,7 +35,7 @@ class spectrum_spin_up_spin_down(experiment):
                            ('Rotation','drive_frequency'),
                            ('Rotation','voltage_pp'),
                            #('Rotation','ramp_down_time'),
-                           #('Rotation','start_hold'),
+                           ('Rotation','start_hold'),
                            ('Rotation','frequency_ramp_time'),
                            #('Rotation','end_hold'),
                            ('Rotation','start_phase'),
@@ -132,7 +132,7 @@ class spectrum_spin_up_spin_down(experiment):
         else:
             sideband_cooling_time = WithUnit(0,'ms')
 
-        start_hold = self.parameters.DopplerCooling.doppler_cooling_duration + sideband_cooling_time + WithUnit(0.5,'ms')
+        start_hold =  rp.start_hold
         #start_hold = rp.start_hold
         #ramp_down_time = rp.ramp_down_time
         start_phase = rp.start_phase

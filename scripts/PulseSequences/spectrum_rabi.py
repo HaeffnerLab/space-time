@@ -8,6 +8,7 @@ from subsequences.TurnOffAll import turn_off_all
 from subsequences.SidebandCooling import sideband_cooling
 from subsequences.EitCooling import eit_cooling
 from subsequences.motion_analysis import motion_analysis
+from subsequences.drive_rotational_sideband import drive_rotational_sideband_after_heating
 from labrad.units import WithUnit
 from treedict import TreeDict
 
@@ -18,12 +19,13 @@ class spectrum_rabi(pulse_sequence):
                            ('StatePreparation','optical_pumping_enable'), 
                            ('StatePreparation','sideband_cooling_enable'),
                            ('StatePreparation','eit_cooling_enable'),
+                           ('StatePreparation','rotational_sideband_cooling_enable'),
                            ('Motion_Analysis','excitation_enable')
                            ]
     
     required_subsequences = [doppler_cooling_after_repump_d, empty_sequence, optical_pumping, 
                              rabi_excitation_select_channel, tomography_readout, turn_off_all, sideband_cooling,
-                             motion_analysis,eit_cooling]
+                             motion_analysis,eit_cooling,drive_rotational_sideband_after_heating]
     
     replaced_parameters = {empty_sequence:[('EmptySequence','empty_sequence_duration'),]}
 
@@ -46,5 +48,8 @@ class spectrum_rabi(pulse_sequence):
         if p.Motion_Analysis.excitation_enable:
             self.addSequence(motion_analysis)
                 
+        if p.StatePreparation.rotational_sideband_cooling_enable:
+            self.addSequence(drive_rotational_sideband_after_heating)
+
         self.addSequence(rabi_excitation_select_channel)
         self.addSequence(tomography_readout)

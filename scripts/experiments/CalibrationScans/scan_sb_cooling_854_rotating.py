@@ -7,10 +7,19 @@ from treedict import TreeDict
 import numpy as np
 import labrad
 
-class scan_sb_cooling_854(experiment):
+class scan_sb_cooling_854_rotating(experiment):
 
-    name = 'ScanSBC_854'
-    required_parameters = [('CalibrationScans', 'sbc_854_scan')]
+    name = 'ScanSBC_854_rotating'
+    required_parameters = [('CalibrationScans', 'sbc_854_scan'),
+
+                           ('Rotation','drive_frequency'),
+                           ('Rotation','voltage_pp'),
+                           ('Rotation','start_hold'),
+                           ('Rotation','frequency_ramp_time'),
+                           ('Rotation','ramp_down_time'),
+                           ('Rotation','end_hold'),
+                           ('Rotation','start_phase'),
+                           ('Rotation','middle_hold')]
     
     @classmethod
     def all_required_parameters(cls):
@@ -28,13 +37,16 @@ class scan_sb_cooling_854(experiment):
         self.rabi_flop.initialize(cxn, context, ident)
         self.save_context = cxn.context()
         self.dv = cxn.data_vault
+        self.awg_rotation = cxn.keysight_33500b
         self.cxnlab = labrad.connect('192.168.169.49', password='lab', tls_mode='off') #connection to labwide network
         
     def run(self, cxn, context):
         
+        self.program_rotation()
+
         dv_args = {'output_size':self.rabi_flop.excite.output_size,
                    'experiment_name': self.name,
-                   'window_name': 'scan_854',
+                   'window_name': 'other',
                    'dataset_name': '854_scan'
                    }
         scan_methods.setup_data_vault(cxn, self.save_context, dv_args)
@@ -56,7 +68,23 @@ class scan_sb_cooling_854(experiment):
             self.dv.add(submission, context = self.save_context)
             self.update_progress(i)
 
+    def program_rotation(self):
+        rp = self.parameters.Rotation
+        frequency_ramp_time = rp.frequency_ramp_time
+        start_hold = rp.start_hold
+        ramp_down_time = rp.ramp_down_time
+        start_phase = rp.start_phase
+        middle_hold = rp.middle_hold
+        end_hold = rp.end_hold
+        voltage_pp = rp.voltage_pp
+        drive_frequency = rp.drive_frequency
+        self.awg_rotation.program_awf(start_phase['deg'],start_hold['ms'],frequency_ramp_time['ms'],middle_hold['ms'],ramp_down_time['ms'],end_hold['ms'],voltage_pp['V'],drive_frequency['kHz'],'free_rotation')
+
     def finalize(self, cxn, context):
+        old_freq = self.pv.get_parameter('RotationCW','drive_frequency')['kHz']
+        old_phase = self.pv.get_parameter('RotationCW','start_phase')['deg']
+        old_amp =self.pv.get_parameter('RotationCW','voltage_pp')['V']
+        self.awg_rotation.update_awg(old_freq*1e3,old_amp,old_phase)
         self.save_parameters(self.dv, cxn, self.cxnlab, self.save_context)
         self.rabi_flop.finalize(cxn, context)
 
@@ -72,6 +100,6 @@ class scan_sb_cooling_854(experiment):
 if __name__ == '__main__':
     cxn = labrad.connect()
     scanner = cxn.scriptscanner
-    exprt = scan_sb_cooling_854(cxn = cxn)
+    exprt = scan_sb_cooling_854_rotating(cxn = cxn)
     ident = scanner.register_external_launch(exprt.name)
     exprt.execute(ident)
