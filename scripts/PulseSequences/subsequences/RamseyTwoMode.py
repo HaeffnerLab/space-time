@@ -24,7 +24,9 @@ class ramsey_two_mode_excitation(pulse_sequence):
                            ('Ramsey','second_pulse_line'),
                            ('Ramsey','second_pulse_manual_frequency_729'),
                            ('Ramsey','second_pulse_sideband_selection'),
-                           ('Ramsey','second_pulse_frequency')
+                           ('Ramsey','second_pulse_frequency'),
+
+                           ('Ramsey','echo_offset'),
                           ]
 
     required_subsequences = [rabi_excitation, empty_sequence, rabi_excitation_no_offset,empty_sequence_with_echo]
@@ -52,7 +54,11 @@ class ramsey_two_mode_excitation(pulse_sequence):
                                      'Excitation_729.channel_729':r.channel_729,
                                      'Excitation_729.rabi_excitation_frequency':r.first_pulse_frequency
                                      }) 
-        self.addTTL('awg_off',self.start,r.ramsey_time+r.first_pulse_duration+r.second_pulse_duration)
+        awg_wait_time = WithUnit(2,'ms')
+
+        self.addTTL('awg_off',self.start,awg_wait_time+r.ramsey_time+r.first_pulse_duration+r.second_pulse_duration)
+        #self.addTTL('awg_on',self.start,awg_wait_time+r.ramsey_time+r.first_pulse_duration+r.second_pulse_duration)
+        self.addSequence(empty_sequence, TreeDict.fromdict({'EmptySequence.empty_sequence_duration':awg_wait_time}))
         self.addSequence(rabi_excitation, replace)
         if r.spin_echo_enable:
           self.addSequence(empty_sequence_with_echo, TreeDict.fromdict({'EmptySequence.empty_sequence_duration':r.ramsey_time}))
@@ -66,7 +72,7 @@ class ramsey_two_mode_excitation(pulse_sequence):
                              'Excitation_729.channel_729':r.channel_729,
                              'Excitation_729.rabi_excitation_frequency':r.second_pulse_frequency
                              })
-        self.addSequence(rabi_excitation, replace)
+        self.addSequence(rabi_excitation_no_offset, replace)
         # self.addSequence(rabi_excitation_no_offset, replace) #this is technically correct but can't do pulses shorter than 6us
         # print(r.first_pulse_frequency,r.second_pulse_frequency,r.first_pulse_frequency-r.second_pulse_frequency)
-        print(r.second_pulse_duration,r.first_pulse_duration)
+        # print(r.second_pulse_duration,r.first_pulse_duration)

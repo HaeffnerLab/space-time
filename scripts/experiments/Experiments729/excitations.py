@@ -29,11 +29,21 @@ class excitation_ramsey_two_mode(base_excitation):
     from space_time.scripts.PulseSequences.ramsey_twomode import ramsey_twomode
     name = 'ExcitationRamsey_TwoMode'
     pulse_sequence = ramsey_twomode
+
+class excitation_ramsey_juggled_mz(base_excitation):
+    from space_time.scripts.PulseSequences.ramsey_juggled_mz import ramsey_juggled_mz
+    name = 'ExcitationRamsey_JuggledMZ'
+    pulse_sequence = ramsey_juggled_mz
     
 class excitation_ramsey_spectrum(base_excitation):
     from space_time.scripts.PulseSequences.pulsed_scan_ramsey import pulsed_scan_ramsey
     name = 'ExcitationRamsey'
     pulse_sequence = pulsed_scan_ramsey
+
+class excitation_ramsey_ladder(base_excitation):
+    from space_time.scripts.PulseSequences.ramsey_ladder_full import ramsey_ladder_full
+    name = 'ExcitationRamsey_Ladder'
+    pulse_sequence = ramsey_ladder_full
 
 class excitation_dephase(base_excitation):
     from space_time.scripts.PulseSequences.dephasing_chain import dephasing_chain

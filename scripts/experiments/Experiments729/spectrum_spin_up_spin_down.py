@@ -137,11 +137,11 @@ class spectrum_spin_up_spin_down(experiment):
         #ramp_down_time = rp.ramp_down_time
         start_phase = rp.start_phase
         middle_hold = rp.middle_hold
-        end_hold = self.parameters.StateReadout.pmt_readout_duration + WithUnit(1,'ms')
+        end_hold = self.parameters.StateReadout.pmt_readout_duration
         #end_hold = rp.end_hold
         voltage_pp = rp.voltage_pp
         drive_frequency = rp.drive_frequency
-        self.awg_rotation.program_awf(start_phase['deg'],start_hold['ms'],frequency_ramp_time['ms'],middle_hold['ms'],0.0,end_hold['ms'],voltage_pp['V'],drive_frequency['kHz'],'spin_up_spin_down')
+        self.awg_rotation.program_awf(start_phase['deg'],start_hold['ms'],frequency_ramp_time['ms'],middle_hold['ms'],0.0,end_hold['ms'],voltage_pp['V'],drive_frequency['kHz'],'spin_up_spin_down_sin')
         self.parameters['Heating.background_heating_time'] = 2*frequency_ramp_time + middle_hold + WithUnit(1.0, 'ms')
         #self.awg_rotation.rotation(frequency['kHz'],voltage_pp['V'])
         #self.awg_modulation.program_modulation(ramp_up_time['ms'],start_hold['ms'],ramp_down_time['ms'],end_hold['ms'])

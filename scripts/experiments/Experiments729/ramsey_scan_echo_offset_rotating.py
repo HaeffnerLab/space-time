@@ -2,15 +2,14 @@ from common.abstractdevices.script_scanner.scan_methods import experiment
 from excitations import excitation_ramsey_two_mode
 from space_time.scripts.scriptLibrary.common_methods_729 import common_methods_729 as cm
 from space_time.scripts.scriptLibrary import dvParameters
-from space_time.scripts.experiments.CalibrationScans.fitters import rot_ramsey_fitter
 import time
 import labrad
 from labrad.units import WithUnit
 from numpy import linspace
 
-class ramsey_scangap_two_modes_rotating(experiment):
+class ramsey_scan_echo_offset_rotating(experiment):
     
-    name = 'RamseyScanGap_TwoModes_rotating'
+    name = 'RamseyScanEchoOffset_rotating'
     ramsey_required_parameters = [
                            ('RamseyScanGap', 'detuning'),
                            ('RamseyScanGap', 'scangap'),
@@ -28,7 +27,8 @@ class ramsey_scangap_two_modes_rotating(experiment):
                            ('Ramsey','echo_manual_frequency_729'),
                            ('Ramsey','echo_line_selection'),
                            ('Ramsey','echo_sideband_selection'),
-                           ('Ramsey','echo_frequency'),
+                           ('Ramsey','scan_echo_offset'),
+                           #('Ramsey','echo_frequency'),
 
                            ('RabiFlopping','rabi_amplitude_729'),
                            ('RabiFlopping','manual_frequency_729'),
@@ -62,8 +62,7 @@ class ramsey_scangap_two_modes_rotating(experiment):
         self.excite.initialize(cxn, context, ident)
         self.scan = []
         self.amplitude = None
-        self.duration = None
-        self.fitter = rot_ramsey_fitter()
+        self.offset = None
         self.cxnlab = labrad.connect('192.168.169.49', password='lab', tls_mode='off') #connection to labwide network
         self.drift_tracker = cxn.sd_tracker
         self.dv = cxn.data_vault
@@ -101,7 +100,7 @@ class ramsey_scangap_two_modes_rotating(experiment):
         end_hold = rp.end_hold
         voltage_pp = rp.voltage_pp
         drive_frequency = rp.drive_frequency
-        self.awg_rotation.program_awf(start_phase['deg'],start_hold['ms'],frequency_ramp_time['ms'],middle_hold['ms'],ramp_down_time['ms'],end_hold['ms'],voltage_pp['V'],drive_frequency['kHz'],'free_rotation_sin_spin')
+        self.awg_rotation.program_awf(start_phase['deg'],start_hold['ms'],frequency_ramp_time['ms'],middle_hold['ms'],ramp_down_time['ms'],end_hold['ms'],voltage_pp['V'],drive_frequency['kHz'],'free_rotation')
 
         r = self.parameters.Ramsey
         echo_frequency = cm.frequency_from_line_selection(r.echo_frequency_selection, r.echo_manual_frequency_729, r.echo_line_selection, self.drift_tracker)
@@ -120,7 +119,7 @@ class ramsey_scangap_two_modes_rotating(experiment):
         # self.parameters['Excitation_729.rabi_excitation_frequency'] = frequency
         # self.parameters['Excitation_729.rabi_excitation_amplitude'] = flop.rabi_amplitude_729
         
-        minim,maxim,steps = self.parameters.RamseyScanGap.scangap
+        minim,maxim,steps = self.parameters.Ramsey.scan_echo_offset
         minim = minim['us']; maxim = maxim['us']
         self.scan = linspace(minim,maxim, steps)
         self.scan = [WithUnit(pt, 'us') for pt in self.scan]
@@ -169,31 +168,16 @@ class ramsey_scangap_two_modes_rotating(experiment):
         
     def run(self, cxn, context):
         #self.setup_sequence_parameters()
-
-        gap = []
-        excis = []
-        for i,duration in enumerate(self.scan):
+        for i,offset in enumerate(self.scan):
             should_stop = self.pause_or_stop()
             if should_stop: break
-            self.parameters['Ramsey.ramsey_time'] = duration
+            self.parameters['Ramsey.echo_offset'] = offset
             self.excite.set_parameters(self.parameters)
             excitation, readouts = self.excite.run(cxn, context)
-            excis.append(excitation[0])
-            gap.append(duration['us'])
-            submission = [duration['us']]
+            submission = [offset['us']]
             submission.extend(excitation)
             self.dv.add(submission, context = self.data_save_context)
             self.update_progress(i)
-
-        try:
-            fit_params = self.fitter.fit(gap,excis)
-            sigma_ell = fit_params[0]
-        except:
-            sigma_ell = 0
-
-        return sigma_ell        
-
-
      
     def finalize(self, cxn, context):
         old_freq = self.pv.get_parameter('RotationCW','drive_frequency')['kHz']
@@ -215,6 +199,6 @@ class ramsey_scangap_two_modes_rotating(experiment):
 if __name__ == '__main__':
     cxn = labrad.connect()
     scanner = cxn.scriptscanner
-    exprt = ramsey_scangap_two_modes_rotating(cxn = cxn)
+    exprt = ramsey_scan_echo_offset_rotating(cxn = cxn)
     ident = scanner.register_external_launch(exprt.name)
     exprt.execute(ident)

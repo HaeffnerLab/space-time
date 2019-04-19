@@ -120,7 +120,8 @@ class scan_micromotion(experiment):
                         
             submission = [multipole_value]
             submission.extend([excitation_carr, excitation_1st, excitation_2nd])
-            
+    
+
             self.dv.add(submission, context = self.save_context)
             self.update_progress(i)
 

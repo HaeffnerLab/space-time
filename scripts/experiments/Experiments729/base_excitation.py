@@ -29,7 +29,11 @@ class base_excitation(experiment):
                             ('RotationalPumping','manual_frequency_729'),
                             ('RotationalPumping','line_selection'),
                             ('RotationalPumping','sideband_selection'),
-                            
+
+                            ('ScrambleGroundState','frequency_selection'),
+                            ('ScrambleGroundState','manual_frequency_729'),
+                            ('ScrambleGroundState','line_selection'),
+
                             ('TrapFrequencies','rotation_frequency'),
                             ('TrapFrequencies','axial_frequency'),
                             ('TrapFrequencies','radial_frequency_1'),
@@ -76,6 +80,7 @@ class base_excitation(experiment):
         params.remove(('SequentialSBCooling', 'stage4_frequency_729'))
         params.remove(('SequentialSBCooling', 'stage5_frequency_729'))
         #params.remove(('RotationalPumping','rotational_pumping_frequency_729'))
+        params.remove(('ScrambleGroundState','excitation_frequency'))
         params.remove(('OpticalPumpingAux', 'aux_optical_frequency_729'))
         params.remove(('StateReadout', 'state_readout_duration'))
         #params.remove(('SequentialSBCooling', 'frequency'))
@@ -155,7 +160,7 @@ class base_excitation(experiment):
         op = self.parameters.OpticalPumping
         sp = self.parameters.StatePreparation
 
-        optical_pumping_frequency = cm.frequency_from_line_selection(op.frequency_selection, op.manual_frequency_729, op.line_selection, self.drift_tracker, sp.optical_pumping_enable)
+        optical_pumping_frequency = cm.frequency_from_line_selection(op.frequency_selection, op.manual_frequency_729, op.line_selection, self.drift_tracker)#, sp.optical_pumping_enable)
         self.parameters['OpticalPumping.optical_pumping_frequency_729'] = optical_pumping_frequency
 
         aux = self.parameters.OpticalPumpingAux
@@ -163,7 +168,7 @@ class base_excitation(experiment):
         self.parameters['OpticalPumpingAux.aux_optical_frequency_729'] = aux_optical_pumping_frequency
 
         sc = self.parameters.SidebandCooling
-        sideband_cooling_frequency = cm.frequency_from_line_selection(sc.frequency_selection, sc.manual_frequency_729, sc.line_selection, self.drift_tracker, sp.sideband_cooling_enable)
+        sideband_cooling_frequency = cm.frequency_from_line_selection(sc.frequency_selection, sc.manual_frequency_729, sc.line_selection, self.drift_tracker)#, sp.sideband_cooling_enable)
         trap = self.parameters.TrapFrequencies
         if sc.frequency_selection == 'auto': 
             #trap = self.parameters.TrapFrequencies
@@ -190,6 +195,9 @@ class base_excitation(experiment):
         self.parameters['SequentialSBCooling.stage4_frequency_729'] = stage4_freq
         self.parameters['SequentialSBCooling.stage5_frequency_729'] = stage5_freq
 
+        sgs = self.parameters.ScrambleGroundState
+        scramble_frequency = cm.frequency_from_line_selection(sgs.frequency_selection, sgs.manual_frequency_729, sgs.line_selection, self.drift_tracker, sp.scramble_ground_state_enable)   
+        self.parameters['ScrambleGroundState.excitation_frequency'] = scramble_frequency
 
         # set state readout time
         if self.use_camera:
@@ -296,6 +304,7 @@ class base_excitation(experiment):
                 if self.pmt_mode == 'simple': exci = numpy.count_nonzero(readouts <= threshold) / float(len(readouts))
                 if self.pmt_mode == 'number_dark': exci, states = self.count_dark(readouts)
                 if self.pmt_mode == 'calc_parity': exci, states = self.calc_parity(readouts)
+                if self.pmt_mode == 'exci_and_parity': exci, states = self.exci_and_parity(readouts)
                 #print self.pmt_mode
             else:
                 #got no readouts
@@ -353,7 +362,7 @@ class base_excitation(experiment):
         N = float(len(readouts))
         binned = binned/N
         print binned, range(num_ions+1)
-        mean = (1-numpy.dot(binned, range(num_ions+1))/2) # avg number of excited ions
+        mean = (1-numpy.dot(binned, range(num_ions+1))/num_ions) # avg number of excited ions
         return mean, binned
 
     def calc_parity(self, readouts):
@@ -364,15 +373,31 @@ class base_excitation(experiment):
         thresholds = sorted(thresholds)
         #print numpy.array(readouts)
         num_ions = len(thresholds)
-        print thresholds
+
         binned = numpy.histogram(readouts, bins=[0]+thresholds + [5000])[0]
         #IPython.embed()
         #print binned
         N = float(len(readouts))
         binned = binned/N
-        print binned, range(num_ions+1)
         parity = numpy.dot(binned, [1,-1,1]) #
         return parity, binned
+
+    def exci_and_parity(self, readouts):
+        thresholds = self.parameters.StateReadout.threshold_list
+        thresholds = thresholds[1]
+        #thresholds.append(0)
+        thresholds = sorted(thresholds)
+        #print numpy.array(readouts)
+        num_ions = len(thresholds)
+        binned = numpy.histogram(readouts, bins=[0]+thresholds + [5000])[0]
+        #IPython.embed()
+        #print binned
+        N = float(len(readouts))
+        binned = binned/N
+
+        mean = (1-numpy.dot(binned, range(num_ions+1))/num_ions) # avg number of excited ions
+        parity = numpy.dot(binned, [1,-1,1]) #
+        return [mean, parity], binned
     
     
     def finalize(self, cxn, context):

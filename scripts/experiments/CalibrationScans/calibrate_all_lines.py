@@ -34,6 +34,8 @@ class calibrate_all_lines(experiment):
         ('Spectrum','sensitivity_selection'),
         ('Spectrum','sideband_selection'),
 
+        ('Heating','background_heating_time'),
+
         ('Display', 'relative_frequencies'),
 
         ('StateReadout', 'repeat_each_measurement'),
@@ -75,6 +77,7 @@ class calibrate_all_lines(experiment):
         parameters.remove(('SidebandCoolingPulsed','sideband_cooling_pulsed_duration_repumps'))
         parameters.remove(('SidebandCoolingPulsed','sideband_cooling_pulsed_duration_additional_866'))
         parameters.remove(('SidebandCoolingPulsed','sideband_cooling_pulsed_duration_between_pulses'))
+        # parameters.remove(('Heating','background_heating_time'))
         return parameters
     
     
@@ -109,8 +112,10 @@ class calibrate_all_lines(experiment):
             'Spectrum.scan_selection':'auto',
             'Spectrum.sensitivity_selection': 'car1_sensitivity',
             'Spectrum.sideband_selection':[0,0,0,0],
+            'Heating.background_heating_time':WithUnit(0,'ms'),
             'StatePreparation.sideband_cooling_enable':False,
             'StatePreparation.optical_pumping_enable':True,
+            'StatePreparation.scramble_ground_state_enable':False,
             'Display.relative_frequencies':False,
             'StateReadout.repeat_each_measurement':100,
             'StateReadout.use_camera_for_readout':False,
@@ -137,8 +142,10 @@ class calibrate_all_lines(experiment):
             'Spectrum.scan_selection':'auto',
             'Spectrum.sensitivity_selection': 'car2_sensitivity',
             'Spectrum.sideband_selection':[0,0,0,0],
+            'Heating.background_heating_time':WithUnit(0,'ms'),
             'StatePreparation.sideband_cooling_enable':False,
             'StatePreparation.optical_pumping_enable':True,
+            'StatePreparation.scramble_ground_state_enable':False,
             'Display.relative_frequencies':False,
             'StateReadout.repeat_each_measurement':100,
             'StateReadout.use_camera_for_readout':False,
@@ -170,6 +177,7 @@ class calibrate_all_lines(experiment):
                'Spectrum.scan_selection':'auto',
                'Spectrum.sensitivity_selection': 'normal',
                'Spectrum.sideband_selection':[-1,0,0,0],
+               'Heating.background_heating_time':WithUnit(0,'ms'),
                'StatePreparation.sideband_cooling_enable':False,
                'StatePreparation.optical_pumping_enable':True,
                'Display.relative_frequencies':True,
@@ -198,6 +206,7 @@ class calibrate_all_lines(experiment):
                'Spectrum.scan_selection':'auto',
                'Spectrum.sensitivity_selection': 'normal',
                'Spectrum.sideband_selection':[0,-1,0,0],
+               'Heating.background_heating_time':WithUnit(0,'ms'),
                'StatePreparation.sideband_cooling_enable':False,
                'StatePreparation.optical_pumping_enable':True,
                'Display.relative_frequencies':True,

@@ -17,12 +17,12 @@ class rabi_excitation(pulse_sequence):
         frequency_advance_duration = WithUnit(6, 'us')
         ampl_off = WithUnit(-63.0, 'dBm')
         self.end = self.start + frequency_advance_duration + p.rabi_excitation_duration
-        #parsingt p.channel_729
+        # print "Channel 729:", p.channel_729
 
         #first advance the frequency but keep amplitude low        
         self.addDDS(p.channel_729, self.start, frequency_advance_duration, p.rabi_excitation_frequency, ampl_off)
         self.addDDS(p.channel_729, self.start + frequency_advance_duration, p.rabi_excitation_duration, p.rabi_excitation_frequency, p.rabi_excitation_amplitude, p.rabi_excitation_phase)
-        print("Excitation Parameters:", p.rabi_excitation_duration,p.rabi_excitation_frequency,p.rabi_excitation_amplitude,p.rabi_excitation_phase)
+        # print("Excitation Parameters:", p.rabi_excitation_duration,p.rabi_excitation_frequency,p.rabi_excitation_amplitude,p.rabi_excitation_phase)
 
 class rabi_excitation_with_sigma(pulse_sequence):
     
@@ -37,7 +37,6 @@ class rabi_excitation_with_sigma(pulse_sequence):
                           
                           ('StatePreparation','channel_397_sigma'),
                           ('StatePreparation','channel_397_linear'),
-                          
                           
                           ('EitCooling','eit_cooling_amplitude_397_sigma'),
                           ('EitCooling','eit_cooling_amplitude_397_linear'),
@@ -103,9 +102,10 @@ class rabi_excitation_no_offset(pulse_sequence):
     
     def sequence(self):
         p = self.parameters.Excitation_729
+        # print "Channel 729:",p.channel_729 
         self.end = self.start + p.rabi_excitation_duration
         self.addDDS(p.channel_729, self.start, p.rabi_excitation_duration, p.rabi_excitation_frequency, p.rabi_excitation_amplitude, p.rabi_excitation_phase)
-        print("Excitation Parameters No Off:", p.rabi_excitation_duration,p.rabi_excitation_frequency,p.rabi_excitation_amplitude,p.rabi_excitation_phase)
+        # print("Excitation Parameters No Off:", p.rabi_excitation_duration,p.rabi_excitation_frequency,p.rabi_excitation_amplitude,p.rabi_excitation_phase)
     
 class rabi_excitation_select_channel(pulse_sequence):
     

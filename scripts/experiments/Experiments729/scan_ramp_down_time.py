@@ -32,7 +32,6 @@ class scan_ramp_down_time(experiment):
                            
                            ('Rotation','drive_frequency'),
                            ('Rotation','voltage_pp'),
-                           #('Rotation','ramp_up_time'),
                            ('Rotation','start_hold'),
                            ('Rotation','frequency_ramp_time'),
                            ('Rotation','ramp_down_time'),

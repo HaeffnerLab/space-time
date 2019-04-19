@@ -13,7 +13,7 @@ class ramsey_excitation(pulse_sequence):
                            ('Ramsey','first_pulse_duration'),
                            ('Ramsey','second_pulse_duration'),
                            ('Ramsey','second_pulse_phase'),
-                           ('Ramsey', 'channel_729'),
+                           ('Ramsey','channel_729'),
                           ]
 
     required_subsequences = [rabi_excitation, empty_sequence, rabi_excitation_no_offset,empty_sequence_with_echo]

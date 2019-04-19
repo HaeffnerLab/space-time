@@ -9,6 +9,7 @@ from subsequences.SidebandCooling import sideband_cooling
 from subsequences.EitCooling import eit_cooling
 from subsequences.motion_analysis import motion_analysis
 from subsequences.drive_rotational_sideband import drive_rotational_sideband_after_heating
+from subsequences.ScrambleGroundState import scramble_ground_state
 from labrad.units import WithUnit
 from treedict import TreeDict
 
@@ -20,12 +21,13 @@ class spectrum_rabi(pulse_sequence):
                            ('StatePreparation','sideband_cooling_enable'),
                            ('StatePreparation','eit_cooling_enable'),
                            ('StatePreparation','rotational_sideband_cooling_enable'),
-                           ('Motion_Analysis','excitation_enable')
+                           ('Motion_Analysis','excitation_enable'),
+                           ('StatePreparation','scramble_ground_state_enable'),
                            ]
     
     required_subsequences = [doppler_cooling_after_repump_d, empty_sequence, optical_pumping, 
                              rabi_excitation_select_channel, tomography_readout, turn_off_all, sideband_cooling,
-                             motion_analysis,eit_cooling,drive_rotational_sideband_after_heating]
+                             motion_analysis,eit_cooling,drive_rotational_sideband_after_heating,scramble_ground_state]
     
     replaced_parameters = {empty_sequence:[('EmptySequence','empty_sequence_duration'),]}
 
@@ -42,6 +44,8 @@ class spectrum_rabi(pulse_sequence):
             self.addSequence(eit_cooling)
         if p.StatePreparation.sideband_cooling_enable:
             self.addSequence(sideband_cooling)
+        if p.StatePreparation.scramble_ground_state_enable:
+            self.addSequence(scramble_ground_state)
                     
         self.addSequence(empty_sequence, TreeDict.fromdict({'EmptySequence.empty_sequence_duration':p.Heating.background_heating_time}))
         

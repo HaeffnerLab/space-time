@@ -1,7 +1,7 @@
 from labrad.units import WithUnit
 
 class agilent():
-    def __init__(self, cxn, output = True, amplitude = WithUnit(23, 'dBm')):
+    def __init__(self, cxn, output = True, amplitude = WithUnit(18, 'dBm')):
         agi = cxn.agilent_server
         dev = agi.list_devices()[0][0]
         agi.select_device(dev)
@@ -17,3 +17,6 @@ class agilent():
         
     def set_amplitude(self, a):
         self.agi.amplitude(a)
+
+    def set_ranges(self, lowlev, highlev):
+        self.agi.ranges(lowlev,highlev)

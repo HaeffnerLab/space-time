@@ -22,20 +22,20 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         centralWidget = QtGui.QWidget()
         layout = QtGui.QHBoxLayout() 
 
-        laser_room = self.makeLaserRoomWidget(reactor, cxn)
-        laser_control = self.makeControlWidget(reactor, cxn)
-        script_scanner = self.makeScriptControlWidget(reactor, cxn)
-        histogram = self.make_histogram_widget(reactor, cxn)
-        drift_tracker = self.makeDriftTrackerWidget(reactor, cxn)
-        config_editor = self.make_config_editor_widget(reactor, cxn)
-        
-        self.tabWidget = QtGui.QTabWidget()
-        self.tabWidget.addTab(laser_room,'&Laser Room')
-        self.tabWidget.addTab(laser_control,'&Control')
-        self.tabWidget.addTab(script_scanner, '&Script Scanner')
-        self.tabWidget.addTab(histogram, '&Readout Histogram')
-        self.tabWidget.addTab(drift_tracker, '&Drift Tracker')
-        self.tabWidget.addTab(config_editor, 'Config &Editor')
+        # laser_room = self.makeLaserRoomWidget(reactor, cxn)
+        # laser_control = self.makeControlWidget(reactor, cxn)
+        # # script_scanner = self.makeScriptControlWidget(reactor, cxn)
+        # histogram = self.make_histogram_widget(reactor, cxn)
+        # drift_tracker = self.makeDriftTrackerWidget(reactor, cxn)
+        # config_editor = self.make_config_editor_widget(reactor, cxn)
+
+        # self.tabWidget = QtGui.QTabWidget()
+        # self.tabWidget.addTab(laser_room,'&Laser Room')
+        # self.tabWidget.addTab(laser_control,'&Control')
+        # # self.tabWidget.addTab(script_scanner, '&Script Scanner')
+        # self.tabWidget.addTab(histogram, '&Readout Histogram')
+        # self.tabWidget.addTab(drift_tracker, '&Drift Tracker')
+        # self.tabWidget.addTab(config_editor, 'Config &Editor')
 
         layout.addWidget(self.tabWidget)
         centralWidget.setLayout(layout)
@@ -68,7 +68,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
 
         widget.setLayout(gridLayout)
         return widget
-    
+
     def make_histogram_widget(self, reactor, cxn):
         histograms_tab = QtGui.QTabWidget()
         from common.clients.readout_histogram import readout_histogram
@@ -104,9 +104,9 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         from common.clients.LINETRIGGER_CONTROL import linetriggerWidget
         gridLayout = QtGui.QGridLayout()
 
-        gridLayout.addWidget(switchWidget(reactor, cxn),        0,3,1,1)
-        gridLayout.addWidget(pmtWidget(reactor),                0,4,1,1)
-        gridLayout.addWidget(DDS_CONTROL(reactor, cxn),         2,4,4,2)
+        gridLayout.addWidget(switchWidget(reactor, cxn),        1,3,1,1)
+        gridLayout.addWidget(pmtWidget(reactor),                0,3,1,1)
+        gridLayout.addWidget(DDS_CONTROL(reactor, cxn),         0,4,4,2)
         gridLayout.addWidget(actions_widget(reactor, cxn),      3,3,2,1)
         gridLayout.addWidget(rotation_widget(reactor, cxn),     4,3,2,1)
         gridLayout.addWidget(DAC_Control(reactor),              0,0,7,3)

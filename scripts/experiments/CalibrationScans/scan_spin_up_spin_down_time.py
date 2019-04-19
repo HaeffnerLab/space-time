@@ -7,11 +7,11 @@ from treedict import TreeDict
 import numpy as np
 import labrad
 
-class scan_parametric_resonance(experiment):
+class scan_spin_up_spin_down_time(experiment):
 
-    name = 'ScanParametricResonance'
+    name = 'scan_spin_up_spin_down_time'
     required_parameters = [
-                           ('Rotation', 'drive_frequency_scan_interval'),
+                           ('Rotation', 'frequency_ramp_time_scan_interval'),
                            ('Rotation','drive_frequency'),
                            ('Rotation','voltage_pp'),
                            ('Rotation','frequency_ramp_time'),
@@ -36,7 +36,7 @@ class scan_parametric_resonance(experiment):
         parameters = parameters.union(set(rf.all_required_parameters()))
         parameters = list(parameters)
         #removing parameters we'll be overwriting, and they do not need to be loaded
-        parameters.remove(('Rotation','drive_frequency'))
+        parameters.remove(('Rotation','frequency_ramp_time'))
         return parameters
     
     def initialize(self, cxn, context, ident):
@@ -58,7 +58,7 @@ class scan_parametric_resonance(experiment):
                    }
 
         rp = self.parameters.Rotation
-        frequency_ramp_time = rp.frequency_ramp_time
+        drive_frequency = rp.drive_frequency
 
         # if self.parameters.SequentialSBCooling.enable:
         #     extra_sbc_cycles = self.parameters.SequentialSBCooling.additional_stages
@@ -84,15 +84,15 @@ class scan_parametric_resonance(experiment):
 
         scan_methods.setup_data_vault(cxn, self.save_context, dv_args)
         
-        scan_param = self.parameters.Rotation.drive_frequency_scan_interval
-        self.scan = scan_methods.simple_scan(scan_param, 'kHz')
+        scan_param = self.parameters.Rotation.frequency_ramp_time_scan_interval
+        self.scan = scan_methods.simple_scan(scan_param, 'ms')
         
-        for i,freq in enumerate(self.scan):
+        for i,ramp_time in enumerate(self.scan):
             should_stop = self.pause_or_stop()
             if should_stop: break
 
             #prgroam AWG!
-            drive_frequency = freq
+            frequency_ramp_time = ramp_time
             self.awg_rotation.program_awf(start_phase['deg'],start_hold['ms'],frequency_ramp_time['ms'],middle_hold['ms'],0.0,end_hold['ms'],voltage_pp['V'],drive_frequency['kHz'],'spin_up_spin_down_sin')
             heat_time = 2*frequency_ramp_time + middle_hold + WithUnit(0.5, 'ms')
 
@@ -102,7 +102,7 @@ class scan_parametric_resonance(experiment):
             self.rabi_flop.set_parameters(replace)
             excitation = self.rabi_flop.run(cxn, context)
             if excitation is None: break 
-            submission = [freq['kHz']]
+            submission = [ramp_time['ms']]
             submission.extend([excitation])
             self.dv.add(submission, context = self.save_context)
             self.update_progress(i)
@@ -123,6 +123,6 @@ class scan_parametric_resonance(experiment):
 if __name__ == '__main__':
     cxn = labrad.connect()
     scanner = cxn.scriptscanner
-    exprt = scan_parametric_resonance(cxn = cxn)
+    exprt = scan_spin_up_spin_down_time(cxn = cxn)
     ident = scanner.register_external_launch(exprt.name)
     exprt.execute(ident)

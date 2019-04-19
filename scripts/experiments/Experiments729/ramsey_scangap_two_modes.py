@@ -31,6 +31,8 @@ class ramsey_scangap_two_modes(experiment):
                            ('TrapFrequencies','radial_frequency_1'),
                            ('TrapFrequencies','radial_frequency_2'),
                            ('TrapFrequencies','rf_drive_frequency'),
+
+                           ('StateReadout', 'pmt_mode'),
                            ]
     
     @classmethod
@@ -154,6 +156,12 @@ class ramsey_scangap_two_modes(experiment):
             excitation, readouts = self.excite.run(cxn, context)
             submission = [duration['us']]
             submission.extend(excitation)
+
+            # # This block of code added to save also the binned excitation probabilities in the data vault
+            # if self.parameters.StateReadout.pmt_mode == 'number_dark':
+            #     (mean, binned) = self.excite.count_dark(readouts)
+            #     submission.extend(binned)
+
             self.dv.add(submission, context = self.data_save_context)
             self.update_progress(i)
      

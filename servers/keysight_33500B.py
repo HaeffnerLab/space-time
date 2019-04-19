@@ -292,21 +292,13 @@ class KEYSIGHT_33500B(LabradServer):
         awf =[]
         awf = np.ones(start_points+int(freq_ramp_points)+middle_points)
         awf = np.append(awf, 1.-np.arange(int(amp_ramp_points))/amp_ramp_points)
-        #slow old code
-        #for i in range(0,int(amp_ramp_points)+1):
-        #    awf = np.append(awf,1.-float(i)/amp_ramp_points)
         awf = np.append(awf, np.zeros(end_points))
         
         #definte frequency curve
         frequency = np.zeros(start_points)
         frequency = np.append(frequency, np.arange(int(freq_ramp_points))*sin_freq/(2.*float(freq_ramp_points)))
         frequency = np.append(frequency, sin_freq*np.ones(middle_points + int(amp_ramp_points)+end_points))
-        #slow old code
-        #frequency = []
-        #for i in range(0,int(freq_ramp_points)+1):
-        #    frequency = np.append(frequency,float(i)*sin_freq/(2.*float(freq_ramp_points)))
-        #frequency = np.append(frequency, sin_freq*np.ones(int(amp_ramp_points)+end_points+start_points))
-
+   
 
         time_step = total_time/float(num_points)
 
@@ -330,27 +322,57 @@ class KEYSIGHT_33500B(LabradServer):
 
         final_wf = np.append(waveform1,waveform2)
     
-       ##too slow old code
-        #for i,el in enumerate(awf):    
-            # if i<freq_ramp_points:
-            #     if channel == 1:
-            #         awf[i] = el*np.sin(2.*np.pi*frequency[i]*i*time_step)
-            #     if channel == 2:
-            #         awf[i] = el*np.sin(2.*np.pi*frequency[i]*i*time_step+np.pi/2.)
-            # else:
-            #     i_0 = int(freq_ramp_points)
-            #     #phi_0 = time_step*i_0*frequency[i_0]/2.0
-                
-            #     phi_0= 2.*np.pi*((frequency[i_0])*(i_0)*time_step)
-                     
-            #     if channel == 1:
-            #         awf[i] = el*np.sin(phi_0+2.*np.pi*frequency[i]*(i-i_0)*time_step)
-            #     if channel == 2:
-            #         awf[i] = el*np.sin(phi_0+2.*np.pi*frequency[i]*(i-i_0)*time_step+np.pi/2.)
-
-        #for i in range(0,len(awf)):
-        #    awf[i] = round(awf[i],8)
         return self.pack_keysight_packet(final_wf)
+
+    def free_rotation_sin_spin(self, start_phase,start_hold,freq_ramp_time,middle_hold, amp_ramp_time,end_hold,sin_freq,channel): #in s and Hz
+        
+        #makes string with values to form arbitrary wave form. 
+        # freq ramp up,hold spinning, amplitude ramp down, hold with no pinning
+        
+        phi0 = start_phase                                  #phase where spin-up starts
+        phi1 = phi0 + 1/2.0*2*np.pi*sin_freq*freq_ramp_time #phase where spin-up ends
+
+        total_time = start_hold+freq_ramp_time + middle_hold + amp_ramp_time+end_hold
+        num_points = self.samp_rate * total_time
+
+        print "Number of points = ", num_points
+        print "Total time = ", total_time, "s"
+
+        freq_ramp_points = round(num_points*freq_ramp_time/total_time)
+        start_points = int(round(num_points*start_hold/total_time))
+        middle_points = int(round(num_points*middle_hold/total_time))
+        amp_ramp_points = round(num_points*amp_ramp_time/total_time)
+        end_points = int(round(num_points*end_hold/total_time))
+        
+        #define amplitude curve
+        awf =[]
+        awf = np.ones(start_points+int(freq_ramp_points)+middle_points)
+        awf = np.append(awf, 1.-np.arange(int(amp_ramp_points))/amp_ramp_points)
+        awf = np.append(awf, np.zeros(end_points))
+        
+        #definte phase curve
+        frequency = np.zeros(start_points)
+        frequency = np.append(frequency, np.arange(int(freq_ramp_points))*sin_freq/(2.*float(freq_ramp_points)))
+        frequency = np.append(frequency, sin_freq*np.ones(middle_points + int(amp_ramp_points)+end_points))
+   
+        time_step = total_time/float(num_points)
+
+        times_start     = time_step * np.arange(start_points)
+        times_spin_up   = time_step * np.arange(freq_ramp_points)
+        times_final   = time_step * np.arange(middle_points+amp_ramp_points+end_points)
+
+        phase_curve = phi0*np.ones(start_points)
+        phase_curve = np.append(phase_curve, phi0 + 2*np.pi*sin_freq * (times_spin_up/2 - freq_ramp_time/(2*np.pi)*np.sin(np.pi*times_spin_up/freq_ramp_time)))
+        phase_curve = np.append(phase_curve, phi1 + 2*np.pi*sin_freq*times_final)
+
+        ##definition through frequency ramp
+        if channel == 1:
+            final_wf = np.multiply(np.sin(phase_curve), awf)
+        if channel == 2:
+            final_wf = np.multiply(np.sin(phase_curve + np.pi/2.), awf)
+    
+        return self.pack_keysight_packet(final_wf)
+
 
 
     def free_rotation_nlinrel(self, start_phase, start_hold, freq_ramp_time, middle_hold, amp_ramp_time, speedfactor, end_hold, sin_freq, channel):
@@ -423,11 +445,15 @@ class KEYSIGHT_33500B(LabradServer):
         elif waveform_label == 'free_rotation_nlinrel':
             wf_str1 = self.free_rotation_nlinrel(start_phase,start_hold,freq_ramp_time, middle_hold, amp_ramp_time, speedfactor, end_hold,sin_freq,1)
             wf_str2 = self.free_rotation_nlinrel(start_phase,start_hold,freq_ramp_time, middle_hold, amp_ramp_time, speedfactor, end_hold,sin_freq,2)
-        elif waveform_label == 'spin_up_spin_down': #ramp up frequency then ramp down
+        elif waveform_label == 'free_rotation_sin_spin':
+            wf_str1 = self.free_rotation_sin_spin(start_phase,start_hold,freq_ramp_time, middle_hold, amp_ramp_time, end_hold,sin_freq,1)
+            wf_str2 = self.free_rotation_sin_spin(start_phase,start_hold,freq_ramp_time, middle_hold, amp_ramp_time, end_hold,sin_freq,2)
+        elif waveform_label == 'spin_up_spin_down_linear': #ramp up frequency then ramp down
             wf_str1 = self.spin_up_spin_down_linear(start_phase,start_hold,freq_ramp_time,middle_hold,end_hold,sin_freq,1)
             wf_str2 = self.spin_up_spin_down_linear(start_phase,start_hold,freq_ramp_time,middle_hold,end_hold,sin_freq,2)
-            # wf_str1 = self.spin_up_spin_down_sin(start_phase,start_hold,freq_ramp_time,middle_hold,end_hold,sin_freq,1)
-            # wf_str2 = self.spin_up_spin_down_sin(start_phase,start_hold,freq_ramp_time,middle_hold,end_hold,sin_freq,2)
+        elif waveform_label ==  'spin_up_spin_down_sin':
+            wf_str1 = self.spin_up_spin_down_sin(start_phase,start_hold,freq_ramp_time,middle_hold,end_hold,sin_freq,1)
+            wf_str2 = self.spin_up_spin_down_sin(start_phase,start_hold,freq_ramp_time,middle_hold,end_hold,sin_freq,2)
         else:
             print "Error: no waveform by that name"
 

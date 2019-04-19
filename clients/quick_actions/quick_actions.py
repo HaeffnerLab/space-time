@@ -2,6 +2,8 @@ from PyQt4 import QtGui, uic
 import os
 from common.clients.connection import connection
 from twisted.internet.defer import inlineCallbacks
+from labrad.units import WithUnit
+import time
 
 
 class actions_widget(QtGui.QWidget):
@@ -21,6 +23,8 @@ class actions_widget(QtGui.QWidget):
         self.toload_button = QtGui.QPushButton('To Loading')
     	self.todc_button = QtGui.QPushButton('To Doppler Cooling')
     	self.tostate_button = QtGui.QPushButton('To State Detection')
+
+        self.eject_button = QtGui.QPushButton('EJECT ION')
         #widget_ui.__init__(self)
     
     	#self.setFrameStyle(QtGui.QFrame.Panel  | QtGui.QFrame.Sunken)
@@ -33,6 +37,7 @@ class actions_widget(QtGui.QWidget):
     	layout.addWidget(self.todc_button, 1, 1)
     	layout.addWidget(self.fromstate_button, 2, 0)
     	layout.addWidget(self.tostate_button, 2, 1)
+        layout.addWidget(self.eject_button, 3, 0)
         #layout.addWidget(self.second_397_DC_box, 3, 0) #used if there are two doppler cooling beams
         #layout.addWidget(self.second_397_SD_box, 3, 1)
     
@@ -66,6 +71,8 @@ class actions_widget(QtGui.QWidget):
         self.toload_button.pressed.connect(self.on_to_loading)
         self.todc_button.pressed.connect(self.on_to_dc)
         self.tostate_button.pressed.connect(self.on_to_state)
+
+        self.eject_button.pressed.connect(self.on_eject_ion)
         #self.second_397_DC_box.stateChanged.connect(self.include_second_397_DC) #used if there are two doppler cooling beams   
         #self.second_397_SD_box.stateChanged.connect(self.include_second_397_SD)   
         
@@ -96,6 +103,37 @@ class actions_widget(QtGui.QWidget):
     #     yield pulser.amplitude('397Extra', ampl397Extra)
 
     #     return
+
+    def on_eject_ion(self):
+        # Bring up a window to confirm ion ejection
+        w = QtGui.QWidget()
+        msg = QtGui.QMessageBox(w)
+        msg.setIcon(QtGui.QMessageBox.Warning)
+        msg.setWindowTitle("You pressed eject!")
+        msg.setText("Are you sure you want to eject the ion(s)?")
+        msg.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+        yesbutton = msg.button(QtGui.QMessageBox.Yes)
+        yesbutton.setText('...Do it.')
+        nobutton = msg.button(QtGui.QMessageBox.No)
+        nobutton.setText('Nooo!')
+	   # If yes, call eject_ion(), defined below, to eject the ion. Otherwise, do nothing.
+        result = msg.exec_()
+        if result == QtGui.QMessageBox.Yes:
+            self.eject_ion()
+        else:
+            pass
+
+    @inlineCallbacks
+    def eject_ion(self):
+        pv = yield self.cxn.get_server('ParameterVault')
+        linear_397 = yield pv.get_parameter(('StatePreparation','channel_397_linear'))
+        pulser = yield self.cxn.get_server('Pulser')
+        freq397 = yield pulser.frequency(linear_397)
+
+        yield pulser.frequency(linear_397, WithUnit(260.0,'MHz'))
+        time.sleep(1)
+        yield pulser.frequency(linear_397, freq397)
+
 
     @inlineCallbacks
     def on_to_loading(self):

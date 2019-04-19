@@ -124,7 +124,7 @@ class spectrum_with_rotation(experiment):
         end_hold = rp.end_hold
         voltage_pp = rp.voltage_pp
         drive_frequency = rp.drive_frequency
-        self.awg_rotation.program_awf(start_phase['deg'],start_hold['ms'],frequency_ramp_time['ms'],middle_hold['ms'],ramp_down_time['ms'],end_hold['ms'],voltage_pp['V'],drive_frequency['kHz'],'free_rotation')
+        self.awg_rotation.program_awf(start_phase['deg'],start_hold['ms'],frequency_ramp_time['ms'],middle_hold['ms'],ramp_down_time['ms'],end_hold['ms'],voltage_pp['V'],drive_frequency['kHz'],'free_rotation_sin_spin')
         #self.awg_rotation.rotation(frequency['kHz'],voltage_pp['V'])
         #self.awg_modulation.program_modulation(ramp_up_time['ms'],start_hold['ms'],ramp_down_time['ms'],end_hold['ms'])
 

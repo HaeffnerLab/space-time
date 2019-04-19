@@ -158,14 +158,6 @@ class rabi_flopping(experiment):
         dvParameters.saveParameters(dv, dict(self.parameters), context)
         cxnlab.disconnect()
 
-def run_return_pulse_seq():
-    cxn = labrad.connect()
-    scanner = cxn.scriptscanner
-    exprt = rabi_flopping(cxn = cxn)
-    ident = scanner.register_external_launch(exprt.name)
-    (dds, ttl, channels) = exprt.execute(ident)
-    return (dds, ttl, channels)
-
 if __name__ == '__main__':
     cxn = labrad.connect()
     scanner = cxn.scriptscanner

@@ -18,7 +18,9 @@ class pulsed_excitation_scan(experiment):
                            ('Motion_Analysis','do_radial2_scan'),
                            ('Motion_Analysis','scan_frequency'),
                            ('Motion_Analysis','excitation_enable'),
-                           ('Motion_Analysis','ramsey_detuning')                           
+                           ('Motion_Analysis','ramsey_detuning'),
+                           ('Motion_Analysis','rf_modulation'),  ###    
+                           ('Motion_Analysis','rf_modulation_depth')   ####                    
                            ]
     
     @classmethod
@@ -36,7 +38,7 @@ class pulsed_excitation_scan(experiment):
         self.save_context = cxn.context()
         self.dv = cxn.data_vault        
         self.pv = cxn.parametervault
-        self.cxnlab = labrad.connect('192.168.169.49') #connection to labwide network
+        self.cxnlab = labrad.connect('192.168.169.49', password='lab', tls_mode='off') #connection to labwide network
         self.agi = agilent(cxn)
         
     def run(self, cxn, context):
@@ -63,12 +65,25 @@ class pulsed_excitation_scan(experiment):
             for i,f in enumerate(self.scan):
                 should_stop = self.pause_or_stop()
                 if should_stop: break
+
+                ma = self.parameters.Motion_Analysis
                 self.agi.set_frequency(f)
-                time.sleep(1)                            
-                
+                time.sleep(1)           
+                print ma.rf_modulation_depth
+                if ma.rf_modulation:
+                  if ma.rf_modulation_depth == 0:
+                    self.agi.set_output(False)
+                  else:
+                    self.agi.set_ranges(WithUnit(-ma.rf_modulation_depth/2.0,'V'),WithUnit(0.0,'V'))
+                    self.agi.set_output(True)
+                else:
+                  self.agi.set_amplitude(WithUnit(18.0,'dBm'))
+                  self.agi.set_output(True)
+                time.sleep(1)
+
                 replace = TreeDict.fromdict({
                                              'Motion_Analysis.excitation_enable':True,
-                                             'RabiFlopping.sideband_selection':[1,0,0,0],
+                                             'RabiFlopping.sideband_selection':[-1,0,0,0],
                                              })
                 self.rabi_flop.set_parameters(replace)
                 excitation = self.rabi_flop.run(cxn, context)
@@ -107,7 +122,7 @@ class pulsed_excitation_scan(experiment):
                                 
                 replace = TreeDict.fromdict({
                                              'Motion_Analysis.excitation_enable':True,
-                                             'RabiFlopping.sideband_selection':[0,1,0,0],
+                                             'RabiFlopping.sideband_selection':[0,-1,0,0],
                                              })
                 self.rabi_flop.set_parameters(replace)
                 excitation = self.rabi_flop.run(cxn, context)

@@ -1,8 +1,7 @@
 from common.abstractdevices.script_scanner.scan_methods import experiment
-from excitations import excitation_ramsey_two_mode
+from excitations import excitation_ramsey_ladder
 from space_time.scripts.scriptLibrary.common_methods_729 import common_methods_729 as cm
 from space_time.scripts.scriptLibrary import dvParameters
-from space_time.scripts.scriptLibrary import scan_methods
 from space_time.scripts.experiments.CalibrationScans.fitters import sin_fitter, double_sin_fitter
 import time
 import labrad
@@ -10,9 +9,9 @@ from labrad.units import WithUnit
 from numpy import linspace
 import numpy as np
 
-class ramsey_scanphase_two_modes_rotating(experiment):
+class ramsey_ladder_scanphase_rotating(experiment):
     
-    name = 'RamseyScanPhase_TwoModes_rotating'
+    name = 'RamseyLadder_ScanPhase_rotating'
     required_parameters = [
                            ('RamseyScanPhase', 'scanphase'),
                            
@@ -32,11 +31,16 @@ class ramsey_scanphase_two_modes_rotating(experiment):
                            ('Rotation','start_phase'),
                            ('Rotation','middle_hold'),
 
-                           ('Ramsey','echo_frequency_selection'),
-                           ('Ramsey','echo_manual_frequency_729'),
-                           ('Ramsey','echo_line_selection'),
-                           ('Ramsey','echo_sideband_selection'),
-                           ('Ramsey','echo_frequency'),
+                           ('Ramsey','frequency_selection'),
+                           ('Ramsey','ladder_blue_frequency'),
+                           ('Ramsey','ladder_red_frequency'),
+                           ('Ramsey','ladder_blue_manual_frequency729'),
+                           ('Ramsey','ladder_red_manual_frequency729'),
+                           ('Ramsey','ladder_blue_line_selection'),
+                           ('Ramsey','ladder_red_line_selection'),
+                           ('Ramsey','ladder_blue_sideband_selection'),
+                           ('Ramsey','ladder_red_sideband_selection'),
+                           ('Ramsey','second_pulse_phase'),
                            
                            ('TrapFrequencies','axial_frequency'),
                            ('TrapFrequencies','radial_frequency_1'),
@@ -48,20 +52,17 @@ class ramsey_scanphase_two_modes_rotating(experiment):
     @classmethod
     def all_required_parameters(cls):
         parameters = set(cls.required_parameters)
-        parameters = parameters.union(set(excitation_ramsey_two_mode.all_required_parameters()))
+        parameters = parameters.union(set(excitation_ramsey_ladder.all_required_parameters()))
         parameters = list(parameters)
         #removing parameters we'll be overwriting, and they do not need to be loaded
-        parameters.remove(('Excitation_729','rabi_excitation_amplitude'))
-        #parameters.remove(('Excitation_729','rabi_excitation_frequency'))
-        parameters.remove(('Ramsey','first_pulse_frequency'))
-        parameters.remove(('Ramsey','second_pulse_frequency'))
+        parameters.remove(('Ramsey','ladder_blue_frequency'))
+        parameters.remove(('Ramsey','ladder_red_frequency'))
         parameters.remove(('Ramsey','second_pulse_phase'))
-        parameters.remove(('Ramsey','echo_frequency'))
         return parameters
     
     def initialize(self, cxn, context, ident):
         self.ident = ident
-        self.excite = self.make_experiment(excitation_ramsey_two_mode)
+        self.excite = self.make_experiment(excitation_ramsey_ladder)
         self.excite.initialize(cxn, context, ident)
         self.scan = []
         self.amplitude = None
@@ -76,21 +77,20 @@ class ramsey_scanphase_two_modes_rotating(experiment):
             self.fitter = double_sin_fitter()
         else:
             self.fitter = sin_fitter()
-        self.fitter2 = double_sin_fitter()
         # self.setup_data_vault()
     
     def setup_sequence_parameters(self):
         r = self.parameters.Ramsey
         flop = self.parameters.RabiFlopping
-        first_pulse_frequency = cm.frequency_from_line_selection(r.frequency_selection, r.first_pulse_manual_frequency_729, r.first_pulse_line, self.drift_tracker)
-        second_pulse_frequency = cm.frequency_from_line_selection(r.frequency_selection, r.second_pulse_manual_frequency_729, r.second_pulse_line, self.drift_tracker)
+        blue_frequency = cm.frequency_from_line_selection(r.frequency_selection, r.ladder_blue_manual_frequency729, r.ladder_blue_line_selection, self.drift_tracker)
+        red_frequency = cm.frequency_from_line_selection(r.frequency_selection, r.ladder_red_manual_frequency729, r.ladder_red_line_selection, self.drift_tracker)
         trap = self.parameters.TrapFrequencies
         if r.frequency_selection == 'auto':
-            first_pulse_frequency = cm.add_sidebands(first_pulse_frequency, r.first_pulse_sideband_selection, trap)   
-            second_pulse_frequency = cm.add_sidebands(second_pulse_frequency, r.second_pulse_sideband_selection, trap)    
-        self.parameters['Ramsey.second_pulse_frequency'] = second_pulse_frequency
-        self.parameters['Ramsey.first_pulse_frequency'] = first_pulse_frequency
-        self.parameters['Excitation_729.rabi_excitation_amplitude'] = flop.rabi_amplitude_729
+            blue_frequency = cm.add_sidebands(blue_frequency, r.ladder_blue_sideband_selection, trap)   
+            red_frequency = cm.add_sidebands(red_frequency, r.ladder_red_sideband_selection, trap)    
+        self.parameters['Ramsey.ladder_blue_frequency'] = blue_frequency
+        self.parameters['Ramsey.ladder_red_frequency'] = red_frequency
+        # self.parameters['Excitation_729.rabi_excitation_amplitude'] = flop.rabi_amplitude_729
         
         rp = self.parameters.Rotation
         frequency_ramp_time = rp.frequency_ramp_time
@@ -109,85 +109,57 @@ class ramsey_scanphase_two_modes_rotating(experiment):
         
         #self.parameters['Ramsey.first_pulse_duration'] = self.parameters.Ramsey.rabi_pi_time / 2.0
         #self.parameters['Ramsey.second_pulse_duration'] = self.parameters.Ramsey.rabi_pi_time / 2.0
-        
-        r = self.parameters.Ramsey
-        echo_frequency = cm.frequency_from_line_selection(r.echo_frequency_selection, r.echo_manual_frequency_729, r.echo_line_selection, self.drift_tracker)
-        trap = self.parameters.TrapFrequencies
-        if r.frequency_selection == 'auto':
-            echo_frequency = cm.add_sidebands(echo_frequency, r.echo_sideband_selection, trap)   
-        self.parameters['Ramsey.echo_frequency'] = echo_frequency
-        
+                
         minim,maxim,steps = self.parameters.RamseyScanPhase.scanphase
         minim = minim['deg']; maxim = maxim['deg']
         self.scan = linspace(minim,maxim, steps)
         self.scan = [WithUnit(pt, 'deg') for pt in self.scan]
         
-    def setup_data_vault(self,cxn):
+    def setup_data_vault(self):
+        localtime = time.localtime()
+        datasetNameAppend = time.strftime("%Y%b%d_%H%M_%S",localtime)
+        dirappend = [ time.strftime("%Y%b%d",localtime) ,time.strftime("%H%M_%S", localtime)]
+        directory = ['','Experiments']
+        directory.extend([self.name])
+        directory.extend(dirappend)
+        output_size = self.excite.output_size
+        dependants = [('Excitation','Ion {}'.format(ion),'Probability') for ion in range(output_size)]
+        self.dv.cd(directory, True,context = self.data_save_context)
+        ds = self.dv.new('{0} {1}'.format(self.name, datasetNameAppend),[('Final pulse phase', 'deg')], dependants , context = self.data_save_context)
         window_name = self.parameters.get('RamseyScanPhase.window_name', ['ramsey_phase_scan'])[0]
-
-        if self.parameters.StateReadout.pmt_mode =='exci_and_parity':
-            output_size = 2
-        else:
-            output_size = 1
-
-        dv_args = {'output_size': output_size,
-                   'experiment_name': self.name,
-                   'window_name': window_name,
-                   'dataset_name': self.name
-                   }
-        scan_methods.setup_data_vault(cxn, self.data_save_context, dv_args)
-
-        # localtime = time.localtime()
-        # datasetNameAppend = time.strftime("%Y%b%d_%H%M_%S",localtime)
-        # dirappend = [ time.strftime("%Y%b%d",localtime) ,time.strftime("%H%M_%S", localtime)]
-        # directory = ['','Experiments']
-        # directory.extend([self.name])
-        # directory.extend(dirappend)
-        # output_size = self.excite.output_size
-        # dependants = [('Excitation','Ion {}'.format(ion),'Probability') for ion in range(output_size)]
-        # self.dv.cd(directory, True,context = self.data_save_context)
-        # ds = self.dv.new('{0} {1}'.format(self.name, datasetNameAppend),[('Second pulse phase', 'deg')], dependants , context = self.data_save_context)
-        # window_name = self.parameters.get('RamseyScanPhase.window_name', ['ramsey_phase_scan'])[0]
-        # self.dv.add_parameter('Window', window_name, context = self.data_save_context)
-        # self.dv.add_parameter('plotLive', True, context = self.data_save_context)
-        # self.grapher.plot_with_axis(ds,window_name,self.scan,False)
+        self.dv.add_parameter('Window', window_name, context = self.data_save_context)
+        self.dv.add_parameter('plotLive', True, context = self.data_save_context)
+        self.grapher.plot_with_axis(ds,window_name,self.scan,False)
         
     def run(self, cxn, context):
         self.setup_sequence_parameters()
-        self.setup_data_vault(cxn)
+        self.setup_data_vault()
         phases =[]
         excis = []
-        parities = []
-        for i,duration in enumerate(self.scan):
+        for i,phase in enumerate(self.scan):
             should_stop = self.pause_or_stop()
             if should_stop: break
-            self.parameters['Ramsey.second_pulse_phase'] = duration
+            self.parameters['Ramsey.second_pulse_phase'] = phase
             self.excite.set_parameters(self.parameters)
             excitation, readouts = self.excite.run(cxn, context)
-            submission = [duration['deg']]
-            phases.append(duration['deg'])
-
-            if type(excitation[0])==list:
-                excis.append(excitation[0][0])
-                parities.append(excitation[0][1])
-                submission.extend(excitation[0])
-            else:
-                excis.append(excitation[0])
-                submission.extend(excitation)
-
+            submission = [phase['deg']]
+            phases.append(phase['deg'])
+            excis.append(excitation[0])
+            submission.extend(excitation)
             self.dv.add(submission, context = self.data_save_context)
             self.update_progress(i)
 
-        # print 'excis =',excis
-        # print parities
-        # print phases
+        print excis
+        print phases
         
-        contrast1, phase_shift = self.fitter.fit(phases,excis)
-        if len(parities) == 0:
-            return [np.abs(contrast1)]
-        else:
-            contrast2, phase_shift = self.fitter2.fit(phases,parities)
-            return [np.abs(contrast1),np.abs(contrast2)]
+        # try:
+        #     contrast, phase_shift = self.fitter.fit(phases,excis)
+        # except:
+        #     contrast = (max(excis)-min(excis))*0
+        #     phase_shift = 0
+        contrast, phase_shift = self.fitter.fit(phases,excis)
+
+        return np.abs(contrast)
             
     @property
     def output_size(self):
@@ -215,6 +187,6 @@ class ramsey_scanphase_two_modes_rotating(experiment):
 if __name__ == '__main__':
     cxn = labrad.connect()
     scanner = cxn.scriptscanner
-    exprt = ramsey_scanphase_two_modes_rotating(cxn = cxn)
+    exprt = ramsey_ladder_scanphase_rotating(cxn = cxn)
     ident = scanner.register_external_launch(exprt.name)
     exprt.execute(ident)

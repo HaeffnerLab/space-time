@@ -3,15 +3,20 @@ from space_time.scripts.experiments.Experiments729.rabi_flop_scannable import ra
 from space_time.scripts.scriptLibrary import scan_methods
 from space_time.scripts.scriptLibrary import dvParameters
 from labrad.units import WithUnit
+from space_time.scripts.scriptLibrary.devices import agilent
 from treedict import TreeDict
 import numpy as np
 import labrad
+import time
 
 class scan_motional_ramsey_time(experiment):
 
     name = 'ScanMotionalRamseyTime'    
     required_parameters = [                           
-                           ('Motion_Analysis','scan_ramsey_time')                           
+                           ('Motion_Analysis','scan_ramsey_time'),                         
+                           ('Motion_Analysis','ramsey_detuning'),
+                           ('Motion_Analysis','rf_modulation'),  ###    
+                           ('Motion_Analysis','rf_modulation_depth')
                            ]
     
     
@@ -31,20 +36,37 @@ class scan_motional_ramsey_time(experiment):
         self.rabi_flop.initialize(cxn, context, ident)
         self.save_context = cxn.context()
         self.dv = cxn.data_vault        
-        self.cxnlab = labrad.connect('192.168.169.49') #connection to labwide network
+        self.agi = agilent(cxn)
+        self.cxnlab = labrad.connect('192.168.169.49', password='lab', tls_mode='off') #connection to labwide network
         
     def run(self, cxn, context):
-        
+
+        ma = self.parameters.Motion_Analysis
+        self.agi.set_frequency(self.parameters['TrapFrequencies.radial_frequency_1']+self.parameters['Motion_Analysis.ramsey_detuning'])
+        time.sleep(1)           
+        print ma.rf_modulation_depth
+        if ma.rf_modulation:
+          if ma.rf_modulation_depth == 0:
+            self.agi.set_output(False)
+          else:
+            self.agi.set_ranges(WithUnit(-ma.rf_modulation_depth/2.0,'V'),WithUnit(0.0,'V'))
+            self.agi.set_output(True)
+        else:
+          self.agi.set_amplitude(WithUnit(18.0,'dBm'))
+          self.agi.set_output(True)
+        time.sleep(1)
+
+
         dv_args = {'output_size':self.rabi_flop.excite.output_size,
                    'experiment_name': self.name,
                    'window_name': 'MotionalRamseyTime',
                    'dataset_name': 'ramsey_time'
                    }
         scan_methods.setup_data_vault(cxn, self.save_context, dv_args)
-        
+
         scan_param = self.parameters.Motion_Analysis.scan_ramsey_time
         self.scan = scan_methods.simple_scan(scan_param, 'us')
-        
+
         for i,t in enumerate(self.scan):
             should_stop = self.pause_or_stop()
             if should_stop: break

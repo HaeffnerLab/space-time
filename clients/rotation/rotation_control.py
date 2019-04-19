@@ -77,7 +77,7 @@ class rotation_widget(QtGui.QWidget):
         self.frequency = QtGui.QDoubleSpinBox()
         self.frequency.setSuffix(' kHz')
         freq = yield pv.get_parameter('RotationCW','drive_frequency')
-        self.frequency.setRange(0.0,1.0e3)
+        self.frequency.setRange(0.0,1.0e4)
         self.frequency.setValue(freq['kHz'])  
         self.frequency.setDecimals(6)
         self.frequency.setKeyboardTracking(False)

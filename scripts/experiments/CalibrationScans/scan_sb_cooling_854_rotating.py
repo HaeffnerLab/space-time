@@ -78,7 +78,7 @@ class scan_sb_cooling_854_rotating(experiment):
         end_hold = rp.end_hold
         voltage_pp = rp.voltage_pp
         drive_frequency = rp.drive_frequency
-        self.awg_rotation.program_awf(start_phase['deg'],start_hold['ms'],frequency_ramp_time['ms'],middle_hold['ms'],ramp_down_time['ms'],end_hold['ms'],voltage_pp['V'],drive_frequency['kHz'],'free_rotation')
+        self.awg_rotation.program_awf(start_phase['deg'],start_hold['ms'],frequency_ramp_time['ms'],middle_hold['ms'],ramp_down_time['ms'],end_hold['ms'],voltage_pp['V'],drive_frequency['kHz'],'free_rotation_sin_spin')
 
     def finalize(self, cxn, context):
         old_freq = self.pv.get_parameter('RotationCW','drive_frequency')['kHz']

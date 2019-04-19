@@ -2,6 +2,7 @@ from scipy.optimize import curve_fit
 import numpy as np
 import matplotlib.pyplot as plt
 import lmfit
+import scipy.constants as scc
 
 class pi_time_fitter():
 
@@ -50,6 +51,74 @@ class peak_fitter():
         else:
             return popt[0] # return only the center value
 
+class sin_fitter():
+    
+    def guess(self, phi, p, force_guess=False):
+        '''
+        just take the point at the peak value
+        '''
+        return np.array([max(p)-min(p),  0, 0])
+    
+    def fit(self, phi, p):
+        model = lambda phi, amplitude, phi0, offset: -amplitude/2.0*np.cos(np.pi/180*(phi - phi0)) + 0.5 + offset
+        force_guess = True
+        guess = self.guess(phi, p, force_guess)
+        perr = np.maximum(np.sqrt(np.array(p)*(1.0-np.array(p))/100), 1.0/(100+2)) # takes quantum projection noise as the source of uncertainty in p. ASSUMES 100 MEASUREMENT REPETITIONS
+        popt, copt = curve_fit(model, phi, p, p0=guess, sigma=perr, absolute_sigma=True)
+        return popt[0], popt[1]
+
+class double_sin_fitter():
+    def guess(self, phi, p, force_guess=False):
+        '''
+        just take the point at the peak value
+        '''
+        return np.array([max(p)-min(p),  0, 0])  
+    
+    def fit(self, phi, p):
+        model = lambda phi, amplitude, phi0, offset: -amplitude/2.0*np.cos(2*np.pi/180*(phi - phi0)) + 0.5 + offset
+        force_guess = True
+        guess = self.guess(phi, p, force_guess)
+        perr = np.maximum(np.sqrt(np.array(p)*(1.0-np.array(p))/100), 1.0/(100+2)) # takes quantum projection noise as the source of uncertainty in p. ASSUMES 100 MEASUREMENT REPETITIONS
+        popt, copt = curve_fit(model, phi, p, p0=guess, sigma=perr, absolute_sigma=True)
+        return popt[0], popt[1]  
+
+
+class rot_ramsey_fitter():  
+    def fit(self, f, p):
+        guess = [60,10,5,0.8,100]
+        popt, copt = curve_fit(self.rot_ramsey_decay, f, p, p0=guess)
+        return 2*popt[0], popt[1] #contrast and phase
+
+    def rot_ramsey_decay(self, times_us, sigma_l, Omega_kHz, delta_kHz, f_trap_MHz, f_rot_kHz):
+        # convert inputs to SI
+        times = 1e-6 * times_us
+        Omega = 1e3 * 2*np.pi * Omega_kHz
+        delta = 1e3 * 2*np.pi * delta_kHz
+        w_trap = 1e6 * 2*np.pi * f_trap_MHz
+        w_rot = 1e3 * 2*np.pi * f_rot_kHz
+        #fix parameters for diffusion measurment
+        scale = 1
+        Delta_l = 1
+        # calculate moment of inertia
+        m = 40*scc.atomic_mass
+        r = 1/2.0 * (scc.e**2/(4*np.pi*scc.epsilon_0) * 2.0/(m*(w_trap**2 - w_rot**2)))**(1/3.0) #rotor radius
+        I = 2*m*r**2  # moment of inertia
+
+        # calculate l distribution and detunings
+        l_0 = I*w_rot/scc.hbar
+        ls = np.arange(int(l_0-3*sigma_l), int(l_0+3*sigma_l))
+        c_ls_unnorm = np.exp(-(ls-l_0)**2/(4.0*sigma_l**2))
+        c_ls = c_ls_unnorm/np.linalg.norm(c_ls_unnorm)
+        delta_ls = scc.hbar*Delta_l/I*(l_0-ls) + delta
+
+        def calc_ramsey_exc(c_ls, delta_ls, Omega, T):
+            Omega_gens = np.sqrt(Omega**2 + delta_ls**2) #generalized Rabi frequency
+            u1s = np.pi*Omega_gens/(4*Omega)
+            u2s = delta_ls*T/2.0
+            return sum(np.abs(c_ls)**2 * (2*Omega/Omega_gens**2*np.sin(u1s) * (Omega_gens*np.cos(u1s)*np.cos(u2s) - delta_ls*np.sin(u1s)*np.sin(u2s)))**2)
+            
+
+        return [scale * calc_ramsey_exc(c_ls, delta_ls, Omega, T) for T in times]
 
 def print_result(result):
 

@@ -10,6 +10,9 @@ class excite_with_397(pulse_sequence):
                            ('Spectroscopy_397','power_397'),
                            ('Spectroscopy_397','readout_duration'),
                            ('Spectroscopy_397','frequency_397'),
+
+                           ('Spectroscopy_397','power_866'),
+                           ('Spectroscopy_397','frequency_866'),
                            
                            ('StatePreparation','channel_397_linear'),
                            ('StatePreparation','channel_397_sigma')
@@ -19,6 +22,9 @@ class excite_with_397(pulse_sequence):
                                             ('DopplerCooling','doppler_cooling_duration'),
                                             ('DopplerCooling','doppler_cooling_amplitude_397'),
                                             ('DopplerCooling','doppler_cooling_frequency_397'),
+                                            ('DopplerCooling','doppler_cooling_amplitude_866'),
+                                            ('DopplerCooling','doppler_cooling_frequency_866'),
+
                                             ('StatePreparation','channel_397_linear')
                                             ]
                            }
@@ -27,6 +33,8 @@ class excite_with_397(pulse_sequence):
         spec_time = self.parameters.Spectroscopy_397.readout_duration
         spec_power = self.parameters.Spectroscopy_397.power_397
         spec_freq = self.parameters.Spectroscopy_397.frequency_397
+        power_866 = self.parameters.Spectroscopy_397.power_866
+        freq_866 = self.parameters.Spectroscopy_397.frequency_866
         
         channel = self.parameters.Spectroscopy_397.calibration_channel_397
         if channel == 'linear':
@@ -35,7 +43,7 @@ class excite_with_397(pulse_sequence):
             calib_channel = self.parameters.StatePreparation.channel_397_sigma
             
         
-        
+        print spec_freq
         #add the sequence
         #self.addSequence(repump_d)
         
@@ -43,7 +51,9 @@ class excite_with_397(pulse_sequence):
         replacement = TreeDict.fromdict({
                                             'DopplerCooling.doppler_cooling_duration':spec_time,
                                             'DopplerCooling.doppler_cooling_amplitude_397':spec_power,
-                                            'DopplerCooling.doppler_cooling_frequency_397':spec_freq/2.0, #divide by two because sending to a double pass AOM 
+                                            'DopplerCooling.doppler_cooling_frequency_397':spec_freq, #divide by two because sending to a double pass AOM 
+                                            'DopplerCooling.doppler_cooling_amplitude_866':power_866,
+                                            'DopplerCooling.doppler_cooling_frequency_866':freq_866,
                                             'StatePreparation.channel_397_linear':calib_channel
                                         })
         
