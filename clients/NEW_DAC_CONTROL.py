@@ -253,8 +253,8 @@ class CHANNEL_MONITOR(QtGui.QWidget):
         brightness = 210
         darkness = 255 - brightness           
         for (k, v) in av:
-     #       print k
-     #       print v
+            print k
+            print v
             self.displays[k].display(float(v)) 
             if abs(v) > 30:
                 self.displays[k].setStyleSheet("QWidget {background-color: orange }")

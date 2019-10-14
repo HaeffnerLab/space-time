@@ -24,7 +24,6 @@ from twisted.internet.defer import DeferredLock, Deferred
 from socket import *
 import select
 import numpy as np
-from matplotlib import pyplot as plt
 import struct
 from warnings import warn
 import time

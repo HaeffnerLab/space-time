@@ -1,7 +1,7 @@
+from twisted.internet.defer import inlineCallbacks
 from PyQt4 import QtGui, uic, QtCore
 import os
-from common.clients.connection import connection
-from twisted.internet.defer import inlineCallbacks
+#from common.clients.connection import connection
 from common.clients.qtui.QCustomSpinBox import QCustomSpinBox
 
 
@@ -72,11 +72,11 @@ class rotation_widget(QtGui.QWidget):
     
     @inlineCallbacks       
     def set_up_GUI(self):
-        pv = yield self.cxn.get_server('ParameterVault')
+        ss = yield self.cxn.get_server('ScriptScanner')
 
         self.frequency = QtGui.QDoubleSpinBox()
         self.frequency.setSuffix(' kHz')
-        freq = yield pv.get_parameter('RotationCW','drive_frequency')
+        freq = yield ss.get_parameter('RotationCW','drive_frequency')
         self.frequency.setRange(0.0,1.0e4)
         self.frequency.setValue(freq['kHz'])  
         self.frequency.setDecimals(6)
@@ -84,7 +84,7 @@ class rotation_widget(QtGui.QWidget):
 
         self.phase = QtGui.QDoubleSpinBox()
         self.phase.setSuffix(' degrees')
-        phi = yield pv.get_parameter('RotationCW','start_phase')
+        phi = yield ss.get_parameter('RotationCW','start_phase')
         self.phase.setRange(0.0,360.0)
         self.phase.setValue(phi['deg'])
         self.phase.setDecimals(1)
@@ -92,7 +92,7 @@ class rotation_widget(QtGui.QWidget):
                
         self.amplitude = QtGui.QDoubleSpinBox()
         self.amplitude.setSuffix(' Vpp')
-        amp = yield pv.get_parameter('RotationCW','voltage_pp')
+        amp = yield ss.get_parameter('RotationCW','voltage_pp')
         self.amplitude.setRange(0.0,14.0)
         self.amplitude.setValue(amp['V'])
         self.amplitude.setDecimals(2)
@@ -157,11 +157,11 @@ class rotation_widget(QtGui.QWidget):
              
     @inlineCallbacks
     def update_awg(self,value):
-        pv = yield self.cxn.get_server('ParameterVault')
+        ss = yield self.cxn.get_server('ScriptScanner')
         try:
-            yield pv.set_parameter('RotationCW','drive_frequency',self.WithUnit(self.frequency.value(),'kHz'))
-            yield pv.set_parameter('RotationCW','start_phase',self.WithUnit(self.phase.value(),'deg'))
-            yield pv.set_parameter('RotationCW','voltage_pp',self.WithUnit(self.amplitude.value(),'V'))
+            yield ss.set_parameter('RotationCW','drive_frequency',self.WithUnit(self.frequency.value(),'kHz'))
+            yield ss.set_parameter('RotationCW','start_phase',self.WithUnit(self.phase.value(),'deg'))
+            yield ss.set_parameter('RotationCW','voltage_pp',self.WithUnit(self.amplitude.value(),'V'))
             yield self.server.update_awg(self.frequency.value()*1e3,self.amplitude.value(),self.phase.value())
         except Exception,e:
             print e
@@ -220,6 +220,7 @@ if __name__=="__main__":
     from common.clients import qt4reactor
     qt4reactor.install()
     from twisted.internet import reactor
+    from common.clients.connection import connection
     rotationwidget = rotation_widget(reactor)
     rotationwidget.show()
     reactor.run()

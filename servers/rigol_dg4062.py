@@ -30,8 +30,8 @@ import time
 #SIGNALID = 190234 ## this needs to change
 
 
-class RIGOL_DG4062_ROTATION(LabradServer):
-    name = 'RIGOL_DG4062_ROTATION'
+class RIGOL_DG4062(LabradServer):
+    name = 'RIGOL_DG4062'
     instr = None
     
     @inlineCallbacks
@@ -42,7 +42,7 @@ class RIGOL_DG4062_ROTATION(LabradServer):
         #iSerialNumber = 'DG4D152500730'
 
         #iSerialNumber = 'DG4D152500738'
-        iSerialNumber = 'DG4D152500730'
+        iSerialNumber = 'DG4E170900409'
 
         try:
             self.instr = usbtmc.Instrument(idProduct,idVendor,iSerialNumber)
@@ -123,46 +123,41 @@ class RIGOL_DG4062_ROTATION(LabradServer):
     @setting(8, "Get Amplitude", channel = 'i')    
     def get_amplitude(self, c, channel):
         yield self.ask(self.instr,':SOUR'+str(channel)+ ':VOLT?')
+
+    @setting(9, "Set Offset", channel = 'i', offset = 'v')    
+    def set_offset(self, c, channel,offset):
+        yield self.write(self.instr,':SOUR'+str(channel)+ ':VOLT:OFFS ' + str(offset))
+
+    @setting(10, "Get Offset", channel = 'i')    
+    def get_offset(self, c, channel):
+        yield self.ask(self.instr,':SOUR'+str(channel)+ ':VOLT:OFFS?')    
         
-    @setting(9, "To Sine", channel = 'i')        
+    @setting(11, "To Sine", channel = 'i')        
     def to_sine(self, c, channel):
         yield self.write(self.instr,':SOUR'+str(channel)+':BURS:STAT OFF')
         yield self.write(self.instr,':SOUR' + str(channel) + ':APPL:SIN')
 
-    @setting(10, "Unmodulate")
+    @setting(12, "Unmodulate")
     def unmodulate(self,c):
         yield self.write(self.instr,':SOUR1:MOD:STAT OFF')
         yield self.write(self.instr,':SOUR2:MOD:STAT OFF')
      
-    @setting(11, "rotation", drive_frequency = 'v', amplitude = 'v')
-    def rotation(self, c, drive_frequency, amplitude): #in kHz
-        drive_frequency = drive_frequency * 1e3
+    @setting(13, "sinusoid", frequency = 'v', amplitude = 'v', offset = 'v', channel = 'i')
+    def sinusoid(self, c, frequency, amplitude, offset, channel): #in kHz
+        frequency = frequency * 1e3
 
+        yield self.to_sine(c,channel)
+        yield self.set_freq(c,channel,frequency)
+        yield self.set_phase(c,channel,0)
+        yield self.set_offset(c,channel,offset)
+        yield self.set_amplitude(c, channel, amplitude)
 
-        yield self.to_sine(c,1)
-        yield self.to_sine(c,1)
-        yield self.set_freq(c,1,drive_frequency)
-        yield self.set_freq(c,2,drive_frequency)
-        yield self.set_phase(c,1,0)
-        yield self.set_phase(c,2,90)
+        yield self.set_state(c,channel,1)
 
-        yield self.set_amplitude(c, 1, amplitude)
-        yield self.set_amplitude(c, 2, amplitude)
-
-        yield self.set_state(c,1,1)
-        yield self.set_state(c,2,1)
-        yield self.sync_phases(c)
-
-        yield self.write(self.instr, 'SOUR1:MOD:STAT ON')
-        yield self.write(self.instr, 'SOUR2:MOD:STAT ON')
-        yield self.write(self.instr, 'SOUR1:MOD:TYPE AM')
-        yield self.write(self.instr, 'SOUR2:MOD:TYPE AM')
-        yield self.write(self.instr, 'SOUR1:MOD:AM:SOUR EXT')
-        yield self.write(self.instr, 'SOUR2:MOD:AM:SOUR EXT')
 
 
         
-__server__ = RIGOL_DG4062_ROTATION()
+__server__ = RIGOL_DG4062()
         
 if __name__ == '__main__':
     from labrad import util
