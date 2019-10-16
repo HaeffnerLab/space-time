@@ -116,8 +116,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         from common.clients.PMT_CONTROL    import pmtWidget
         from common.clients.SWITCH_CONTROL import switchWidget
         from common.clients.DDS_CONTROL    import DDS_CONTROL
-        #from common.clients.DAC_CONTROL    import DAC_Control
-        from common.clients.NEW_DAC_CONTROL import DAC_Control
+        from ST_DAC_CONTROL import DAC_Control
         from quick_actions.quick_actions import actions_widget
         from rotation.rotation_control import rotation_widget
         from common.clients.LINETRIGGER_CONTROL import linetriggerWidget
