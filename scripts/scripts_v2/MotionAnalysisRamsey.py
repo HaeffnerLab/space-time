@@ -17,7 +17,7 @@ class MotionAnalysisRamsey(pulse_sequence):
                   'Motion_Analysis.diagnosis_line',
                   'Motion_Analysis.detuning',
                   'Motion_Analysis.ramsey_time',
-
+                  'Motion_Analysis.channel729',
                   'Motion_Analysis.duration729',
                   'Motion_Analysis.amplitude729'
                   ]
@@ -63,6 +63,7 @@ class MotionAnalysisRamsey(pulse_sequence):
         # calculate the final diagnosis params
         ma = self.parameters.Motion_Analysis
         freq_729 = self.calc_freq_from_array(ma.diagnosis_line, ma.diagnosis_sideband)
+        freq_729_op = self.calc_freq_from_array(self.parameters.OpticalPumping.line_selection)
 
         # print out some diagnostics
         print "Using freq 729: ", freq_729
@@ -74,14 +75,16 @@ class MotionAnalysisRamsey(pulse_sequence):
 
         # 397 excitation and small optical pumping after the motion excitation
         self.addSequence(MotionAnalysis)
-        self.addSequence(OpticalPumping, { 'OpticalPumpingContinuous.optical_pumping_continuous_duration': duration_op })
+        # self.addSequence(OpticalPumping, { 'OpticalPumpingContinuous.optical_pumping_continuous_duration': duration_op,
+        #                                    'OpticalPumping.optical_pumping_frequency_729':freq_729_op })
 
         # wait for desired time
         self.addSequence(EmptySequence,  { 'EmptySequence.empty_sequence_duration' : ma.ramsey_time})
 
         # 397 excitation and small optical pumping after the motion excitation
         self.addSequence(MotionAnalysis)
-        self.addSequence(OpticalPumping, { 'OpticalPumpingContinuous.optical_pumping_continuous_duration': duration_op })
+        self.addSequence(OpticalPumping, { 'OpticalPumpingContinuous.optical_pumping_continuous_duration': duration_op,
+                                           'OpticalPumping.optical_pumping_frequency_729':freq_729_op })
 
         # 729 excitation to transfer the motional DOF to the electronic DOF
         # running the excitation from the Rabi flopping

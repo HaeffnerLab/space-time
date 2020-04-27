@@ -2,7 +2,7 @@
 ### BEGIN NODE INFO
 [info]
 name = KEYSIGHT_33500B
-version = 1.0
+version = 2.0
 description =
 instancename = KEYSIGHT_33500B
 

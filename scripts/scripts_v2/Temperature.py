@@ -13,8 +13,8 @@ class rsb(Excitation729):
 		data = data.sum(1)
 		# peak_guess =  cls.peak_guess(data_x, data)[0]
 		# print "@@@@@@@@@@@@@@", peak_guess
-		print data_x
-		print data
+		#print data_x
+		#print data
 		fit_params = cls.gaussian_fit(data_x, data, return_all_params = True)
 		print "red sideband"
 		print "############## fit params: ", fit_params
@@ -30,8 +30,8 @@ class bsb(Excitation729):
 		data = data.sum(1)
 		# peak_guess =  cls.peak_guess(data_x, data)[0]
 		# print "@@@@@@@@@@@@@@", peak_guess
-		print data_x
-		print data
+		#print data_x
+		#print data
 		fit_params = cls.gaussian_fit(data_x, data, return_all_params = True)
 		print "blue sideband"
 		print "############## fit params: ", fit_params

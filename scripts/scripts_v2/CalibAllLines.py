@@ -30,7 +30,7 @@ class CalibLine1(pulse_sequence):
                                          'Excitation_729.amplitude729': amp729,
                                          'Excitation_729.duration729': dur729,
                                          'Excitation_729.channel729': channel729,
-                                          'rabi_change_DDS': True})
+                                          'Excitation_729.rabi_change_DDS': True})
         self.addSequence(StateReadout)
 
     @classmethod
@@ -106,7 +106,7 @@ class CalibLine2(pulse_sequence):
                                          'Excitation_729.amplitude729': amp729,
                                          'Excitation_729.duration729': dur729,
                                          'Excitation_729.channel729': channel729,
-                                          'rabi_change_DDS': True})
+                                          'Excitation_729.rabi_change_DDS': True})
         self.addSequence(StateReadout)
 
     @classmethod
@@ -177,7 +177,7 @@ class CalibAllLines(pulse_sequence):
 
     fixed_params = {
                     'Display.relative_frequencies': False,
-                    # 'StatePreparation.sideband_cooling_enable': False,
+                    'StateReadout.repeat_each_measurement': 100,
                     'StateReadout.readout_mode': "pmt_excitation"}
                     
     sequence = [CalibLine1, CalibLine2] 

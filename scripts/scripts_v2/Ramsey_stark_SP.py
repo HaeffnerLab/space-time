@@ -5,14 +5,18 @@ import numpy as np
 import math as m
 import time
 
-class Ramsey(pulse_sequence):
+class Ramsey_stark_SP(pulse_sequence):
+  ## Ramsey measurement with an AC stark shift 729 beam on during the interrogation time for a "b field"
+  ## In this case, the AC stark shift modulation is controlled by an extra SP AO powered by the Marconi.
     
     #name = 'Ramsey'
 
     scannable_params = {
                         
-        'Ramsey.ramsey_time': [(0, 1.0, 0.05, 'ms') ,'ramsey'],
+        'BfieldIncoh.frequency_separation': [(0.0, 1.0, 0.1,'kHz'), 'ramsey_contrast'],
+        #'Bfield2.frequency_separation': [(0.0, 1.0, 0.1,'kHz'), 'ramsey_contrast'],
         'Ramsey.second_pulse_phase': [(0, 360., 30, 'deg') ,'ramsey_phase_scan'],
+        'Ramsey.ramsey_time': [(0, 1.0, 0.05, 'ms') ,'ramsey'],
 
         }
 
@@ -38,36 +42,32 @@ class Ramsey(pulse_sequence):
                   'DynamicDecoupling.dd_pi_time',
                   'DynamicDecoupling.dd_amplitude_729',
 
-                  'Rotation.rotation_enable',
-                  'Rotation.drive_frequency',
-                  'Rotation.end_hold',
-                  'Rotation.frequency_ramp_time',
-                  'Rotation.middle_hold',
-                  'Rotation.ramp_down_time',
-                  'Rotation.start_hold',
-                  'Rotation.start_phase',
-                  'Rotation.voltage_pp',
-
                   'Bfield2.bfield_enable',
                   'Bfield2.center_frequency',
                   'Bfield2.phase1',
                   'Bfield2.phase2',
                   'Bfield2.frequency_separation',
                   'Bfield2.voltage_pp',
+                  'Bfield2.first_only',
+                  'Bfield2.on_time',
+                  'Bfield2.on_before',
 
                   'BfieldIncoh.bfield_enable',
                   'BfieldIncoh.center_frequency',
                   'BfieldIncoh.n_points',
                   'BfieldIncoh.frequency_separation',
                   'BfieldIncoh.voltage_std',
-                  'BfieldIncoh.prep_time',
-                  'BfieldIncoh.buffer_time',
+                  'BfieldIncoh.tot_time',
+                  'BfieldIncoh.first_only',
 
                   'ACStarkShift.amplitude729',
                   'ACStarkShift.channel729',
                   'ACStarkShift.frequency729',
                   'ACStarkShift.line_selection',
                   'ACStarkShift.acstark_enable',
+
+                  'Noise.noise_enable',
+                  'Noise.voltage',
 
                   'EmptySequence.empty_sequence_duration',
                   'StateReadout.repeat_each_measurement',
@@ -79,8 +79,9 @@ class Ramsey(pulse_sequence):
         from subsequences.StatePreparation import StatePreparation
         from subsequences.RabiExcitation import RabiExcitation
         from subsequences.StateReadout import StateReadout
-        from subsequences.DynamicDecoupling import DynamicDecoupling
+        from subsequences.DynamicDecoupling_stark_SP import DynamicDecoupling_stark_SP
         from subsequences.EmptySequence import EmptySequence
+        print "beginning sequence"
         
         
         r = self.parameters.Ramsey   
@@ -90,6 +91,7 @@ class Ramsey(pulse_sequence):
         bfi = self.parameters.BfieldIncoh
         ac = self.parameters.ACStarkShift
         dd = self.parameters.DynamicDecoupling
+        sr = self.parameters.StateReadout
         initial_freq_729 = self.calc_freq_from_array(r.first_pulse_line, r.first_pulse_sideband)
         final_freq_729 = self.calc_freq_from_array(r.second_pulse_line, r.second_pulse_sideband)
         ac_stark_freq_729 = self.calc_freq_from_array(ac.line_selection) + ac.frequency729
@@ -102,8 +104,8 @@ class Ramsey(pulse_sequence):
         fad = U(6, 'us')
 
         if bfi.bfield_enable:
-          #start the awg. luckily the awg ignores pulses while it's running a sequence, so only the first
-          #one of these should matter.
+          # for an incoherent signal, this starts a long sequence that covers all n experiments.
+          # luckily the awg ignores pulses while it's running a sequence, so only the first matters
           dur = U(50, 'us')
           self.addTTL('awg_off',self.end,dur)
         
@@ -111,21 +113,12 @@ class Ramsey(pulse_sequence):
         self.addSequence(StatePreparation)     
         self.addSequence(EmptySequence)
         self.addDDS(ac.channel729, self.end, fad, ac_stark_freq_729, ampl_off)       
-
-        ###ttl for turning on b field during ramsey. assumes awg is in burst mode
-        if bf.bfield_enable or bf2.bfield_enable:
-          dur = U(50, 'us')
-          self.addTTL('awg_off',self.end,dur)
-          self.addSequence(EmptySequence,{'EmptySequence.empty_sequence_duration':U(1,'ms')})
-
-        if bfi.bfield_enable:
-          #start the awg.
-          self.addSequence(EmptySequence,{'EmptySequence.empty_sequence_duration':bfi.buffer_time})
         
-        ####for use with switching circuit to switch AWG to ground when not in use
-        #awg_wait_time = U(0,'ms')
-        #self.addTTL('awg_off',self.start+rot.start_hold+rot.frequency_ramp_time+rot.ramp_down_time+awg_wait_time/2,awg_wait_time+r.ramsey_time+r.first_pulse_duration+r.second_pulse_duration)
-        #self.addSequence(EmptySequence,{"EmptySequence.empty_sequence_duration":awg_wait_time})
+        if bf2.bfield_enable:
+          #for a coherent field it's the same every time.
+          dur = U(50,'us')
+          self.addTTL('awg_off',self.end,dur)
+          self.addSequence(EmptySequence,{"EmptySequence.empty_sequence_duration":bf2.on_before})
 
         self.addSequence(RabiExcitation, { "Excitation_729.frequency729": initial_freq_729,
                                            "Excitation_729.duration729": r.first_pulse_duration,
@@ -135,11 +128,22 @@ class Ramsey(pulse_sequence):
                                            "Excitation_729.rabi_change_DDS":True
                                           })
 
-        if not r.dynamic_decoupling_enable and ac.acstark_enable:
-          self.addDDS(ac.channel729, self.end, r.ramsey_time, ac_stark_freq_729, ac.amplitude729, U(0,'deg'))
+        if not r.dynamic_decoupling_enable:
+          now = self.end
+          if (bfi.bfield_enable or bf2.bfield_enable) and ac.acstark_enable:
+            #turn on the switch to let the Marconi through to the AOM. 
+            self.addTTL('awg_on',now,r.ramsey_time)
+            #turn the laser on.
+            self.addDDS(ac.channel729,now,r.ramsey_time,ac_stark_freq_729,ac.amplitude729)
+            #turn on the switch to let the AWG through to the Marconi
+            self.addTTL('awg_off',now,r.ramsey_time)
 
-        self.addSequence(DynamicDecoupling,  {"DynamicDecoupling.dd_duration" : r.ramsey_time})
+        # we need the free evolution time to be ramseytime/2 for each arm of the echo in this particular
+        # case, so we need to account for the pi time.
+
+        extra = r.dynamic_decoupling_enable * dd.dd_repetitions * dd.dd_pi_time['ms']
         
+        self.addSequence(DynamicDecoupling_stark_SP,  {"DynamicDecoupling.dd_duration" : r.ramsey_time + U(extra,'ms')})
         
         self.addSequence(RabiExcitation, { "Excitation_729.frequency729": final_freq_729,
                                            "Excitation_729.duration729": r.second_pulse_duration,
@@ -148,68 +152,42 @@ class Ramsey(pulse_sequence):
                                            "Excitation_729.channel729":r.channel_729,
                                            "Excitation_729.rabi_change_DDS":False
                                           })
-
-        if bfi.bfield_enable:
-          self.addSequence(EmptySequence,{'EmptySequence.empty_sequence_duration':bfi.buffer_time})
-
         self.addSequence(StateReadout)
         
     @classmethod
     def run_initial(cls,cxn, parameters_dict):
       pd = parameters_dict
-      rot = pd.Rotation
-      bf = pd.Bfield 
       bf2 = pd.Bfield2
       bfi = pd.BfieldIncoh
       sr = pd.StateReadout
       sp = pd.StatePreparation
-
-      ## add rotation if necessary
-      if rot.rotation_enable:
-        awg_rotation = cxn.keysight_33500b
-        
-        frequency_ramp_time = rot.frequency_ramp_time
-        start_hold = rot.start_hold
-        ramp_down_time = rot.ramp_down_time
-        start_phase = rot.start_phase
-        middle_hold = rot.middle_hold
-        end_hold = rot.end_hold
-        voltage_pp = rot.voltage_pp
-        drive_frequency = rot.drive_frequency
-        
-        awg_rotation.program_awf(start_phase['deg'],start_hold['ms'],frequency_ramp_time['ms'],middle_hold['ms'],ramp_down_time['ms'],end_hold['ms'],voltage_pp['V'],drive_frequency['kHz'],'free_rotation_sin_spin')
+      r = pd.Ramsey
+      n = pd.Noise
+      if n.noise_enable:
+        noise = True 
+        noiseAmp = n.voltage
+      else:
+        noise = False
+        noiseAmp = U(0,'V')
 
 
       ## add AC magnetic field if necessary 
-      
-      if bf.bfield_enable:
-        print 'setting single frequency b field'
-        awg_bfield = cxn.keysight_33600a
-        start_hold = bf.start_hold
-        on_time = bf.on_time
-        end_hold = bf.end_hold
-        voltage_pp = bf.voltage_pp
-        offset = bf.offset
-        phase = bf.phase
-        frequency = bf.frequency
-
-        awg_bfield.program_b_field(phase['deg'],frequency['kHz'],start_hold['ms'],on_time['us'],end_hold['ms'],voltage_pp['V'],offset['V'])
 
       if bf2.bfield_enable:
-        print 'setting multi-frequency b field'
+        print 'setting coherent b field'
         awg_bfield = cxn.keysight_33600a
-        start_hold = bf.start_hold
-        on_time = bf.on_time
-        end_hold = bf.end_hold
+        start_hold = U(0,'ms')
+        on_time = bf2.on_time
+        end_hold = U(0,'ms')
         phases = [bf2.phase1['deg'],bf2.phase2['deg']]
         center_freq = bf2.center_frequency
         freq_sep = bf2.frequency_separation
         voltage_pp = bf2.voltage_pp
 
-        awg_bfield.program_b_field_2freq(phases, center_freq['kHz'], freq_sep['kHz'], start_hold['ms'],on_time['us'],end_hold['ms'],voltage_pp['V'])
+        awg_bfield.program_b_field_2freq(phases, center_freq['kHz'], freq_sep['kHz'], start_hold['ms'],on_time['us'],end_hold['ms'],voltage_pp['V'],False)
 
       if bfi.bfield_enable:
-        print 'setting and beginning incoherent b field'
+        'setting incoherent b field'
         awg_bfield = cxn.keysight_33600a
 
         #user set parameters
@@ -217,37 +195,58 @@ class Ramsey(pulse_sequence):
         freq_sep = bfi.frequency_separation
         std = bfi.voltage_std
         n_points = bfi.n_points
-        prep_time = bfi.prep_time # could take from parameters, but that's hard as it's written now.
-
-        #parameters derived from the experiment
         n_exp = sr.repeat_each_measurement
-        on_time = pd.Ramsey.ramsey_time + bfi.buffer_time*2
-        tot_time = m.ceil((prep_time['ms']+on_time['ms']+sr.state_readout_duration['ms'])*(60.0/1000.0))/(60.0/1000.0) ## This assumes that we are using line triggering
-        print 'total time is ', tot_time 
-        readout_time = U(tot_time,'ms') - (prep_time + on_time)
+        tot_time = m.ceil(bfi.tot_time['ms']*(60.0/1000.0))/(60.0/1000.0) # could take from parameters, but that's hard as it's written now.
 
-        awg_bfield.program_b_field_incoh(center_freq['kHz'],freq_sep['kHz'],std['V'],prep_time['ms'],on_time['ms'],readout_time['ms'],n_exp,n_points)
+        print 'total time is ', tot_time 
+
+        awg_bfield.program_b_field_incoh(center_freq['kHz'],freq_sep['kHz'],std['V'],tot_time,n_exp,n_points,False,noise,noiseAmp['V'])
+
 
     @classmethod
     def run_in_loop(cls,cxn, parameters_dict, data, x):
       pass
+      # pd = parameters_dict
+      # bfi = pd.BfieldIncoh
+      # bf2 = pd.Bfield2
+      # sr = pd.StateReadout
+      # sp = pd.StatePreparation
+      # r = pd.Ramsey
+
+      # # if bf2.bfield_enable:
+      # #   print 'setting coherent b field'
+      # #   awg_bfield = cxn.keysight_33600a
+      # #   start_hold = U(0,'ms')
+      # #   on_time = bf2.on_time
+      # #   end_hold = U(0,'ms')
+      # #   phases = [bf2.phase1['deg'],bf2.phase2['deg']]
+      # #   center_freq = bf2.center_frequency
+      # #   freq_sep = bf2.frequency_separation
+      # #   voltage_pp = bf2.voltage_pp
+
+      # #   awg_bfield.program_b_field_2freq(phases, center_freq['kHz'], freq_sep['kHz'], start_hold['ms'],on_time['us'],end_hold['ms'],voltage_pp['V'],True)
+
+      # if bfi.bfield_enable:
+      #   'setting incoherent b field'
+      #   awg_bfield = cxn.keysight_33600a
+
+      #   #user set parameters
+      #   center_freq = bfi.center_frequency
+      #   freq_sep = bfi.frequency_separation
+      #   std = bfi.voltage_std
+      #   n_points = bfi.n_points
+      #   n_exp = bfi.n_exp
+      #   tot_time = m.ceil(bfi.tot_time['ms']*(60.0/1000.0))/(60.0/1000.0) # could take from parameters, but that's hard as it's written now.
+
+      #   print 'total time is ', tot_time 
+
+      #   awg_bfield.program_b_field_incoh(center_freq['kHz'],freq_sep['kHz'],std['V'],tot_time,n_exp,n_points,True)
 
     @classmethod
     def run_finally(cls,cxn, parameters_dict, data, x):
-      ## if rotating set back to pinning parameters
-      rot = parameters_dict.Rotation
-      rcw = parameters_dict.RotationCW
-      bf = parameters_dict.Bfield 
+      ## if bfield on make sure it's off.
       bf2 = parameters_dict.Bfield2
       bfi = parameters_dict.BfieldIncoh
-      if rot.rotation_enable:
-        old_freq = rcw.drive_frequency['kHz']
-        old_phase = rcw.start_phase['deg']
-        old_amp = rcw.voltage_pp['V']
-        cxn.keysight_33500b.update_awg(old_freq*1e3,old_amp,old_phase)
-      if bf.bfield_enable:
-        awg_bfield = cxn.keysight_33600a
-        awg_bfield.set_state(1,0) 
       if bf2.bfield_enable:
         awg_bfield = cxn.keysight_33600a
         awg_bfield.set_state(1,0)  

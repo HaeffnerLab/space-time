@@ -16,10 +16,11 @@ class MotionAnalysis(pulse_sequence):
         freq_397 = dc.doppler_cooling_frequency_397
         freq_866 = dc.doppler_cooling_frequency_866
         amp_866 = dc.doppler_cooling_amplitude_866
+        repump_extra = dc.doppler_cooling_repump_additional
         
-        self.addTTL('awg_on', self.start, ma.pulse_width_397 + WithUnit(2, 'us')) # 2 us for safe TTL switch on  
+        self.addTTL('397mod', self.start, ma.pulse_width_397 + WithUnit(2, 'us')) # 2 us for safe TTL switch on  
 
         self.addDDS('397Extra', self.start + WithUnit(1, 'us'), ma.pulse_width_397, freq_397, ma.amplitude_397)
-        self.addDDS('866DP', self.start + WithUnit(1,'us'), ma.pulse_width_397, freq_866, amp_866 )
+        self.addDDS('866DP', self.start + WithUnit(1,'us'), ma.pulse_width_397+repump_extra, freq_866, amp_866 )
 
-        self.end = self.start + ma.pulse_width_397 + WithUnit(2, 'us')
+        self.end = self.start + WithUnit(1,'us') + ma.pulse_width_397 + repump_extra

@@ -6,8 +6,10 @@ import numpy as np
 class MotionAnalysisSpectrum(pulse_sequence):
     
                           
-    scannable_params = {   'Motion_Analysis.detuning': [(0,200.0, 50.0, 'kHz'),'spectrum'],
-                           'Motion_Analysis.amplitude_397': [(-25.0,-13.0, 1.0, 'dBm'),'current']}
+    scannable_params = {   'Motion_Analysis.detuning': [(-5.0, 5.0, 0.5, 'kHz'),'spectrum'],
+                           'Motion_Analysis.amplitude_397': [(-25.0,-13.0, 1.0, 'dBm'),'other'],
+                           'Motion_Analysis.duration729': [(0.0, 100.0, 10.0, 'us'),'rabi'],
+                           'Motion_Analysis.pulse_width_397': [(0.0, 1000.0, 10.0, 'us'),'other'] }
  
 
     show_params= [
@@ -17,7 +19,6 @@ class MotionAnalysisSpectrum(pulse_sequence):
                   'Motion_Analysis.diagnosis_line',
                   'Motion_Analysis.detuning',
                   'Motion_Analysis.channel729',
-
                   'Motion_Analysis.duration729',
                   'Motion_Analysis.amplitude729'
 
@@ -81,13 +82,15 @@ class MotionAnalysisSpectrum(pulse_sequence):
         ## calculate the final diagnosis params
         ma = self.parameters.Motion_Analysis
         freq_729 = self.calc_freq_from_array(ma.diagnosis_line, ma.diagnosis_sideband)
+        freq_729_op = self.calc_freq_from_array(self.parameters.OpticalPumping.line_selection) 
         print freq_729
 
         self.addSequence(StatePreparation)
         # 397 excitation 
         self.addSequence(MotionAnalysis)
         # small optical pumping after the motion excitation
-        self.addSequence(OpticalPumping, {'OpticalPumpingContinuous.optical_pumping_continuous_duration':duration_op })
+        self.addSequence(OpticalPumping, {'OpticalPumpingContinuous.optical_pumping_continuous_duration':duration_op,
+                                          'OpticalPumping.optical_pumping_frequency_729':freq_729_op})
 
         # 729 excitation to transfer the motional DOF to the electronic DOF
         # running the excitation from the Rabi flopping 

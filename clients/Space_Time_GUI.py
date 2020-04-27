@@ -7,7 +7,6 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         self.clipboard = clipboard
         self.reactor = reactor
         self.connect_labrad()
-       # self.startgrapher()
 
     @inlineCallbacks
     def connect_labrad(self):
@@ -24,20 +23,16 @@ class SPACETIME_GUI(QtGui.QMainWindow):
 
         laser_room = self.makeLaserRoomWidget(reactor, cxn)
         laser_control = self.makeControlWidget(reactor, cxn)
-        script_scanner = self.makeScriptControlWidget(reactor, cxn)
         script_scannerv2 = self.makeScriptControlWidgetv2(reactor, cxn)
         histogram = self.make_histogram_widget(reactor, cxn)
-        drift_tracker = self.makeDriftTrackerWidget(reactor, cxn)
         drift_tracker_global = self.makeDriftTrackerGlobalWidget(reactor, cxn)
         config_editor = self.make_config_editor_widget(reactor, cxn)
 
         self.tabWidget = QtGui.QTabWidget()
         self.tabWidget.addTab(laser_room,'&Laser Room')
         self.tabWidget.addTab(laser_control,'&Control')
-        # self.tabWidget.addTab(script_scanner, '&Script Scanner')
         self.tabWidget.addTab(script_scannerv2, '&Script Scanner_v2')
         self.tabWidget.addTab(histogram, '&Readout Histogram')
-        # self.tabWidget.addTab(drift_tracker, '&Drift Tracker')
         self.tabWidget.addTab(drift_tracker_global, '&Drift Tracker Global')
         self.tabWidget.addTab(config_editor, 'Config &Editor')
 
@@ -46,7 +41,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         layout.addWidget(self.tabWidget)
         centralWidget.setLayout(layout)
         self.setCentralWidget(centralWidget)
-        self.setWindowTitle('Spacetime GUI')
+        #self.setWindowTitle('Spacetime GUI')
 
     def makeScriptControlWidget(self, reactor, cxn):
         widget = QtGui.QWidget()
@@ -68,14 +63,14 @@ class SPACETIME_GUI(QtGui.QMainWindow):
     def makeLaserRoomWidget(self, reactor, cxn):
         widget = QtGui.QWidget()
  
-        #from common.clients.CAVITY_CONTROL import cavityWidget
+
         from common.clients.LASERDAC_CONTROL import DAC_Control as laserdac_control_widget
         from common.clients.multiplexer.MULTIPLEXER_CONTROL import multiplexerWidget
-        from common.clients.InjectionLock_GUI_new import InjectionLock_Control
+        #from common.clients.InjectionLock_GUI import InjectionLock_Control
         gridLayout = QtGui.QGridLayout()
 
         gridLayout.addWidget(laserdac_control_widget(reactor),             0,0)
-        gridLayout.addWidget(InjectionLock_Control(reactor),    1,0)
+        #gridLayout.addWidget(InjectionLock_Control(reactor),    1,0)
         gridLayout.addWidget(multiplexerWidget(reactor),        0,1)
 
         widget.setLayout(gridLayout)
@@ -128,10 +123,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         gridLayout.addWidget(actions_widget(reactor, cxn),      3,3,2,1)
         gridLayout.addWidget(rotation_widget(reactor, cxn),     4,3,2,1)
         gridLayout.addWidget(DAC_Control(reactor),              0,0,7,3)
-        print "1"
         gridLayout.addWidget(linetriggerWidget(reactor),        2,3,1,1)
-        print "2"
-
 
         widget.setLayout(gridLayout)
         return widget
@@ -139,10 +131,6 @@ class SPACETIME_GUI(QtGui.QMainWindow):
     def closeEvent(self, x):
         self.reactor.stop()
         
-    def startgrapher(self):
-       # import common.clients.pygrapherlive.grapher as grapher
-       import common.devel.RealSimpleGrapher.rsg as grapher
-       # grapher.main()
 
 if __name__=="__main__":
     a = QtGui.QApplication( [] )
