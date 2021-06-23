@@ -13,8 +13,6 @@ class Ramsey_stark_SP(pulse_sequence):
 
     scannable_params = {
                         
-        'BfieldIncoh.frequency_separation': [(0.0, 1.0, 0.1,'kHz'), 'ramsey_contrast'],
-        #'Bfield2.frequency_separation': [(0.0, 1.0, 0.1,'kHz'), 'ramsey_contrast'],
         'Ramsey.second_pulse_phase': [(0, 360., 30, 'deg') ,'ramsey_phase_scan'],
         'Ramsey.ramsey_time': [(0, 1.0, 0.05, 'ms') ,'ramsey'],
 
@@ -25,6 +23,7 @@ class Ramsey_stark_SP(pulse_sequence):
                   'Ramsey.amplitude_729',
                   'Ramsey.channel_729',
                   'Ramsey.dynamic_decoupling_enable',
+                  'Ramsey.phase_offset',
 
                   'Ramsey.first_pulse_line',
                   'Ramsey.first_pulse_sideband',
@@ -65,9 +64,6 @@ class Ramsey_stark_SP(pulse_sequence):
                   'ACStarkShift.frequency729',
                   'ACStarkShift.line_selection',
                   'ACStarkShift.acstark_enable',
-
-                  'Noise.noise_enable',
-                  'Noise.voltage',
 
                   'EmptySequence.empty_sequence_duration',
                   'StateReadout.repeat_each_measurement',
@@ -144,11 +140,12 @@ class Ramsey_stark_SP(pulse_sequence):
         extra = r.dynamic_decoupling_enable * dd.dd_repetitions * dd.dd_pi_time['ms']
         
         self.addSequence(DynamicDecoupling_stark_SP,  {"DynamicDecoupling.dd_duration" : r.ramsey_time + U(extra,'ms')})
+
         
         self.addSequence(RabiExcitation, { "Excitation_729.frequency729": final_freq_729,
                                            "Excitation_729.duration729": r.second_pulse_duration,
                                            "Excitation_729.amplitude729": r.amplitude_729,
-                                           "Excitation_729.phase729": r.second_pulse_phase,
+                                           "Excitation_729.phase729": r.second_pulse_phase + r.phase_offset,
                                            "Excitation_729.channel729":r.channel_729,
                                            "Excitation_729.rabi_change_DDS":False
                                           })
@@ -206,41 +203,6 @@ class Ramsey_stark_SP(pulse_sequence):
     @classmethod
     def run_in_loop(cls,cxn, parameters_dict, data, x):
       pass
-      # pd = parameters_dict
-      # bfi = pd.BfieldIncoh
-      # bf2 = pd.Bfield2
-      # sr = pd.StateReadout
-      # sp = pd.StatePreparation
-      # r = pd.Ramsey
-
-      # # if bf2.bfield_enable:
-      # #   print 'setting coherent b field'
-      # #   awg_bfield = cxn.keysight_33600a
-      # #   start_hold = U(0,'ms')
-      # #   on_time = bf2.on_time
-      # #   end_hold = U(0,'ms')
-      # #   phases = [bf2.phase1['deg'],bf2.phase2['deg']]
-      # #   center_freq = bf2.center_frequency
-      # #   freq_sep = bf2.frequency_separation
-      # #   voltage_pp = bf2.voltage_pp
-
-      # #   awg_bfield.program_b_field_2freq(phases, center_freq['kHz'], freq_sep['kHz'], start_hold['ms'],on_time['us'],end_hold['ms'],voltage_pp['V'],True)
-
-      # if bfi.bfield_enable:
-      #   'setting incoherent b field'
-      #   awg_bfield = cxn.keysight_33600a
-
-      #   #user set parameters
-      #   center_freq = bfi.center_frequency
-      #   freq_sep = bfi.frequency_separation
-      #   std = bfi.voltage_std
-      #   n_points = bfi.n_points
-      #   n_exp = bfi.n_exp
-      #   tot_time = m.ceil(bfi.tot_time['ms']*(60.0/1000.0))/(60.0/1000.0) # could take from parameters, but that's hard as it's written now.
-
-      #   print 'total time is ', tot_time 
-
-      #   awg_bfield.program_b_field_incoh(center_freq['kHz'],freq_sep['kHz'],std['V'],tot_time,n_exp,n_points,True)
 
     @classmethod
     def run_finally(cls,cxn, parameters_dict, data, x):

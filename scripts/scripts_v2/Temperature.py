@@ -16,6 +16,8 @@ class rsb(Excitation729):
 		#print data_x
 		#print data
 		fit_params = cls.gaussian_fit(data_x, data, return_all_params = True)
+		if fit_params == None:
+			fit_params = (0,0)
 		print "red sideband"
 		print "############## fit params: ", fit_params
 		print "Amplitude: ", fit_params[1]
@@ -33,6 +35,8 @@ class bsb(Excitation729):
 		#print data_x
 		#print data
 		fit_params = cls.gaussian_fit(data_x, data, return_all_params = True)
+		if fit_params == None:
+			fit_params = (0,0)
 		print "blue sideband"
 		print "############## fit params: ", fit_params
 		print "Amplitude: ", fit_params[1]

@@ -1,10 +1,10 @@
 '''
 ### BEGIN NODE INFO
 [info]
-name = KEYSIGHT_33500B
+name = KEYSIGHT_33500B_Old
 version = 2.0
 description =
-instancename = KEYSIGHT_33500B
+instancename = KEYSIGHT_33500B_Old
 
 [startup]
 cmdline = %PYTHON% %FILE%
@@ -16,7 +16,7 @@ timeout = 20
 ### END NODE INFO
 '''
 
-#instancename = KEYSIGHT_33500B
+#instancename = KEYSIGHT_33500B_Old
 
 from labrad.server import LabradServer, setting, inlineCallbacks
 from twisted.internet.defer import DeferredLock, Deferred
@@ -29,12 +29,12 @@ import struct
 from warnings import warn
 import time
 
-#SERVERNAME = 'KEYSIGHT_33500B'
+#SERVERNAME = 'KEYSIGHT_33500B_Old'
 #SIGNALID = 190234 ## this needs to change
 
 
 class KEYSIGHT_33500B(LabradServer):
-    name = 'KEYSIGHT_33500B'
+    name = 'KEYSIGHT_33500B_Old'
     instr = None
     
     def initServer(self):

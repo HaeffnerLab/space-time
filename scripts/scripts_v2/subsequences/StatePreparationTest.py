@@ -22,6 +22,7 @@ class StatePreparation(pulse_sequence):
         from DopplerCooling import DopplerCooling
         from OpticalPumping import OpticalPumping
         from SidebandCooling import SidebandCooling
+        from EmptySequence import EmptySequence
         from ScrambleGroundState import ScrambleGroundState
 
         p = self.parameters
@@ -33,7 +34,7 @@ class StatePreparation(pulse_sequence):
         self.addSequence(DopplerCooling) 
         
         if sp.optical_pumping_enable:
-            freq729 = self.calc_freq_from_array(p.OpticalPumping.line_selection)
+            freq729 = self.calc_freq_from_array_universal(p.OpticalPumping.line_selection)
             self.addSequence(OpticalPumping,{'OpticalPumping.optical_pumping_frequency_729':freq729})
         if sp.eit_cooling_enable:
           print "EIT cooling not yet implemented"

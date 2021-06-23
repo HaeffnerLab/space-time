@@ -25,7 +25,7 @@ class CalibLine1(pulse_sequence):
         self.addSequence(StatePreparation,{'StatePreparation.eit_cooling_enable': False,
                                             'StatePreparation.sideband_cooling_enable': False,
                                             'StatePreparation.scramble_ground_state_enable': False,
-                                            'Heating.background_heating_time':U(0,'ms')})
+                                            })
         self.addSequence(RabiExcitation,{'Excitation_729.frequency729': freq729,
                                          'Excitation_729.amplitude729': amp729,
                                          'Excitation_729.duration729': dur729,

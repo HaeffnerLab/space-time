@@ -13,7 +13,8 @@ class Excitation729(pulse_sequence):
         'Excitation_729.duration729':  [(0., 200., 10., 'us'), 'rabi'],
         'Excitation_729.frequency729': [(-50., 50., 5., 'kHz'), 'spectrum',True],
         'SidebandCooling.stark_shift': [(-20., 20., 2., 'kHz'), 'other'],
-        'EmptySequence.empty_sequence_duration_readout': [(0.,1000.,100.,'us'),'rabi']
+        'EmptySequence.empty_sequence_duration_readout': [(0.,1000.,100.,'us'),'rabi'],
+        'OpticalPumping.optical_pumping_amplitude_854':  [(-30., -10., .5, 'dBm'), 'other']
               }
 
     show_params= [

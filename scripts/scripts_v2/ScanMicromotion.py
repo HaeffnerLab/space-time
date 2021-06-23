@@ -3,6 +3,7 @@ from labrad.units import WithUnit as U
 from treedict import TreeDict
 import time
 
+
 class point(pulse_sequence):
     
     
@@ -11,9 +12,11 @@ class point(pulse_sequence):
               }
 
     show_params= ['MicromotionCalibration.multipole_to_calibrate',
-                    'MicromotionCalibration.carrier_time',
-                    'MicromotionCalibration.sideband_time',
-                    'Spectrum.manual_amplitude_729'
+                  'MicromotionCalibration.carrier_time',
+                  'MicromotionCalibration.sideband_time',
+                  'MicromotionCalibration.amplitude729',
+                  'MicromotionCalibration.line_selection',
+                  'MicromotionCalibration.channel729',
                         ] 
                   
    
@@ -24,23 +27,20 @@ class point(pulse_sequence):
         from subsequences.StateReadout import StateReadout
         from subsequences.TurnOffAll import TurnOffAll
            
-        ## calculate the scan params
-        spc = self.parameters.Spectrum
-        mc = self.parameters.MicromotionCalibration   
-        rabi = self.parameters.RabiFlopping
-
-        carrier_freq_729=self.calc_freq_from_array(spc.line_selection,spc.sideband_selection)
-        amp=rabi.rabi_amplitude_729
-
                 
         # building the sequence
         # needs a 10 micro sec for some reason
         self.end = U(10., 'us')
 
-        self.addSequence(TurnOffAll)           
-        self.addSequence(StatePreparation)      
-        self.addSequence(RabiExcitation,{'Excitation_729.rabi_excitation_frequency': carrier_freq_729,
-                                         'Excitation_729.rabi_excitation_amplitude': amp})
+        mc = self.parameters.MicromotionCalibration   
+        e729 = self.parameters.Excitation_729
+
+        #self.addSequence(TurnOffAll)           
+        self.addSequence(StatePreparation)
+        self.addSequence(RabiExcitation,{'Excitation_729.frequency729': self.calc_freq_from_array(mc.line_selection, e729.sideband_selection),
+                                         'Excitation_729.amplitude729': mc.amplitude729,
+                                         'Excitation_729.channel729': mc.channel729
+                                         })
         self.addSequence(StateReadout)
  
 
@@ -60,12 +60,12 @@ class micromotion_sideband_2(point):
 class Scan3points(pulse_sequence):
 
 
-    sequence = [(carrier, {'Spectrum.sideband_selection': [0,0,0,0],
-                        'Excitation_729.rabi_excitation_duration':  'MicromotionCalibration.carrier_time'}), 
-                (micromotion_sideband_1, {'Spectrum.sideband_selection': [0,0,0,1],
-                        'Excitation_729.rabi_excitation_duration':  'MicromotionCalibration.sideband_time' }),
-                (micromotion_sideband_2, {'Spectrum.sideband_selection': [0,0,0,2],
-                        'Excitation_729.rabi_excitation_duration':  'MicromotionCalibration.sideband_time' })
+    sequence = [(carrier,                {'Excitation_729.sideband_selection': [0,0,0,0,0],
+                                          'Excitation_729.duration729': 'MicromotionCalibration.carrier_time'}), 
+                (micromotion_sideband_1, {'Excitation_729.sideband_selection': [0,0,0,1,0],
+                                          'Excitation_729.duration729': 'MicromotionCalibration.sideband_time'}),
+                (micromotion_sideband_2, {'Excitation_729.sideband_selection': [0,0,0,2,0],
+                                          'Excitation_729.duration729': 'MicromotionCalibration.sideband_time'})
                 ]
 
 
@@ -83,6 +83,8 @@ class Scan3points(pulse_sequence):
         multipoles_new = multipoles_current
         multipole_to_calibrate = parameters_dict.MicromotionCalibration.multipole_to_calibrate
         scan_value = parameters_dict.MicromotionCalibration.multipole_value
+        print "scan value = "
+        print scan_value
 
         for i in range(len(multipoles_current)):
             if multipoles_current[i][0] == multipole_to_calibrate:
@@ -110,7 +112,7 @@ class Scan3points(pulse_sequence):
 class ScanMicromotion(pulse_sequence):
 
     scannable_params = {
-        'MicromotionCalibration.multipole_value' : [(-.02, .02, .002, 'Vmm'),'micromotion'],
+        'MicromotionCalibration.multipole_value' : [(-.02, .02, .002, 'Vmm'),'scan_Efields'],
               }
 
     sequence = Scan3points
