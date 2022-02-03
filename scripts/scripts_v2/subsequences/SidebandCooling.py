@@ -54,7 +54,7 @@ class SidebandCooling(pulse_sequence):
         sbc_op_duration = sc.sideband_cooling_optical_pumping_duration
         
         if sc.sideband_cooling_type == 'continuous':
-            duration = scc.sideband_cooling_continuous_duration
+            duration = sc.sideband_cooling_continuous_duration
 
             if scseq.interleave:
 
@@ -88,7 +88,7 @@ class SidebandCooling(pulse_sequence):
                         #sideband cooling sequence
                         self.addSequence(OpticalPumping,
                             {"OpticalPumping.optical_pumping_type":sc.sideband_cooling_type,
-                            "OpticalPumping.optical_pumping_continuous_duration":duration,
+                            "OpticalPumpingContinuous.optical_pumping_continuous_duration":duration,
                             "OpticalPumping.optical_pumping_frequency_854":freq854,
                             "OpticalPumping.optical_pumping_amplitude_854":amps854[j],
                             "OpticalPumping.optical_pumping_frequency_729":freq729,
@@ -102,7 +102,7 @@ class SidebandCooling(pulse_sequence):
 
 
         elif sc.sideband_cooling_type == 'pulsed':
-            duration = scc.sideband_cooling_pulsed_duration
+            duration = scp.sideband_cooling_pulsed_duration_729
 
             if scseq.interleave:
 

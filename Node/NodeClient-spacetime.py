@@ -16,14 +16,14 @@ except:
 nodeDict = {
 			#'node spacetime-exp-control':
 			'node space-time-exp-comp':
-				['NormalPMTFlow',
-				'Data Vault', 
+				['Pulser',
 				'DAC Server', 
-				'Pulser', 
+				'Data Vault', 
+				'KEYSIGHT_33500B',
 				'ParameterVault',
-				'SD Tracker',
+				'SD Tracker Global',
 				'ScriptScanner',
-				'KEYSIGHT_33500B'
+				'NormalPMTFlow',
 				],
 			'node space-time-imaging':
 				['GPIB Device Manager',
