@@ -31,7 +31,10 @@ class OpticalPumping(pulse_sequence):
         if op.optical_pumping_type == 'continuous':
             duration_854 = opc.optical_pumping_continuous_duration + opc.optical_pumping_continuous_repump_additional
             duration_866 = opc.optical_pumping_continuous_duration + 2 * opc.optical_pumping_continuous_repump_additional
-            freq866 = op.optical_pumping_frequency_866
+            if op.match_866_frequency_to_doppler:
+                freq866 = self.parameters.DopplerCooling.doppler_cooling_frequency_866
+            else:
+                freq866 = op.optical_pumping_frequency_866
             ampl866 = op.optical_pumping_amplitude_866
             freq854 = op.optical_pumping_frequency_854
             ampl854 = op.optical_pumping_amplitude_854
@@ -47,7 +50,10 @@ class OpticalPumping(pulse_sequence):
             cycles_start = [self.start + cycle_duration * i for i in range(cycles)]
             self.end = self.start + cycles * cycle_duration
             ampl729 = op.optical_pumping_amplitude_729
-            freq866 = op.optical_pumping_frequency_866
+            if op.match_866_frequency_to_doppler:
+                freq866 = self.parameters.DopplerCooling.doppler_cooling_frequency_866
+            else:
+                freq866 = op.optical_pumping_frequency_866
             ampl866 = op.optical_pumping_amplitude_866
             freq854 = op.optical_pumping_frequency_854
             ampl854 = op.optical_pumping_amplitude_854
@@ -62,7 +68,10 @@ class OpticalPumping(pulse_sequence):
             duration_866 = ops.optical_pumping_397sigma_duration + ops.optical_pumping_397sigma_additional
             freq397 = ops.optical_pumping_397sigma_frequency_397
             amp397 = ops.optical_pumping_397sigma_amplitude_397
-            freq866 = ops.optical_pumping_397sigma_frequency_866
+            if op.match_866_frequency_to_doppler:
+                freq866 = self.parameters.DopplerCooling.doppler_cooling_frequency_866
+            else:
+                freq866 = ops.optical_pumping_397sigma_frequency_866
             amp866 = ops.optical_pumping_397sigma_amplitude_866
             self.end = self.start + duration_866
             self.addDDS(ops.channel_397_sigma, self.start, ops.optical_pumping_397sigma_duration, freq397, amp397)

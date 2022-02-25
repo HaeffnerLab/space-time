@@ -14,7 +14,7 @@ class CalibLine1(pulse_sequence):
         from subsequences.StateReadout import StateReadout
 
         p = self.parameters
-        line1 = p.DriftTracker.line_selection_1
+        line1 = p.CalibrateLines.line_selection_1
 
         freq729 = self.calc_freq(line1)
         freq729 = freq729 + p.Excitation729.frequency729
@@ -25,7 +25,7 @@ class CalibLine1(pulse_sequence):
         self.addSequence(StatePreparation,{'StatePreparation.eit_cooling_enable': False,
                                             'StatePreparation.sideband_cooling_enable': False,
                                             'StatePreparation.scramble_ground_state_enable': False,
-                                            })
+                                            'DopplerCooling.doppler_cooling_duration': p.CalibrateLines.calibration_doppler_duration})
         self.addSequence(RabiExcitation,{'Excitation_729.frequency729': freq729,
                                          'Excitation_729.amplitude729': amp729,
                                          'Excitation_729.duration729': dur729,
@@ -46,7 +46,7 @@ class CalibLine1(pulse_sequence):
                                'S+1/2D+5/2':'c8',
                                'S-1/2D+3/2':'c9',
                                }
-        line = parameters_dict.DriftTracker.line_selection_1
+        line = parameters_dict.CalibrateLines.line_selection_1
         shift = parameters_dict.Carriers[carrier_translation[line]]
 
         pv = cxn.parametervault
@@ -82,7 +82,7 @@ class CalibLine1(pulse_sequence):
 
 class CalibLine2(pulse_sequence):
 
-    scannable_params = {'Excitation729.frequency729':[(-10, 10, 1, 'kHz'),'car2',True]}
+    scannable_params = {'Excitation729.frequency729':[(-30, 30, 1, 'kHz'),'car2',True]}
 
     def sequence(self):
         from subsequences.StatePreparation import StatePreparation
@@ -90,7 +90,7 @@ class CalibLine2(pulse_sequence):
         from subsequences.StateReadout import StateReadout
 
         p = self.parameters
-        line2 = p.DriftTracker.line_selection_2
+        line2 = p.CalibrateLines.line_selection_2
 
         freq729 = self.calc_freq(line2)
         freq729 = freq729 + p.Excitation729.frequency729
@@ -101,7 +101,7 @@ class CalibLine2(pulse_sequence):
         self.addSequence(StatePreparation,{'StatePreparation.eit_cooling_enable': False,
                                             'StatePreparation.sideband_cooling_enable': False,
                                             'StatePreparation.scramble_ground_state_enable': False,
-                                            'Heating.background_heating_time':U(0,'ms')})
+                                            'DopplerCooling.doppler_cooling_duration': p.CalibrateLines.calibration_doppler_duration})
         self.addSequence(RabiExcitation,{'Excitation_729.frequency729': freq729,
                                          'Excitation_729.amplitude729': amp729,
                                          'Excitation_729.duration729': dur729,
@@ -122,7 +122,7 @@ class CalibLine2(pulse_sequence):
                                'S+1/2D+5/2':'c8',
                                'S-1/2D+3/2':'c9',
                                }
-        line = parameters_dict.DriftTracker.line_selection_2
+        line = parameters_dict.CalibrateLines.line_selection_2
         shift = parameters_dict.Carriers[carrier_translation[line]]
 
         pv = cxn.parametervault
@@ -158,8 +158,8 @@ class CalibLine2(pulse_sequence):
           
         carr_2 = peak_fit
         
-        line_1 = parameters_dict.DriftTracker.line_selection_1
-        line_2 = parameters_dict.DriftTracker.line_selection_2
+        line_1 = parameters_dict.CalibrateLines.line_selection_1
+        line_2 = parameters_dict.CalibrateLines.line_selection_2
 
         submission = [(line_1, carr_1), (line_2, carr_2)]
 
@@ -182,10 +182,11 @@ class CalibAllLines(pulse_sequence):
                     
     sequence = [CalibLine1, CalibLine2] 
 
-    show_params= ['DriftTracker.line_selection_1',
-                'DriftTracker.line_selection_2',
+    show_params= ['CalibrateLines.line_selection_1',
+                'CalibrateLines.line_selection_2',
                 'CalibrateLines.amplitude729_line1',
                 'CalibrateLines.amplitude729_line2',
                 'CalibrateLines.channel729',
-                'CalibrateLines.duration729'
+                'CalibrateLines.duration729',
+                'CalibrateLines.calibration_doppler_duration'
                   ]

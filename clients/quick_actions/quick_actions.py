@@ -2,7 +2,7 @@ from PyQt4 import QtGui, uic
 import os
 #from common.clients.connection import connection
 from twisted.internet.defer import inlineCallbacks
-#from labrad.units import WithUnit
+from labrad.units import WithUnit
 import time
 
 
@@ -126,7 +126,6 @@ class actions_widget(QtGui.QWidget):
 
     @inlineCallbacks
     def eject_ion(self):
-        ss = yield self.cxn.get_server('ScriptScanner')
         linear_397 = '397Extra'
         #linear_397 = yield pv.get_parameter(('StatePreparation','channel_397_linear'))
         pulser = yield self.cxn.get_server('Pulser')

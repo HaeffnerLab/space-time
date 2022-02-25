@@ -13,8 +13,10 @@ class Excitation729(pulse_sequence):
         'Excitation_729.duration729':  [(0., 200., 2., 'us'), 'rabi'],
         'Excitation_729.frequency729': [(-50., 50., 5., 'kHz'), 'spectrum',True],
         #'SidebandCooling.stark_shift': [(-20., 20., 2., 'kHz'), 'other'],
-        #'EmptySequence.empty_sequence_duration_readout': [(0.,1000.,100.,'us'),'rabi'],
-        'OpticalPumping.optical_pumping_amplitude_854':  [(-30., -10., .5, 'dBm'), 'other']
+        #'EmptySequence.empty_sequence_readout_duration': [(0.,1000.,100.,'us'),'rabi'],
+        'OpticalPumping.optical_pumping_amplitude_854':  [(-30., -10., .5, 'dBm'), 'other'],
+        'SidebandCoolingContinuous.sideband_cooling_continuous_duration':  [(0., 3., 0.5, 'ms'), 'other'],
+        'SidebandCoolingContTwoTone.sideband_cooling_cont_twotone_duration':  [(0., 30., 1., 'ms'), 'other']
               }
 
     show_params= [
@@ -35,7 +37,14 @@ class Excitation729(pulse_sequence):
                   'Rotation.voltage_pp',
                   'EmptySequence.empty_sequence_duration',
                   'SidebandCoolingContinuous.sideband_cooling_continuous_cycles',
-                  'SidebandCoolingContinuous.sideband_cooling_continuous_duration'
+                  'SidebandCoolingContinuous.sideband_cooling_continuous_duration',
+                  'SidebandCoolingContTwoTone.sideband_cooling_cont_twotone_cycles',
+                  'SidebandCoolingContTwoTone.sideband_cooling_cont_twotone_duration',
+                  'SidebandCoolingContTwoTone.channel_729_secondary',
+                  'SidebandCoolingContTwoTone.stage2_line',
+                  'SidebandCoolingContTwoTone.stage3_line',
+                  'SidebandCoolingContTwoTone.stage4_line',
+                  'SidebandCoolingContTwoTone.stage5_line',
                   ]
 
 
@@ -65,7 +74,7 @@ class Excitation729(pulse_sequence):
       self.addSequence(EmptySequence)
       self.addSequence(RabiExcitation,{  'Excitation_729.frequency729': freq_729,
                                          'Excitation_729.rabi_change_DDS': True})
-      self.addSequence(EmptySequence,{'EmptySequence.empty_sequence_duration':es.empty_sequence_duration_readout})
+      self.addSequence(EmptySequence,{'EmptySequence.empty_sequence_duration':es.empty_sequence_readout_duration})
       self.addSequence(StateReadout)  
         
     @classmethod

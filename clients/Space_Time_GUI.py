@@ -123,7 +123,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         gridLayout.addWidget(actions_widget(reactor, cxn),      3,3,2,1)
         gridLayout.addWidget(rotation_widget(reactor, cxn),     4,3,2,1)
         gridLayout.addWidget(DAC_Control(reactor),              0,0,7,3)
-        gridLayout.addWidget(linetriggerWidget(reactor),        2,3,1,1)
+        #gridLayout.addWidget(linetriggerWidget(reactor),        2,3,1,1)
 
         widget.setLayout(gridLayout)
         return widget
