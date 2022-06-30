@@ -82,7 +82,7 @@ class CalibLine1(pulse_sequence):
 
 class CalibLine2(pulse_sequence):
 
-    scannable_params = {'Excitation729.frequency729':[(-30, 30, 1, 'kHz'),'car2',True]}
+    scannable_params = {'Excitation729.frequency729':[(-30, 30, 3, 'kHz'),'car2',True]}
 
     def sequence(self):
         from subsequences.StatePreparation import StatePreparation

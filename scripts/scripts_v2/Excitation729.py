@@ -16,7 +16,8 @@ class Excitation729(pulse_sequence):
         #'EmptySequence.empty_sequence_readout_duration': [(0.,1000.,100.,'us'),'rabi'],
         'OpticalPumping.optical_pumping_amplitude_854':  [(-30., -10., .5, 'dBm'), 'other'],
         'SidebandCoolingContinuous.sideband_cooling_continuous_duration':  [(0., 3., 0.5, 'ms'), 'other'],
-        'SidebandCoolingContTwoTone.sideband_cooling_cont_twotone_duration':  [(0., 30., 1., 'ms'), 'other']
+        'SidebandCoolingContTwoTone.sideband_cooling_cont_twotone_duration':  [(0., 30., 1., 'ms'), 'other'],
+        'SidebandCooling.stark_shift': [(-20., 20., 1., 'kHz'), 'other']
               }
 
     show_params= [
@@ -36,6 +37,7 @@ class Excitation729(pulse_sequence):
                   'Rotation.start_phase',
                   'Rotation.voltage_pp',
                   'EmptySequence.empty_sequence_duration',
+                  # 'EmptySequence.empty_sequence_readout_duration',
                   'SidebandCoolingContinuous.sideband_cooling_continuous_cycles',
                   'SidebandCoolingContinuous.sideband_cooling_continuous_duration',
                   'SidebandCoolingContTwoTone.sideband_cooling_cont_twotone_cycles',
