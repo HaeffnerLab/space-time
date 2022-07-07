@@ -20,10 +20,10 @@ nodeDict = {
 				'DAC Server', 
 				'Data Vault', 
 				'KEYSIGHT_33500B',
-				'ParameterVault',
-				'SD Tracker Global',
-				'ScriptScanner',
 				'NormalPMTFlow',
+				'ParameterVault',
+				#'SD Tracker Global', # Turns out since this is running on the laser room computer, this is totally unneccessary!
+				'ScriptScanner',
 				],
 			'node space-time-imaging':
 				['GPIB Device Manager',

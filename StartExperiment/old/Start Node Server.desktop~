@@ -1,0 +1,11 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Icon[en_US]=gnome-panel-launcher
+Name[en_US]=Start Node Server
+Exec=./LabRAD/space-time/2_Start_Node_Server.sh
+Name=Start Node
+Icon=gnome-panel-launcher

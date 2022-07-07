@@ -1,0 +1,8 @@
+#!/bin/bash
+source virtualenvwrapper.sh
+workon labrad
+
+python /home/space-time/LabRAD/common/clients/script_scanner_gui/script_scanner_gui.py &
+
+python /home/space-time/LabRAD/common/clients/pygrapherlive &
+

@@ -110,6 +110,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
 
         from common.clients.PMT_CONTROL    import pmtWidget
         from common.clients.SWITCH_CONTROL import switchWidget
+        from SWITCH_CONTROL_CUSTOM import switchWidgetCustom
         from common.clients.DDS_CONTROL    import DDS_CONTROL
         from ST_DAC_CONTROL import DAC_Control
         from quick_actions.quick_actions import actions_widget
@@ -117,7 +118,8 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         #from common.clients.LINETRIGGER_CONTROL import linetriggerWidget
         gridLayout = QtGui.QGridLayout()
 
-        gridLayout.addWidget(switchWidget(reactor, cxn),        1,3,1,1)
+        gridLayout.addWidget(switchWidget(reactor, cxn),        2,3,1,1)
+        gridLayout.addWidget(switchWidgetCustom(reactor, cxn),  1,3,1,1)
         gridLayout.addWidget(pmtWidget(reactor),                0,3,1,1)
         gridLayout.addWidget(DDS_CONTROL(reactor, cxn),         0,4,4,2)
         gridLayout.addWidget(actions_widget(reactor, cxn),      3,3,2,1)

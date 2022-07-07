@@ -1,0 +1,10 @@
+For each in a new terminal window:
+
+To start the experiment:
+- Run ./labrad.sh to start labrad
+- Run ./servers.sh to turn on all necessary labrad servers. This is equivalent to simply manually starting the servers on Chrome at localhost:7667/nodes. This terminal window doesn't need to stay open once the servers are running.
+- Run ./grapher.sh to open the grapher
+- Run ./gui.sh to open the GUI
+
+To run a jupyter notebook server:
+- Run ./jupyter.sh

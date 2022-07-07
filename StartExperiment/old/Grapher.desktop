@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=true
+Icon[en_US]=gnome-panel-launcher
+Name[en_US]=Grapher
+Exec=bash -i /home/space-time/LabRAD/start_up/6_Start_Grapher.sh
+Name=Space Time GUI
+Icon=gnome-panel-launcher

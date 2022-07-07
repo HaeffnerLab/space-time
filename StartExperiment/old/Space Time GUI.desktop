@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=true
+Icon[en_US]=gnome-panel-launcher
+Name[en_US]=Space Time GUI
+Exec=bash -i /home/space-time/LabRAD/start_up/4_Space_Time_GUI.sh
+Name=Space Time GUI
+Icon=gnome-panel-launcher

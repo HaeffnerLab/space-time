@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=true
+Icon[en_US]=gnome-panel-launcher
+Name[en_US]=Script Scanner GUI
+Exec=bash -i /home/space-time/LabRAD/start_up/5_Start_Script_Scanner.sh
+Name=Space Time GUI
+Icon=gnome-panel-launcher

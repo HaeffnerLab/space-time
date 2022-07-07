@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Icon[en_US]=gnome-panel-launcher
+Name[en_US]=Start Labrad
+Exec=./LabRAD/space-time/1_Start_LabRAD.sh
+Name=Start Labrad
+Icon=gnome-panel-launcher
