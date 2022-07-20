@@ -12,12 +12,14 @@ class Rabi(Excitation729):
     def run_finally(cls, cxn, parameter_dict, data, data_x):
         data_y = data.sum(1)
         trap_frequency_MHz = parameter_dict.HeatingRateRabi.trap_frequency['MHz']
-        nbar = cls.rabi_fit(data_x, data_y, trap_frequency_MHz, return_all_params = False)
+        n_ions = parameter_dict.HeatingRateRabi.n_ions
+        nbar = cls.rabi_fit(data_x, data_y, trap_frequency_MHz, n_ions, return_all_params = False)
         return nbar
 
 
 class Heating_Rate_Rabi(pulse_sequence):
     show_params = ['HeatingRateRabi.trap_frequency',
+                   'HeatingRateRabi.n_ions'
                     ]
 
     scannable_params = {'EmptySequence.empty_sequence_duration': [(0., 40., 10., 'ms'), 'nbar']}
