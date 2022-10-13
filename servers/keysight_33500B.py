@@ -454,7 +454,7 @@ class KEYSIGHT_33500B(LabradServer):
             wf_str1 = self.spin_up_spin_down_sin(start_phase,start_hold,freq_ramp_time,middle_hold,end_hold,sin_freq,1)
             wf_str2 = self.spin_up_spin_down_sin(start_phase,start_hold,freq_ramp_time,middle_hold,end_hold,sin_freq,2)
         else:
-            print "Error: no waveform by that name"
+            print "Error: no waveform by the name {}".format(waveform_label)
 
         #initialize
         self.write(self.instr,'*RST;*CLS')

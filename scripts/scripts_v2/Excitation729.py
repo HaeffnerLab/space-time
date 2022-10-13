@@ -59,6 +59,7 @@ class Excitation729(pulse_sequence):
 
       e = self.parameters.Excitation_729
       es = self.parameters.EmptySequence
+      rot = self.parameters.Rotation
 
         
       ## calculate the scan params
@@ -73,14 +74,19 @@ class Excitation729(pulse_sequence):
 
       ## build the sequence
       self.addSequence(StatePreparation)
+      if rot.rotation_enable:
+        rot_prep_time = rot.frequency_ramp_time + rot.middle_hold + rot.ramp_down_time
+        self.addSequence(EmptySequence, {'EmptySequence.empty_sequence_duration':rot_prep_time+U(400.0, 'us')})
       self.addSequence(EmptySequence)
       self.addSequence(RabiExcitation,{  'Excitation_729.frequency729': freq_729,
                                          'Excitation_729.rabi_change_DDS': True})
       self.addSequence(EmptySequence,{'EmptySequence.empty_sequence_duration':es.empty_sequence_readout_duration})
-      self.addSequence(StateReadout)  
+      self.addSequence(StateReadout)
         
     @classmethod
-    def run_initial(cls,cxn, parameters_dict):
+    def run_initial(cls, cxn, parameters_dict):
+      from subsequences.StatePreparation import StatePreparation
+      state_prep_time = StatePreparation(parameters_dict).end
       r = parameters_dict.Rotation
       e = parameters_dict.Excitation_729
 
@@ -97,7 +103,7 @@ class Excitation729(pulse_sequence):
         voltage_pp = r.voltage_pp
         drive_frequency = r.drive_frequency
         
-        awg_rotation.program_awf(start_phase['deg'],start_hold['ms'],frequency_ramp_time['ms'],middle_hold['ms'],ramp_down_time['ms'],end_hold['ms'],voltage_pp['V'],drive_frequency['kHz'],'free_rotation_sin_spin')
+        awg_rotation.program_awf(start_phase['deg'], state_prep_time['ms'] + 0.2 + start_hold['ms'], frequency_ramp_time['ms'], middle_hold['ms'], ramp_down_time['ms'], end_hold['ms'], voltage_pp['V'], drive_frequency['kHz'], 'free_rotation_sin_spin')
       
       ###### add shift for spectra purposes
       carrier_translation = {'S+1/2D-3/2':'c0',

@@ -23,9 +23,11 @@ class StatePreparation(pulse_sequence):
         from OpticalPumping import OpticalPumping
         from SidebandCooling import SidebandCooling
         from ScrambleGroundState import ScrambleGroundState
+        from EmptySequence import EmptySequence
 
         p = self.parameters
         sp = p.StatePreparation
+        rot = p.Rotation
         
         self.end = U(10., 'us')
         self.addSequence(TurnOffAll)
@@ -36,9 +38,12 @@ class StatePreparation(pulse_sequence):
             freq729 = self.calc_freq_from_array(p.OpticalPumping.line_selection)
             self.addSequence(OpticalPumping,{'OpticalPumping.optical_pumping_frequency_729':freq729})
         if sp.eit_cooling_enable:
-          print "EIT cooling not yet implemented"
-          #self.addSequence(EITcooling)
+            print "EIT cooling not yet implemented"
+            #self.addSequence(EITcooling)
         if sp.sideband_cooling_enable:
-          self.addSequence(SidebandCooling)
+            self.addSequence(SidebandCooling)
         if sp.scramble_ground_state_enable:
-          self.addSequence(ScrambleGroundState)
+            self.addSequence(ScrambleGroundState)
+        # if rot.rotation_enable:
+        #     rot_prep_time = rot.frequency_ramp_time + rot.middle_hold + rot.ramp_down_time
+        #     self.addSequence(EmptySequence, {'EmptySequence.empty_sequence_duration':rot_prep_time+U(100.0, 'us')})

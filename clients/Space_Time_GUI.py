@@ -31,7 +31,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         self.tabWidget = QtGui.QTabWidget()
         self.tabWidget.addTab(laser_room,'&Laser Room')
         self.tabWidget.addTab(laser_control,'&Control')
-        self.tabWidget.addTab(script_scannerv2, '&Script Scanner_v2')
+        self.tabWidget.addTab(script_scannerv2, '&Script Scanner v2')
         self.tabWidget.addTab(histogram, '&Readout Histogram')
         self.tabWidget.addTab(drift_tracker_global, '&Drift Tracker Global')
         self.tabWidget.addTab(config_editor, 'Config &Editor')
