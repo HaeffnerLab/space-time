@@ -28,6 +28,8 @@ import struct
 from warnings import warn
 import time
 
+from labrad.units import WithUnit as U
+
 #SERVERNAME = 'KEYSIGHT_33500B'
 #SIGNALID = 190234 ## this needs to change
 
@@ -427,8 +429,8 @@ class KEYSIGHT_33500B(LabradServer):
         return self.pack_keysight_packet(final_wf)
     
     
-    @setting(5, "Program Awf", start_phase = 'v', start_hold = 'v',freq_ramp_time = 'v', middle_hold = 'v', amp_ramp_time = 'v',end_hold = 'v',vpp = 'v', sin_freq = 'v',waveform_label = 's')
-    def program_awf(self, c, start_phase,start_hold,freq_ramp_time, middle_hold, amp_ramp_time,end_hold,vpp,sin_freq,waveform_label='free_rotation'): #in ms and kHz
+    @setting(5, "Program Awf", start_phase='v', start_hold='v', freq_ramp_time='v', middle_hold='v', amp_ramp_time='v', end_hold='v', vpp='v', sin_freq='v', waveform_label='s')
+    def program_awf(self, c, start_phase, start_hold, freq_ramp_time, middle_hold, amp_ramp_time, end_hold, vpp, sin_freq, waveform_label='free_rotation'): #in ms and kHz
         start_phase = start_phase * np.pi/180.0
         start_hold = start_hold * 1e-3
         amp_ramp_time = amp_ramp_time * 1e-3
@@ -494,7 +496,37 @@ class KEYSIGHT_33500B(LabradServer):
         #yield self.sync_phases(c)
 
         #self.read_error_queue()
-        
+
+    @setting(6, "Rotation run initial", state_prep_time='v')
+    def rotation_run_initial(self, c, state_prep_time):
+        # To be added to the run_initial method of scripts conditioned on rotation being enabled
+        sc = self.client.scriptscanner
+        voltage_pp = yield sc.get_parameter('Rotation', 'voltage_pp')
+        drive_frequency = yield sc.get_parameter('Rotation', 'drive_frequency')
+        start_phase = yield sc.get_parameter('Rotation', 'start_phase')
+        start_hold = yield sc.get_parameter('Rotation', 'start_hold')
+        frequency_ramp_time = yield sc.get_parameter('Rotation', 'frequency_ramp_time')
+        middle_hold = yield sc.get_parameter('Rotation', 'middle_hold')
+        ramp_down_time = yield sc.get_parameter('Rotation', 'ramp_down_time')
+        end_hold = yield sc.get_parameter('Rotation', 'end_hold')
+
+        state_prep_time -= U(0.4, 'ms')  # Compensate for 400 us cushion put into state prep
+        state_prep_time_minus_rotation = state_prep_time - (start_hold + frequency_ramp_time + middle_hold + ramp_down_time + end_hold)
+
+        print state_prep_time
+        print state_prep_time_minus_rotation
+
+        self.program_awf(c, start_phase['deg'], state_prep_time_minus_rotation['ms'] + 0.2 + start_hold['ms'], frequency_ramp_time['ms'], middle_hold['ms'], ramp_down_time['ms'], end_hold['ms'], voltage_pp['V'], drive_frequency['kHz'], 'free_rotation_sin_spin')
+
+    @setting(7, "Rotation run finally")
+    def rotation_run_finally(self, c):
+        # To be added to the run_finally method of scripts conditioned on rotation being enabled
+        sc = self.client.scriptscanner
+        old_freq = yield sc.get_parameter('RotationCW', 'drive_frequency')
+        old_amp = yield sc.get_parameter('RotationCW', 'voltage_pp')
+        old_phase = yield sc.get_parameter('RotationCW', 'start_phase')
+        self.update_awg(c, old_freq['Hz'], old_amp['V'], old_phase['deg'])   
+
 __server__ = KEYSIGHT_33500B()
         
 if __name__ == '__main__':

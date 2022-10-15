@@ -74,9 +74,6 @@ class Excitation729(pulse_sequence):
 
         ## build the sequence
         self.addSequence(StatePreparation)
-        if rot.rotation_enable:
-            rot_prep_time = rot.frequency_ramp_time + rot.middle_hold + rot.ramp_down_time
-            self.addSequence(EmptySequence, {'EmptySequence.empty_sequence_duration':rot_prep_time+U(400.0, 'us')})
         self.addSequence(EmptySequence)
         self.addSequence(RabiExcitation,{  'Excitation_729.frequency729': freq_729,
                                            'Excitation_729.rabi_change_DDS': True})
@@ -85,26 +82,14 @@ class Excitation729(pulse_sequence):
         
     @classmethod
     def run_initial(cls, cxn, parameters_dict):
-        from subsequences.StatePreparation import StatePreparation
-        state_prep_time = StatePreparation(parameters_dict).end
-        r = parameters_dict.Rotation
+        # Add rotation if necessary
+        if parameters_dict.Rotation.rotation_enable:
+            from subsequences.StatePreparation import StatePreparation
+            state_prep_time = StatePreparation(parameters_dict).end
+            cxn.keysight_33500b.rotation_run_initial(state_prep_time)
+        
         e = parameters_dict.Excitation_729
 
-        ## add rotation if necessary
-        if r.rotation_enable:
-            awg_rotation = cxn.keysight_33500b
-            
-            frequency_ramp_time = r.frequency_ramp_time
-            start_hold = r.start_hold
-            ramp_down_time = r.ramp_down_time
-            start_phase = r.start_phase
-            middle_hold = r.middle_hold
-            end_hold = r.end_hold
-            voltage_pp = r.voltage_pp
-            drive_frequency = r.drive_frequency
-            
-            awg_rotation.program_awf(start_phase['deg'], state_prep_time['ms'] + 0.2 + start_hold['ms'], frequency_ramp_time['ms'], middle_hold['ms'], ramp_down_time['ms'], end_hold['ms'], voltage_pp['V'], drive_frequency['kHz'], 'free_rotation_sin_spin')
-        
         ###### add shift for spectra purposes
         carrier_translation = {'S+1/2D-3/2':'c0',
                               'S-1/2D-5/2':'c1',
@@ -140,12 +125,5 @@ class Excitation729(pulse_sequence):
 
     @classmethod
     def run_finally(cls,cxn, parameters_dict, data, x):
-        ## if rotating set back to pinning parameters
-        r = parameters_dict.Rotation
-        rcw = parameters_dict.RotationCW
-        if r.rotation_enable:
-            old_freq = rcw.drive_frequency['kHz']
-            old_phase = rcw.start_phase['deg']
-            old_amp = rcw.voltage_pp['V']
-            cxn.keysight_33500b.update_awg(old_freq*1e3,old_amp,old_phase)   
-
+        if parameters_dict.Rotation.rotation_enable:
+            cxn.keysight_33500b.rotation_run_finally()
