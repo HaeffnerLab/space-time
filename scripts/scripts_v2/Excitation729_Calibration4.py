@@ -3,7 +3,7 @@ from labrad.units import WithUnit as U
 from treedict import TreeDict
 import numpy as np
 
-class Excitation729_Calibration1(pulse_sequence):
+class Excitation729_Calibration4(pulse_sequence):
     scannable_params = {
         'DopplerCooling.doppler_cooling_frequency_397':  [(180., 210., .5, 'MHz'), 'calib_doppler'],
         'DopplerCooling.doppler_cooling_amplitude_397':  [(-30., -15., .5, 'dBm'), 'other'],
@@ -15,15 +15,15 @@ class Excitation729_Calibration1(pulse_sequence):
               }
 
     show_params= [
-                  'Excitation_729_Cal1.line_selection',
-                  'Excitation_729_Cal1.amplitude729',
-                  'Excitation_729_Cal1.duration729',
-                  'Excitation_729_Cal1.sideband_selection',
-                  'Excitation_729_Cal1.channel729',
-                  'Excitation_729_Cal1.stark_shift_729',
-                  'Excitation_729_Cal1.sideband_cooling_enable',
-                  'Excitation_729_Cal1.rotation_enable',
-                  'Excitation_729_Cal1.empty_sequence_duration',
+                  'Excitation_729_Cal4.line_selection',
+                  'Excitation_729_Cal4.amplitude729',
+                  'Excitation_729_Cal4.duration729',
+                  'Excitation_729_Cal4.sideband_selection',
+                  'Excitation_729_Cal4.channel729',
+                  'Excitation_729_Cal4.stark_shift_729',
+                  'Excitation_729_Cal4.sideband_cooling_enable',
+                  'Excitation_729_Cal4.rotation_enable',
+                  'Excitation_729_Cal4.empty_sequence_duration',
                   'Rotation.drive_frequency',
                   'Rotation.end_hold',
                   'Rotation.frequency_ramp_time',
@@ -40,7 +40,7 @@ class Excitation729_Calibration1(pulse_sequence):
 
       from Excitation729 import Excitation729
 
-      e729c = self.parameters.Excitation_729_Cal1
+      e729c = self.parameters.Excitation_729_Cal4
 
       self.addSequence(Excitation729,{  'Excitation_729.amplitude729': e729c.amplitude729,
                                         'Excitation_729.channel729': e729c.channel729,
@@ -54,7 +54,7 @@ class Excitation729_Calibration1(pulse_sequence):
         
     @classmethod
     def run_initial(cls,cxn, parameters_dict):
-      e729c = parameters_dict.Excitation_729_Cal1
+      e729c = parameters_dict.Excitation_729_Cal4
       
       # Add rotation if necessary
       if e729c.rotation_enable:
@@ -104,5 +104,5 @@ class Excitation729_Calibration1(pulse_sequence):
 
     @classmethod
     def run_finally(cls,cxn, parameters_dict, data, x):
-        if parameters_dict.Excitation_729_Cal1.rotation_enable:
+        if parameters_dict.Excitation_729_Cal4.rotation_enable:
             cxn.keysight_33500b.rotation_run_finally()
