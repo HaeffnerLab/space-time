@@ -10,6 +10,9 @@ class Rabi(Excitation729):
 
     @classmethod
     def run_finally(cls, cxn, parameter_dict, data, data_x):
+        if parameters_dict.StatePreparation.rotation_enable:
+            cxn.keysight_33500b.rotation_run_finally()
+        
         data_y = data.sum(1)
         trap_frequency_MHz = parameter_dict.HeatingRateRabi.trap_frequency['MHz']
         n_ions = parameter_dict.HeatingRateRabi.n_ions

@@ -19,7 +19,17 @@ class Excitation729_Calibration1(pulse_sequence):
                   'Excitation_729_Cal1.channel729',
                   'Excitation_729_Cal1.stark_shift_729',
                   'Excitation_729_Cal1.sideband_cooling_enable',
+                  'Excitation_729_Cal1.rotation_enable',
                   'Excitation_729_Cal1.empty_sequence_duration',
+                  'Rotation.drive_frequency',
+                  'Rotation.end_hold',
+                  'Rotation.frequency_ramp_time',
+                  'Rotation.middle_hold',
+                  'Rotation.ramp_down_time',
+                  'Rotation.start_hold',
+                  'Rotation.start_phase',
+                  'Rotation.voltage_pp',
+
                   ]
 
 
@@ -35,12 +45,26 @@ class Excitation729_Calibration1(pulse_sequence):
                                         'Excitation_729.line_selection': ec1.line_selection,
                                         'Excitation_729.sideband_selection': ec1.sideband_selection,
                                         'Excitation_729.stark_shift_729': ec1.stark_shift_729,
-                                        'EmptySequence.empty_sequence_duration': ec1.empty_sequence_duration,
-                                        'StatePreparation.sideband_cooling_enable': ec1.sideband_cooling_enable})
+                                        'StatePreparation.sideband_cooling_enable': ec1.sideband_cooling_enable,
+                                        'StatePreparation.rotation_enable': ec1.rotation_enable,
+                                        'EmptySequence.empty_sequence_duration': ec1.empty_sequence_duration,})
         
     @classmethod
     def run_initial(cls,cxn, parameters_dict):
       ec1 = parameters_dict.Excitation_729_Cal1
+      
+      # Add rotation if necessary
+      if ec1.rotation_enable:
+          # Modify parameters_dict for this calibration scan's state prep parameters
+          parameters_dict_calibration = parameters_dict
+          parameters_dict_calibration.StatePreparation.sideband_cooling_enable = ec1.sideband_cooling_enable
+          parameters_dict_calibration.StatePreparation.rotation_enable = ec1.rotation_enable
+
+          from subsequences.StatePreparation import StatePreparation
+          state_prep_time = StatePreparation(parameters_dict_calibration).end
+          cxn.keysight_33500b.rotation_run_initial(state_prep_time)
+        
+
       
       ###### add shift for spectra purposes
       carrier_translation = {'S+1/2D-3/2':'c0',
@@ -56,7 +80,7 @@ class Excitation729_Calibration1(pulse_sequence):
                                }
 
       trapfreq = parameters_dict.TrapFrequencies
-      sideband_frequencies = [trapfreq.radial_frequency_1, trapfreq.radial_frequency_2, trapfreq.axial_frequency, trapfreq.rf_drive_frequency]
+      sideband_frequencies = [trapfreq.radial_frequency_1, trapfreq.radial_frequency_2, trapfreq.axial_frequency, trapfreq.rf_drive_frequency, trapfreq.rotation_frequency]
       shift = U(0.,'MHz')
       if parameters_dict.Display.relative_frequencies:
         # shift by sideband only (spectrum "0" will be carrier frequency)
@@ -77,4 +101,5 @@ class Excitation729_Calibration1(pulse_sequence):
 
     @classmethod
     def run_finally(cls,cxn, parameters_dict, data, x):
-        pass        
+        if parameters_dict.Excitation_729_Cal1.rotation_enable:
+            cxn.keysight_33500b.rotation_run_finally()

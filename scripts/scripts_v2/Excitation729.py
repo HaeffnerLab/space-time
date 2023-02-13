@@ -27,7 +27,6 @@ class Excitation729(pulse_sequence):
                   'Excitation_729.sideband_selection',
                   'Excitation_729.channel729',
                   'Excitation_729.stark_shift_729',
-                  'Rotation.rotation_enable',
                   'Rotation.drive_frequency',
                   'Rotation.end_hold',
                   'Rotation.frequency_ramp_time',
@@ -75,15 +74,15 @@ class Excitation729(pulse_sequence):
         ## build the sequence
         self.addSequence(StatePreparation)
         self.addSequence(EmptySequence)
-        self.addSequence(RabiExcitation,{  'Excitation_729.frequency729': freq_729,
-                                           'Excitation_729.rabi_change_DDS': True})
+        self.addSequence(RabiExcitation,{'Excitation_729.frequency729': freq_729,
+                                         'Excitation_729.rabi_change_DDS': True})
         self.addSequence(EmptySequence,{'EmptySequence.empty_sequence_duration':es.empty_sequence_readout_duration})
         self.addSequence(StateReadout)
         
     @classmethod
     def run_initial(cls, cxn, parameters_dict):
         # Add rotation if necessary
-        if parameters_dict.Rotation.rotation_enable:
+        if parameters_dict.StatePreparation.rotation_enable:
             from subsequences.StatePreparation import StatePreparation
             state_prep_time = StatePreparation(parameters_dict).end
             cxn.keysight_33500b.rotation_run_initial(state_prep_time)
@@ -104,7 +103,7 @@ class Excitation729(pulse_sequence):
                                  }
 
         trapfreq = parameters_dict.TrapFrequencies
-        sideband_frequencies = [trapfreq.radial_frequency_1, trapfreq.radial_frequency_2, trapfreq.axial_frequency, trapfreq.rf_drive_frequency]
+        sideband_frequencies = [trapfreq.radial_frequency_1, trapfreq.radial_frequency_2, trapfreq.axial_frequency, trapfreq.rf_drive_frequency, trapfreq.rotation_frequency]
         shift = U(0.,'MHz')
         if parameters_dict.Display.relative_frequencies:
             # shift by sideband only (spectrum "0" will be carrier frequency)
@@ -125,5 +124,5 @@ class Excitation729(pulse_sequence):
 
     @classmethod
     def run_finally(cls,cxn, parameters_dict, data, x):
-        if parameters_dict.Rotation.rotation_enable:
+        if parameters_dict.StatePreparation.rotation_enable:
             cxn.keysight_33500b.rotation_run_finally()

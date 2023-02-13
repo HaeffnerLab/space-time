@@ -513,9 +513,6 @@ class KEYSIGHT_33500B(LabradServer):
         state_prep_time -= U(0.4, 'ms')  # Compensate for 400 us cushion put into state prep
         state_prep_time_minus_rotation = state_prep_time - (start_hold + frequency_ramp_time + middle_hold + ramp_down_time + end_hold)
 
-        print state_prep_time
-        print state_prep_time_minus_rotation
-
         self.program_awf(c, start_phase['deg'], state_prep_time_minus_rotation['ms'] + 0.2 + start_hold['ms'], frequency_ramp_time['ms'], middle_hold['ms'], ramp_down_time['ms'], end_hold['ms'], voltage_pp['V'], drive_frequency['kHz'], 'free_rotation_sin_spin')
 
     @setting(7, "Rotation run finally")

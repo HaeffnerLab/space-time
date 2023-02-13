@@ -44,7 +44,7 @@ class StatePreparation(pulse_sequence):
             self.addSequence(SidebandCooling)
         if sp.scramble_ground_state_enable:
             self.addSequence(ScrambleGroundState)
-        if rot.rotation_enable:
+        if sp.rotation_enable:
             rot_prep_time = rot.start_hold + rot.frequency_ramp_time + rot.middle_hold + rot.ramp_down_time + rot.end_hold
             # Add empty sequence for rotation AWF plus 400 us cushion (200 us before, 200 us after)
             self.addSequence(EmptySequence, {'EmptySequence.empty_sequence_duration':rot_prep_time + U(400.0, 'us')})

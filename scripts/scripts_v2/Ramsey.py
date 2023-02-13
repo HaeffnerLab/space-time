@@ -11,7 +11,7 @@ class Ramsey(pulse_sequence):
 
     scannable_params = {
                         
-        'Ramsey.ramsey_time': [(0, 1.0, 0.05, 'ms') ,'ramsey'],
+        'Ramsey.ramsey_time': [(0, 1000.0, 50.0, 'us') ,'ramsey'],
         'Ramsey.second_pulse_phase': [(0, 360., 30, 'deg') ,'ramsey_phase_scan'],
 
         }
@@ -38,7 +38,6 @@ class Ramsey(pulse_sequence):
                   'DynamicDecoupling.dd_pi_time',
                   'DynamicDecoupling.dd_amplitude_729',
 
-                  'Rotation.rotation_enable',
                   'Rotation.drive_frequency',
                   'Rotation.end_hold',
                   'Rotation.frequency_ramp_time',
@@ -102,37 +101,18 @@ class Ramsey(pulse_sequence):
         
     @classmethod
     def run_initial(cls,cxn, parameters_dict):
-      pd = parameters_dict
-      rot = pd.Rotation
-      
-      ## add rotation if necessary
-      if rot.rotation_enable:
-        awg_rotation = cxn.keysight_33500b
-        
-        frequency_ramp_time = rot.frequency_ramp_time
-        start_hold = rot.start_hold
-        ramp_down_time = rot.ramp_down_time
-        start_phase = rot.start_phase
-        middle_hold = rot.middle_hold
-        end_hold = rot.end_hold
-        voltage_pp = rot.voltage_pp
-        drive_frequency = rot.drive_frequency
-        
-        awg_rotation.program_awf(start_phase['deg'],start_hold['ms'],frequency_ramp_time['ms'],middle_hold['ms'],ramp_down_time['ms'],end_hold['ms'],voltage_pp['V'],drive_frequency['kHz'],'free_rotation_sin_spin')
+        # Add rotation if necessary
+        if parameters_dict.StatePreparation.rotation_enable:
+            from subsequences.StatePreparation import StatePreparation
+            state_prep_time = StatePreparation(parameters_dict).end
+            cxn.keysight_33500b.rotation_run_initial(state_prep_time)
 
      
     @classmethod
     def run_in_loop(cls,cxn, parameters_dict, data, x):
-      pass
+        pass  
 
     @classmethod
     def run_finally(cls,cxn, parameters_dict, data, x):
-      ## if rotating set back to pinning parameters
-      rot = parameters_dict.Rotation
-      rcw = parameters_dict.RotationCW
-
-      if rot.rotation_enable:
-        old_freq = rcw.drive_frequency['kHz']
-        old_phase = rcw.start_phase['deg']
-        old_amp = rcw.voltage_pp['V']
-        cxn.keysight_33500b.update_awg(old_freq*1e3,old_amp,old_phase)
+        if parameters_dict.StatePreparation.rotation_enable:
+            cxn.keysight_33500b.rotation_run_finally()

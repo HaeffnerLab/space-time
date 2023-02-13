@@ -25,6 +25,7 @@ class CalibLine1(pulse_sequence):
         self.addSequence(StatePreparation,{'StatePreparation.eit_cooling_enable': False,
                                             'StatePreparation.sideband_cooling_enable': False,
                                             'StatePreparation.scramble_ground_state_enable': False,
+                                            'StatePreparation.rotation_enable': False,
                                             'DopplerCooling.doppler_cooling_duration': p.CalibrateLines.calibration_doppler_duration})
         self.addSequence(RabiExcitation,{'Excitation_729.frequency729': freq729,
                                          'Excitation_729.amplitude729': amp729,
@@ -82,7 +83,7 @@ class CalibLine1(pulse_sequence):
 
 class CalibLine2(pulse_sequence):
 
-    scannable_params = {'Excitation729.frequency729':[(-30, 30, 3, 'kHz'),'car2',True]}
+    scannable_params = {'Excitation729.frequency729':[(-20, 20, 2, 'kHz'),'car2',True]}
 
     def sequence(self):
         from subsequences.StatePreparation import StatePreparation

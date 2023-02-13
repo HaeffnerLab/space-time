@@ -36,7 +36,7 @@ class point(pulse_sequence):
         e729 = self.parameters.Excitation_729
 
         #self.addSequence(TurnOffAll)           
-        self.addSequence(StatePreparation)
+        self.addSequence(StatePreparation, {'StatePreparation.rotation_enable': False})   # Never rotate for this experiment
         self.addSequence(RabiExcitation,{'Excitation_729.frequency729': self.calc_freq_from_array(mc.line_selection, e729.sideband_selection),
                                          'Excitation_729.amplitude729': mc.amplitude729,
                                          'Excitation_729.channel729': mc.channel729
