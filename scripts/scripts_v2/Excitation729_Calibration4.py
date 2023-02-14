@@ -7,7 +7,7 @@ class Excitation729_Calibration4(pulse_sequence):
     scannable_params = {
         'DopplerCooling.doppler_cooling_frequency_397':  [(180., 210., .5, 'MHz'), 'calib_doppler'],
         'DopplerCooling.doppler_cooling_amplitude_397':  [(-30., -15., .5, 'dBm'), 'other'],
-        'DopplerCooling.doppler_cooling_frequency_866':  [(50., 80., .5, 'MHz'), 'calib_doppler'],
+        'DopplerCooling.doppler_cooling_frequency_866':  [(60., 85., .5, 'MHz'), 'calib_doppler'],
         'DopplerCooling.doppler_cooling_amplitude_866':  [(-20., -6., .5, 'dBm'), 'other'],
         'Excitation_729.duration729':  [(0., 200., 2., 'us'), 'rabi'],
         'Excitation_729.frequency729': [(-50., 50., 5., 'kHz'), 'spectrum',True],

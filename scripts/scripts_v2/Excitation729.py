@@ -7,9 +7,9 @@ class Excitation729(pulse_sequence):
     scannable_params = {
         'DopplerCooling.doppler_cooling_frequency_397':  [(180., 210., .5, 'MHz'), 'calib_doppler'],
         'DopplerCooling.doppler_cooling_amplitude_397':  [(-30., -15., .5, 'dBm'), 'other'],
-        'DopplerCooling.doppler_cooling_frequency_866':  [(50., 80., .5, 'MHz'), 'calib_doppler'],
+        'DopplerCooling.doppler_cooling_frequency_866':  [(60., 85., .5, 'MHz'), 'calib_doppler'],
         'DopplerCooling.doppler_cooling_amplitude_866':  [(-20., -6., .5, 'dBm'), 'other'],
-        'SidebandCooling.sideband_cooling_amplitude_854': [(-30.,-10., 1., 'dBm'), 'scan_854'],
+        'SidebandCooling.sideband_cooling_amplitude_854': [(-25.,-5., 1., 'dBm'), 'scan_854'],
         'Excitation_729.duration729':  [(0., 200., 2., 'us'), 'rabi'],
         'Excitation_729.frequency729': [(-50., 50., 5., 'kHz'), 'spectrum',True],
         #'SidebandCooling.stark_shift': [(-20., 20., 2., 'kHz'), 'other'],
