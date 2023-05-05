@@ -22,7 +22,6 @@ class StatePreparation(pulse_sequence):
         from DopplerCooling import DopplerCooling
         from OpticalPumping import OpticalPumping
         from SidebandCooling import SidebandCooling
-        from ScrambleGroundState import ScrambleGroundState
         from EmptySequence import EmptySequence
 
         p = self.parameters
@@ -37,14 +36,10 @@ class StatePreparation(pulse_sequence):
         if sp.optical_pumping_enable:
             freq729 = self.calc_freq_from_array(p.OpticalPumping.line_selection)
             self.addSequence(OpticalPumping,{'OpticalPumping.optical_pumping_frequency_729':freq729})
-        if sp.eit_cooling_enable:
-            print "EIT cooling not yet implemented"
-            #self.addSequence(EITcooling)
         if sp.sideband_cooling_enable:
             self.addSequence(SidebandCooling)
-        if sp.scramble_ground_state_enable:
-            self.addSequence(ScrambleGroundState)
         if sp.rotation_enable:
-            rot_prep_time = rot.start_hold + rot.frequency_ramp_time + rot.middle_hold + rot.ramp_down_time + rot.end_hold
             # Add empty sequence for rotation AWF plus 400 us cushion (200 us before, 200 us after)
-            self.addSequence(EmptySequence, {'EmptySequence.empty_sequence_duration':rot_prep_time + U(400.0, 'us')})
+            rot_prep_time = rot.start_hold + rot.frequency_ramp_time + rot.middle_hold + rot.ramp_down_time + rot.end_hold
+            self.addSequence(EmptySequence, {'EmptySequence.empty_sequence_duration':rot_prep_time + U(400.0, 'us'),
+                                             'EmptySequence.noise_enable':False})

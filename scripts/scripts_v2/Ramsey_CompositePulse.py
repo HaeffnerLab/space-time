@@ -21,7 +21,7 @@ class Ramsey_CompositePulse(pulse_sequence):
     scannable_params = {
 
                 'RamseyComposite.ramsey_time': [(0.1, 10, 0.1, 'ms'), 'ramsey'],
-                'RamseyComposite.final_pulse_phase': [(0.0, 360.0, 30.0, 'deg'), 'ramsey_phase_scan'],
+                'RamseyComposite.final_pulse_phase': [(0.0, 360.0, 36.0, 'deg'), 'ramsey_phase_scan'],
 
     }
 
@@ -110,20 +110,20 @@ class Ramsey_CompositePulse(pulse_sequence):
 
         def add_pulse_n(n, final_pulse=False):
             if final_pulse:
-                 self.addSequence(RabiExcitation, {"Excitation_729.channel729": pulse_channels[n-1],
-                                                   "Excitation_729.frequency729": pulse_frequencies[n-1],
-                                                   "Excitation_729.amplitude729": pulse_amplitudes[n-1],
-                                                   "Excitation_729.duration729": pulse_durations[n-1],
-                                                   "Excitation_729.phase729": rc.final_pulse_phase,
-                                                   "Excitation_729.rabi_change_DDS": False
+                 self.addSequence(RabiExcitation, {"Excitation729.channel729": pulse_channels[n-1],
+                                                   "Excitation729.frequency729": pulse_frequencies[n-1],
+                                                   "Excitation729.amplitude729": pulse_amplitudes[n-1],
+                                                   "Excitation729.duration729": pulse_durations[n-1],
+                                                   "Excitation729.phase729": rc.final_pulse_phase,
+                                                   "Excitation729.rabi_change_DDS": False
                                                   })
             else:
-                 self.addSequence(RabiExcitation, {"Excitation_729.channel729": pulse_channels[n-1],
-                                                   "Excitation_729.frequency729": pulse_frequencies[n-1],
-                                                   "Excitation_729.amplitude729": pulse_amplitudes[n-1],
-                                                   "Excitation_729.duration729": pulse_durations[n-1],
-                                                   "Excitation_729.phase729": U(0, 'deg'),
-                                                   "Excitation_729.rabi_change_DDS": False
+                 self.addSequence(RabiExcitation, {"Excitation729.channel729": pulse_channels[n-1],
+                                                   "Excitation729.frequency729": pulse_frequencies[n-1],
+                                                   "Excitation729.amplitude729": pulse_amplitudes[n-1],
+                                                   "Excitation729.duration729": pulse_durations[n-1],
+                                                   "Excitation729.phase729": U(0, 'deg'),
+                                                   "Excitation729.rabi_change_DDS": False
                                                   })
 
         N = int(rc.pulses)

@@ -5,7 +5,8 @@ from treedict import TreeDict
 from Ramsey import Ramsey
 
 class contrast(Ramsey):
-    scannable_params = {'Ramsey.second_pulse_phase': [(0, 360., 30, 'deg') ,'ramsey_phase_scan'],}
+    scannable_params = {'Ramsey.second_pulse_phase': [(0, 360., 36, 'deg') ,'ramsey_phase_scan'],}
+    
     @classmethod
     def run_finally(cls, cxn, parameters_dict, data, data_x):
         if parameters_dict.StatePreparation.rotation_enable:
@@ -13,7 +14,7 @@ class contrast(Ramsey):
         
         data_y = data.sum(1)
         fit_params = cls.sin_fit(data_x, data_y, return_all_params = True)
-        return 2.*fit_params[0]
+        return 2.0*fit_params[0]
 
 class RamseyContrast(pulse_sequence):
 

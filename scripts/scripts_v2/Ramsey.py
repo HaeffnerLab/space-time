@@ -12,7 +12,7 @@ class Ramsey(pulse_sequence):
     scannable_params = {
                         
         'Ramsey.ramsey_time': [(100.0, 1000.0, 50.0, 'us') ,'ramsey'],
-        'Ramsey.second_pulse_phase': [(0, 360., 30, 'deg') ,'ramsey_phase_scan'],
+        'Ramsey.second_pulse_phase': [(0, 360., 36, 'deg') ,'ramsey_phase_scan'],
 
         }
 
@@ -20,7 +20,8 @@ class Ramsey(pulse_sequence):
                   'Ramsey.detuning',
                   'Ramsey.amplitude_729',
                   'Ramsey.channel_729',
-                  'Ramsey.dynamic_decoupling_enable',
+                  'Ramsey.dynamical_decoupling_enable',
+                  'Ramsey.noise_enable',
 
                   'Ramsey.first_pulse_line',
                   'Ramsey.first_pulse_sideband',
@@ -31,12 +32,12 @@ class Ramsey(pulse_sequence):
                   'Ramsey.second_pulse_duration',
                   'Ramsey.second_pulse_phase',
 
-                  'DynamicDecoupling.dd_line_selection',
-                  'DynamicDecoupling.dd_sideband',
-                  'DynamicDecoupling.dd_channel_729',
-                  'DynamicDecoupling.dd_repetitions',
-                  'DynamicDecoupling.dd_pi_time',
-                  'DynamicDecoupling.dd_amplitude_729',
+                  'DynamicalDecoupling.dd_line_selection',
+                  'DynamicalDecoupling.dd_sideband',
+                  'DynamicalDecoupling.dd_channel_729',
+                  'DynamicalDecoupling.dd_repetitions',
+                  'DynamicalDecoupling.dd_pi_time',
+                  'DynamicalDecoupling.dd_amplitude_729',
 
                   'Rotation.drive_frequency',
                   'Rotation.end_hold',
@@ -48,6 +49,7 @@ class Ramsey(pulse_sequence):
                   'Rotation.voltage_pp',
 
                   'EmptySequence.empty_sequence_duration',
+                  'EmptySequence.noise_enable',
                   'StateReadout.repeat_each_measurement',
                       ]
 
@@ -57,13 +59,13 @@ class Ramsey(pulse_sequence):
         from subsequences.StatePreparation import StatePreparation
         from subsequences.RabiExcitation import RabiExcitation
         from subsequences.StateReadout import StateReadout
-        from subsequences.DynamicDecoupling import DynamicDecoupling
+        from subsequences.DynamicalDecoupling import DynamicalDecoupling
         from subsequences.EmptySequence import EmptySequence
         
         
         r = self.parameters.Ramsey   
         rot = self.parameters.Rotation
-        dd = self.parameters.DynamicDecoupling
+        dd = self.parameters.DynamicalDecoupling
         initial_freq_729 = self.calc_freq_from_array(r.first_pulse_line, r.first_pulse_sideband)
         final_freq_729 = self.calc_freq_from_array(r.second_pulse_line, r.second_pulse_sideband)
 
@@ -79,22 +81,22 @@ class Ramsey(pulse_sequence):
         self.addSequence(StatePreparation)     
         self.addSequence(EmptySequence)
 
-        self.addSequence(RabiExcitation, { "Excitation_729.frequency729": initial_freq_729,
-                                           "Excitation_729.duration729": r.first_pulse_duration,
-                                           "Excitation_729.amplitude729": r.amplitude_729,
-                                           "Excitation_729.phase729": U(0, 'deg'),
-                                           "Excitation_729.channel729":r.channel_729,
-                                           "Excitation_729.rabi_change_DDS":True
+        self.addSequence(RabiExcitation, { "Excitation729.frequency729": initial_freq_729,
+                                           "Excitation729.duration729": r.first_pulse_duration,
+                                           "Excitation729.amplitude729": r.amplitude_729,
+                                           "Excitation729.phase729": U(0, 'deg'),
+                                           "Excitation729.channel729":r.channel_729,
+                                           "Excitation729.rabi_change_DDS":True
                                           })
 
-        self.addSequence(DynamicDecoupling,  {"DynamicDecoupling.dd_duration" : r.ramsey_time})
+        self.addSequence(DynamicalDecoupling,  {"DynamicalDecoupling.dd_duration" : r.ramsey_time - (r.first_pulse_duration+r.second_pulse_duration)/2.0})
         
-        self.addSequence(RabiExcitation, { "Excitation_729.frequency729": final_freq_729,
-                                           "Excitation_729.duration729": r.second_pulse_duration,
-                                           "Excitation_729.amplitude729": r.amplitude_729,
-                                           "Excitation_729.phase729": r.second_pulse_phase,
-                                           "Excitation_729.channel729":r.channel_729,
-                                           "Excitation_729.rabi_change_DDS":False
+        self.addSequence(RabiExcitation, { "Excitation729.frequency729": final_freq_729,
+                                           "Excitation729.duration729": r.second_pulse_duration,
+                                           "Excitation729.amplitude729": r.amplitude_729,
+                                           "Excitation729.phase729": r.second_pulse_phase,
+                                           "Excitation729.channel729":r.channel_729,
+                                           "Excitation729.rabi_change_DDS":False
                                           })
 
         self.addSequence(StateReadout)

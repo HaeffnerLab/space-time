@@ -90,18 +90,18 @@ class actions_widget(QtGui.QWidget):
 
     #     pulser = yield self.cxn.get_server('Pulser')
     #     ampl397 = self.WithUnit(-5.0, 'dBm')
-    #     ampl397Extra = self.WithUnit(-7.0, 'dBm')
+    #     ampl397DP = self.WithUnit(-7.0, 'dBm')
     #     ampl866 = self.WithUnit(-7.0, 'dBm')
     #     freq397 = self.WithUnit(180.0, 'MHz')
-    #     freq397Extra = self.WithUnit(183.0, 'MHz')
+    #     freq397DP = self.WithUnit(183.0, 'MHz')
     #     freq866 = self.WithUnit(80.0, 'MHz')
         
     #     yield pulser.frequency('866DP', freq866)
     #     yield pulser.amplitude('866DP', ampl866)
     #     yield pulser.frequency('397DP', freq397)
     #     yield pulser.amplitude('397DP', ampl397)
-    #     yield pulser.frequency('397Extra', freq397Extra)
-    #     yield pulser.amplitude('397Extra', ampl397Extra)
+    #     yield pulser.frequency('397DP', freq397DP)
+    #     yield pulser.amplitude('397DP', ampl397DP)
 
     #     return
 
@@ -126,7 +126,7 @@ class actions_widget(QtGui.QWidget):
 
     @inlineCallbacks
     def eject_ion(self):
-        linear_397 = '397Extra'
+        linear_397 = '397DP'
         #linear_397 = yield pv.get_parameter(('StatePreparation','channel_397_linear'))
         pulser = yield self.cxn.get_server('Pulser')
         freq397 = yield pulser.frequency(linear_397)
@@ -139,15 +139,15 @@ class actions_widget(QtGui.QWidget):
     @inlineCallbacks
     def on_to_loading(self):
         ss = yield self.cxn.get_server('ScriptScanner')
-        linear_397 = '397Extra'
+        linear_397 = '397DP'
         pulser = yield self.cxn.get_server('Pulser')
         ampl397 = yield pulser.amplitude(linear_397)
         #ampl397 = yield pulser.amplitude('397DP')
-        #ampl397Extra = yield pulser.amplitude('397Extra')
+        #ampl397DP = yield pulser.amplitude('397DP')
         ampl866 = yield pulser.amplitude('866DP')
         freq397 = yield pulser.frequency(linear_397)
         #freq397 = yield pulser.frequency('397DP')
-        #freq397Extra = yield pulser.frequency('397Extra')
+        #freq397DP = yield pulser.frequency('397DP')
         freq866 = yield pulser.frequency('866DP')
         #use_second_397_SD = yield pv.get_parameter(('StateReadout','state_readout_include_second_397'))
         yield ss.set_parameter('Loading','loading_amplitude_397',ampl397)
@@ -155,21 +155,21 @@ class actions_widget(QtGui.QWidget):
         yield ss.set_parameter('Loading','loading_frequency_397',freq397)
         yield ss.set_parameter('Loading','loading_frequency_866',freq866)
         #if use_second_397_SD:   #used if there are two doppler cooling beams
-        #    yield pv.set_parameter('StateReadout','state_readout_amplitude_397Extra',ampl397Extra)
-        #    yield pv.set_parameter('StateReadout','state_readout_frequency_397Extra',freq397Extra)
+        #    yield pv.set_parameter('StateReadout','state_readout_amplitude_397DP',ampl397DP)
+        #    yield pv.set_parameter('StateReadout','state_readout_frequency_397DP',freq397DP)
     
     @inlineCallbacks
     def on_to_state(self):
         ss = yield self.cxn.get_server('ScriptScanner')
-        linear_397 = '397Extra'
+        linear_397 = '397DP'
         pulser = yield self.cxn.get_server('Pulser')
         ampl397 = yield pulser.amplitude(linear_397)
         #ampl397 = yield pulser.amplitude('397DP')
-        #ampl397Extra = yield pulser.amplitude('397Extra')
+        #ampl397DP = yield pulser.amplitude('397DP')
         ampl866 = yield pulser.amplitude('866DP')
         freq397 = yield pulser.frequency(linear_397)
         #freq397 = yield pulser.frequency('397DP')
-        #freq397Extra = yield pulser.frequency('397Extra')
+        #freq397DP = yield pulser.frequency('397DP')
         freq866 = yield pulser.frequency('866DP')
         #use_second_397_SD = yield pv.get_parameter(('StateReadout','state_readout_include_second_397'))
         yield ss.set_parameter('StateReadout','state_readout_amplitude_397',ampl397)
@@ -177,44 +177,44 @@ class actions_widget(QtGui.QWidget):
         yield ss.set_parameter('StateReadout','state_readout_frequency_397',freq397)
         yield ss.set_parameter('StateReadout','state_readout_frequency_866',freq866)
         #if use_second_397_SD:   #used if there are two doppler cooling beams
-        #    yield pv.set_parameter('StateReadout','state_readout_amplitude_397Extra',ampl397Extra)
-        #    yield pv.set_parameter('StateReadout','state_readout_frequency_397Extra',freq397Extra)
+        #    yield pv.set_parameter('StateReadout','state_readout_amplitude_397DP',ampl397DP)
+        #    yield pv.set_parameter('StateReadout','state_readout_frequency_397DP',freq397DP)
     
     @inlineCallbacks
     def on_to_dc(self):
         ss = yield self.cxn.get_server('ScriptScanner')
-        linear_397 = '397Extra'
+        linear_397 = '397DP'
         pulser = yield self.cxn.get_server('Pulser')
         ampl397 = yield pulser.amplitude(linear_397)        
         #ampl397 = yield pulser.amplitude('397DP')
-        #ampl397Extra = yield pulser.amplitude('397Extra')
+        #ampl397DP = yield pulser.amplitude('397DP')
         ampl866 = yield pulser.amplitude('866DP')
         freq397 = yield pulser.frequency(linear_397)       
         #freq397 = yield pulser.frequency('397DP')
-        #freq397Extra = yield pulser.frequency('397Extra')
+        #freq397DP = yield pulser.frequency('397DP')
         freq866 = yield pulser.frequency('866DP')
         #use_second_397_DC = yield pv.get_parameter(('DopplerCooling','doppler_cooling_include_second_397'))
         yield ss.set_parameter('DopplerCooling','doppler_cooling_amplitude_397',ampl397)
-        #yield pv.set_parameter('DopplerCooling','doppler_cooling_amplitude_397Extra',ampl397Extra)
+        #yield pv.set_parameter('DopplerCooling','doppler_cooling_amplitude_397DP',ampl397DP)
         yield ss.set_parameter('DopplerCooling','doppler_cooling_amplitude_866',ampl866)
         yield ss.set_parameter('DopplerCooling','doppler_cooling_frequency_397',freq397)
-        #yield pv.set_parameter('DopplerCooling','doppler_cooling_frequency_397Extra',freq397Extra)
+        #yield pv.set_parameter('DopplerCooling','doppler_cooling_frequency_397DP',freq397DP)
         yield ss.set_parameter('DopplerCooling','doppler_cooling_frequency_866',freq866)
         #if use_second_397_DC:   #used if there are two doppler cooling beams
-        #    yield pv.set_parameter('DopplerCooling','doppler_cooling_amplitude_397Extra',ampl397Extra)
-        #    yield pv.set_parameter('DopplerCooling','doppler_cooling_frequency_397Extra',freq397Extra)
+        #    yield pv.set_parameter('DopplerCooling','doppler_cooling_amplitude_397DP',ampl397DP)
+        #    yield pv.set_parameter('DopplerCooling','doppler_cooling_frequency_397DP',freq397DP)
 
 
     @inlineCallbacks
     def on_from_loading(self):
         ss = yield self.cxn.get_server('ScriptScanner')
-        linear_397 = '397Extra'
+        linear_397 = '397DP'
         pulser = yield self.cxn.get_server('Pulser')
         ampl397 = yield ss.get_parameter(('Loading','loading_amplitude_397'))
-        #ampl397Extra = yield pv.get_parameter(('DopplerCooling','doppler_cooling_amplitude_397Extra'))
+        #ampl397DP = yield pv.get_parameter(('DopplerCooling','doppler_cooling_amplitude_397DP'))
         ampl866 = yield ss.get_parameter(('Loading','loading_amplitude_866'))
         freq397 = yield ss.get_parameter(('Loading','loading_frequency_397'))
-        #freq397Extra = yield pv.get_parameter(('DopplerCooling','doppler_cooling_frequency_397Extra'))
+        #freq397DP = yield pv.get_parameter(('DopplerCooling','doppler_cooling_frequency_397DP'))
         freq866 = yield ss.get_parameter(('Loading','loading_frequency_866'))
         #doppler_cooling_with_second_397 = yield pv.get_parameter(('DopplerCooling','doppler_cooling_include_second_397'))
         yield pulser.frequency('866DP', freq866)
@@ -222,20 +222,20 @@ class actions_widget(QtGui.QWidget):
         yield pulser.frequency(linear_397, freq397)
         yield pulser.amplitude(linear_397, ampl397)
         #if doppler_cooling_with_second_397: #used if there are two doppler cooling beams
-        #    yield pulser.frequency('397Extra', freq397Extra)
-        #    yield pulser.amplitude('397Extra', ampl397Extra)
+        #    yield pulser.frequency('397DP', freq397DP)
+        #    yield pulser.amplitude('397DP', ampl397DP)
 
         
     @inlineCallbacks
     def on_from_dc(self):
         ss = yield self.cxn.get_server('ScriptScanner')
-        linear_397 = '397Extra'
+        linear_397 = '397DP'
         pulser = yield self.cxn.get_server('Pulser')
         ampl397 = yield ss.get_parameter(('DopplerCooling','doppler_cooling_amplitude_397'))
-        #ampl397Extra = yield pv.get_parameter(('DopplerCooling','doppler_cooling_amplitude_397Extra'))
+        #ampl397DP = yield pv.get_parameter(('DopplerCooling','doppler_cooling_amplitude_397DP'))
         ampl866 = yield ss.get_parameter(('DopplerCooling','doppler_cooling_amplitude_866'))
         freq397 = yield ss.get_parameter(('DopplerCooling','doppler_cooling_frequency_397'))
-        #freq397Extra = yield pv.get_parameter(('DopplerCooling','doppler_cooling_frequency_397Extra'))
+        #freq397DP = yield pv.get_parameter(('DopplerCooling','doppler_cooling_frequency_397DP'))
         freq866 = yield ss.get_parameter(('DopplerCooling','doppler_cooling_frequency_866'))
         #doppler_cooling_with_second_397 = yield pv.get_parameter(('DopplerCooling','doppler_cooling_include_second_397'))
         yield pulser.frequency('866DP', freq866)
@@ -243,19 +243,19 @@ class actions_widget(QtGui.QWidget):
         yield pulser.frequency(linear_397, freq397)
         yield pulser.amplitude(linear_397, ampl397)
         #if doppler_cooling_with_second_397: #used if there are two doppler cooling beams
-        #    yield pulser.frequency('397Extra', freq397Extra)
-        #    yield pulser.amplitude('397Extra', ampl397Extra)
+        #    yield pulser.frequency('397DP', freq397DP)
+        #    yield pulser.amplitude('397DP', ampl397DP)
     
     @inlineCallbacks
     def on_from_state(self):
         ss = yield self.cxn.get_server('ScriptScanner')
-        linear_397 = '397Extra'
+        linear_397 = '397DP'
         pulser = yield self.cxn.get_server('Pulser')
         ampl397 = yield ss.get_parameter(('StateReadout','state_readout_amplitude_397'))
-        #ampl397Extra = yield pv.get_parameter(('StateReadout','state_readout_amplitude_397Extra'))
+        #ampl397DP = yield pv.get_parameter(('StateReadout','state_readout_amplitude_397DP'))
         ampl866 = yield ss.get_parameter(('StateReadout','state_readout_amplitude_866'))
         freq397 = yield ss.get_parameter(('StateReadout','state_readout_frequency_397'))
-        #freq397Extra = yield pv.get_parameter(('StateReadout','state_readout_frequency_397Extra'))
+        #freq397DP = yield pv.get_parameter(('StateReadout','state_readout_frequency_397DP'))
         freq866 = yield ss.get_parameter(('StateReadout','state_readout_frequency_866'))
         #state_readout_with_second_397 = yield pv.get_parameter(('StateReadout','state_readout_include_second_397'))
         yield pulser.frequency('866DP', freq866)
@@ -263,8 +263,8 @@ class actions_widget(QtGui.QWidget):
         yield pulser.frequency(linear_397, freq397)
         yield pulser.amplitude(linear_397, ampl397)
         #if state_readout_with_second_397: #used if there are two doppler cooling beams
-        #    yield pulser.frequency('397Extra', freq397Extra)
-        #    yield pulser.amplitude('397Extra', ampl397Extra)
+        #    yield pulser.frequency('397DP', freq397DP)
+        #    yield pulser.amplitude('397DP', ampl397DP)
         
     #@inlineCallbacks   
     #def include_second_397_DC(self, event):    #used if there are two doppler cooling beams

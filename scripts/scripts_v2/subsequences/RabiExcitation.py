@@ -5,7 +5,7 @@ from labrad.units import WithUnit
 class RabiExcitation(pulse_sequence):
 
     def sequence(self):
-        e = self.parameters.Excitation_729
+        e = self.parameters.Excitation729
         
         ampl_off = WithUnit(-63.0, 'dBm')
         fad = WithUnit(6, 'us')

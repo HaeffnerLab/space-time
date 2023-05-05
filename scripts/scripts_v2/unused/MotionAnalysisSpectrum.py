@@ -6,21 +6,21 @@ import numpy as np
 class MotionAnalysisSpectrum(pulse_sequence):
     
                           
-    scannable_params = {   'Motion_Analysis.detuning': [(-5.0, 5.0, 0.5, 'kHz'),'spectrum'],
-                           'Motion_Analysis.amplitude_397': [(-25.0,-13.0, 1.0, 'dBm'),'other'],
-                           'Motion_Analysis.duration729': [(0.0, 100.0, 10.0, 'us'),'rabi'],
-                           'Motion_Analysis.pulse_width_397': [(0.0, 1000.0, 10.0, 'us'),'other'] }
+    scannable_params = {   'MotionAnalysis.detuning': [(-5.0, 5.0, 0.5, 'kHz'),'spectrum'],
+                           'MotionAnalysis.amplitude_397': [(-25.0,-13.0, 1.0, 'dBm'),'other'],
+                           'MotionAnalysis.duration729': [(0.0, 100.0, 10.0, 'us'),'rabi'],
+                           'MotionAnalysis.pulse_width_397': [(0.0, 1000.0, 10.0, 'us'),'other'] }
  
 
     show_params= [
-                  'Motion_Analysis.pulse_width_397',
-                  'Motion_Analysis.amplitude_397',
-                  'Motion_Analysis.diagnosis_sideband',
-                  'Motion_Analysis.diagnosis_line',
-                  'Motion_Analysis.detuning',
-                  'Motion_Analysis.channel729',
-                  'Motion_Analysis.duration729',
-                  'Motion_Analysis.amplitude729'
+                  'MotionAnalysis.pulse_width_397',
+                  'MotionAnalysis.amplitude_397',
+                  'MotionAnalysis.diagnosis_sideband',
+                  'MotionAnalysis.diagnosis_line',
+                  'MotionAnalysis.detuning',
+                  'MotionAnalysis.channel729',
+                  'MotionAnalysis.duration729',
+                  'MotionAnalysis.amplitude729'
 
                 ]
 
@@ -34,7 +34,7 @@ class MotionAnalysisSpectrum(pulse_sequence):
         awg = cxn.keysight_33600a
 
         tf = parameters_dict.TrapFrequencies
-        ma = parameters_dict.Motion_Analysis
+        ma = parameters_dict.MotionAnalysis
         sideband_selection = ma.diagnosis_sideband
         sideband_frequencies = [tf.radial_frequency_1, tf.radial_frequency_2, tf.axial_frequency, tf.rf_drive_frequency, tf.rotation_frequency]
         
@@ -50,7 +50,7 @@ class MotionAnalysisSpectrum(pulse_sequence):
         awg = cxn.keysight_33600a
 
         tf = parameters_dict.TrapFrequencies
-        ma = parameters_dict.Motion_Analysis
+        ma = parameters_dict.MotionAnalysis
         sideband_selection = ma.diagnosis_sideband
         sideband_frequencies = [tf.radial_frequency_1, tf.radial_frequency_2, tf.axial_frequency, tf.rf_drive_frequency, tf.rotation_frequency]
         
@@ -80,7 +80,7 @@ class MotionAnalysisSpectrum(pulse_sequence):
         duration_op= self.parameters.SidebandCooling.sideband_cooling_optical_pumping_duration
 
         ## calculate the final diagnosis params
-        ma = self.parameters.Motion_Analysis
+        ma = self.parameters.MotionAnalysis
         freq_729 = self.calc_freq_from_array(ma.diagnosis_line, ma.diagnosis_sideband)
         freq_729_op = self.calc_freq_from_array(self.parameters.OpticalPumping.line_selection) 
         print freq_729
@@ -94,11 +94,11 @@ class MotionAnalysisSpectrum(pulse_sequence):
 
         # 729 excitation to transfer the motional DOF to the electronic DOF
         # running the excitation from the Rabi flopping 
-        self.addSequence(RabiExcitation, {'Excitation_729.frequency729': freq_729,
-                                          'Excitation_729.amplitude729': ma.amplitude729,
-                                          'Excitation_729.duration729':  ma.duration729,
-                                          'Excitation_729.rabi_change_DDS':True,
-                                          "Excitation_729.channel729":ma.channel729})
+        self.addSequence(RabiExcitation, {'Excitation729.frequency729': freq_729,
+                                          'Excitation729.amplitude729': ma.amplitude729,
+                                          'Excitation729.duration729':  ma.duration729,
+                                          'Excitation729.rabi_change_DDS':True,
+                                          "Excitation729.channel729":ma.channel729})
 
         
         self.addSequence(StateReadout)

@@ -5,15 +5,12 @@ class EmptySequence(pulse_sequence):
     
     def sequence(self):
         
-        duration=self.parameters.EmptySequence.empty_sequence_duration
+        es = self.parameters.EmptySequence
 
-        #code added to test 854 weirdness
-        #power_extra866 = U(-5.,'dBm')
-        #frequency_extra866 = U(80.,'MHz')
-        #power_extra854 = U(-33.,'dBm')
-        #frequency_extra854 = U(80.,'MHz')
-        #self.addDDS('854DP',self.start,duration,frequency_extra854,power_extra854)
-        #self.addDDS('866DP',self.start,duration,frequency_extra866,power_extra866)
-        #end added code
+        duration = es.empty_sequence_duration
+
+        if es.noise_enable and (duration > U(50, 'us')):
+            self.addTTL('rot_switch_awg_off', self.start-U(135, 'us'), duration-U(50, 'us'))
+            self.addTTL('rot_switch_noise_on', self.start-U(120, 'us'), duration-U(5, 'us'))
 
         self.end = self.start + duration

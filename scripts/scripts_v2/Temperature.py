@@ -6,11 +6,11 @@ from Excitation729 import Excitation729
 
 class rsb(Excitation729):
 
-    scannable_params = {'Excitation_729.frequency729': [(-30., 30., 2., 'kHz'), 'temp_rsb',True]}
+    scannable_params = {'Excitation729.frequency729': [(-30., 30., 2., 'kHz'), 'temp_rsb',True]}
 
     @classmethod
     def run_finally(cls, cxn, parameter_dict, data, data_x):
-        if parameters_dict.StatePreparation.rotation_enable:
+        if parameter_dict.StatePreparation.rotation_enable:
             cxn.keysight_33500b.rotation_run_finally()
 
         data = data.sum(1)
@@ -28,11 +28,11 @@ class rsb(Excitation729):
 
 class bsb(Excitation729):
 
-    scannable_params = {'Excitation_729.frequency729': [(-30., 30., 2., 'kHz'), 'temp_bsb',True]}
+    scannable_params = {'Excitation729.frequency729': [(-30., 30., 2., 'kHz'), 'temp_bsb',True]}
 
     @classmethod
     def run_finally(cls, cxn, parameter_dict, data, data_x):
-        if parameters_dict.StatePreparation.rotation_enable:
+        if parameter_dict.StatePreparation.rotation_enable:
             cxn.keysight_33500b.rotation_run_finally()
 
         data = data.sum(1)
@@ -50,8 +50,8 @@ class bsb(Excitation729):
 
 class Temperature(pulse_sequence):
     
-    sequence = [(rsb, {'Excitation_729.invert_sb': -1.0}), 
-                (bsb, {'Excitation_729.invert_sb': 1.0})]
+    sequence = [(rsb, {'Excitation729.invert_sb': -1.0}), 
+                (bsb, {'Excitation729.invert_sb': 1.0})]
 
     @classmethod
     def run_finally(cls, cxn, parameter_dict, amp, seq_name):

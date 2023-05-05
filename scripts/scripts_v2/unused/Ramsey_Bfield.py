@@ -135,22 +135,22 @@ class Ramsey_Bfield(pulse_sequence):
           self.addTTL('awg_on',self.end,dur)
           self.addSequence(EmptySequence,{"EmptySequence.empty_sequence_duration":bfi.on_before})
 
-        self.addSequence(RabiExcitation, { "Excitation_729.frequency729": initial_freq_729,
-                                           "Excitation_729.duration729": r.first_pulse_duration,
-                                           "Excitation_729.amplitude729": r.amplitude_729,
-                                           "Excitation_729.phase729": U(0, 'deg'),
-                                           "Excitation_729.channel729":r.channel_729,
-                                           "Excitation_729.rabi_change_DDS":True
+        self.addSequence(RabiExcitation, { "Excitation729.frequency729": initial_freq_729,
+                                           "Excitation729.duration729": r.first_pulse_duration,
+                                           "Excitation729.amplitude729": r.amplitude_729,
+                                           "Excitation729.phase729": U(0, 'deg'),
+                                           "Excitation729.channel729":r.channel_729,
+                                           "Excitation729.rabi_change_DDS":True
                                           })
 
         self.addSequence(DynamicDecoupling_Bfield,  {"DynamicDecoupling.dd_duration" : r.ramsey_time})
         
-        self.addSequence(RabiExcitation, { "Excitation_729.frequency729": final_freq_729,
-                                           "Excitation_729.duration729": r.second_pulse_duration,
-                                           "Excitation_729.amplitude729": r.amplitude_729,
-                                           "Excitation_729.phase729": r.second_pulse_phase,
-                                           "Excitation_729.channel729":r.channel_729,
-                                           "Excitation_729.rabi_change_DDS":False
+        self.addSequence(RabiExcitation, { "Excitation729.frequency729": final_freq_729,
+                                           "Excitation729.duration729": r.second_pulse_duration,
+                                           "Excitation729.amplitude729": r.amplitude_729,
+                                           "Excitation729.phase729": r.second_pulse_phase,
+                                           "Excitation729.channel729":r.channel_729,
+                                           "Excitation729.rabi_change_DDS":False
                                           })
 
         self.addSequence(StateReadout,{'StateReadout.repeat_each_measurement':bfi.n_exp})

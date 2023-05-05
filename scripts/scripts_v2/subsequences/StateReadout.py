@@ -31,7 +31,7 @@ class StateReadout(pulse_sequence):
         self.addTTL('ReadoutCount', self.start, readout_duration)
         
         #self.addDDS('866DP',self.start, extra866_time, st.state_readout_frequency_866, extra866_amplitude)
-        self.addDDS ('397Extra',self.start, duration_397, st.state_readout_frequency_397, st.state_readout_amplitude_397)
+        self.addDDS ('397DP',self.start, duration_397, st.state_readout_frequency_397, st.state_readout_amplitude_397)
         self.addDDS ('866DP',self.start, duration_866, st.state_readout_frequency_866, st.state_readout_amplitude_866)
                     
         self.end = self.start + duration_866

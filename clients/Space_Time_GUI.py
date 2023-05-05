@@ -43,16 +43,16 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         self.setCentralWidget(centralWidget)
         #self.setWindowTitle('Spacetime GUI')
 
-    def makeScriptControlWidget(self, reactor, cxn):
-        widget = QtGui.QWidget()
+    # def makeScriptControlWidget(self, reactor, cxn):
+    #     widget = QtGui.QWidget()
         
-        from common.clients.script_scanner_gui.script_scanner_gui import script_scanner_gui
-        gridLayout = QtGui.QGridLayout()
+    #     from common.clients.script_scanner_gui.script_scanner_gui import script_scanner_gui
+    #     gridLayout = QtGui.QGridLayout()
        
-        gridLayout.addWidget(script_scanner_gui(reactor))
+    #     gridLayout.addWidget(script_scanner_gui(reactor))
         
-        widget.setLayout(gridLayout)
-        return widget
+    #     widget.setLayout(gridLayout)
+    #     return widget
 
     def makeScriptControlWidgetv2(self, reactor, cxn):
         from common.devel.bum.gui_scriptscanner2.script_scanner_gui import script_scanner_gui

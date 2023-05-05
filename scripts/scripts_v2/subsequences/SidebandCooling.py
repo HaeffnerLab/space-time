@@ -16,7 +16,7 @@ class SidebandCooling(pulse_sequence):
         scseq = self.parameters.SequentialSBCooling
         
         Nsb = 1
-        if scseq.enable:
+        if sc.sequential_sbc_enable:
             Nsb += int(scseq.additional_stages) 
 
         amp866 = sc.sideband_cooling_amplitude_866
@@ -123,8 +123,8 @@ class SidebandCooling(pulse_sequence):
             # Continuous "two-tone" sideband cooling
             # Instead of sideband cooling in cycles where optical pumping is necessary in between them, this scheme simultaneously pumps the +-1/2 -> +-1/2 or the +-1/2 -> +-5/2 lines.
             # That way, population is always being driven. Might be more time efficient.
-            # Requires an extra DDS channel; currently this is required to be "729extra".
-            # Automatically decided which line to drive with the secondary channel based on SidebandCooling.line_selection.
+            # Requires an extra DDS channel; currently this is required to be "729horizExtra" or "729vertExtra".
+            # Automatically decides which line to drive with the secondary channel based on SidebandCooling.line_selection.
             # Sequential cycles, interleaved or not, are still possible.
             # In all cases, optical pumping only occurs once at the end of sideband cooling. 
 
@@ -206,6 +206,6 @@ class SBCTwoTonePulse(pulse_sequence):
         self.end = self.start + duration_866
         self.addDDS(sc.channel_729,              self.start, duration_729, freq729_1, sc.sideband_cooling_amplitude_729)
         self.addDDS(scctt.channel_729_secondary, self.start, duration_729, freq729_2, sc.sideband_cooling_amplitude_729)
-        self.addDDS('854DP', self.start, duration_854, sc.sideband_cooling_frequency_854, sc.sideband_cooling_amplitude_854)
+        self.addDDS('AAAAAA', self.start, duration_854, sc.sideband_cooling_frequency_854, sc.sideband_cooling_amplitude_854)
         self.addDDS('866DP', self.start, duration_866, freq866,                           sc.sideband_cooling_amplitude_866)
 

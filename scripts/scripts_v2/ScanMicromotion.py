@@ -22,7 +22,7 @@ class point(pulse_sequence):
    
     def sequence(self):
         
-        from StatePreparation import StatePreparation
+        from subsequences.StatePreparation import StatePreparation
         from subsequences.RabiExcitation import RabiExcitation
         from subsequences.StateReadout import StateReadout
         from subsequences.TurnOffAll import TurnOffAll
@@ -33,13 +33,13 @@ class point(pulse_sequence):
         self.end = U(10., 'us')
 
         mc = self.parameters.MicromotionCalibration   
-        e729 = self.parameters.Excitation_729
+        e729 = self.parameters.Excitation729
 
         #self.addSequence(TurnOffAll)           
         self.addSequence(StatePreparation, {'StatePreparation.rotation_enable': False})   # Never rotate for this experiment
-        self.addSequence(RabiExcitation,{'Excitation_729.frequency729': self.calc_freq_from_array(mc.line_selection, e729.sideband_selection),
-                                         'Excitation_729.amplitude729': mc.amplitude729,
-                                         'Excitation_729.channel729': mc.channel729
+        self.addSequence(RabiExcitation,{'Excitation729.frequency729': self.calc_freq_from_array(mc.line_selection, e729.sideband_selection),
+                                         'Excitation729.amplitude729': mc.amplitude729,
+                                         'Excitation729.channel729': mc.channel729
                                          })
         self.addSequence(StateReadout)
  
@@ -60,12 +60,12 @@ class micromotion_sideband_2(point):
 class Scan3points(pulse_sequence):
 
 
-    sequence = [(carrier,                {'Excitation_729.sideband_selection': [0,0,0,0,0],
-                                          'Excitation_729.duration729': 'MicromotionCalibration.carrier_time'}), 
-                (micromotion_sideband_1, {'Excitation_729.sideband_selection': [0,0,0,1,0],
-                                          'Excitation_729.duration729': 'MicromotionCalibration.sideband_time'}),
-                (micromotion_sideband_2, {'Excitation_729.sideband_selection': [0,0,0,2,0],
-                                          'Excitation_729.duration729': 'MicromotionCalibration.sideband_time'})
+    sequence = [(carrier,                {'Excitation729.sideband_selection': [0,0,0,0,0],
+                                          'Excitation729.duration729': 'MicromotionCalibration.carrier_time'}), 
+                (micromotion_sideband_1, {'Excitation729.sideband_selection': [0,0,0,1,0],
+                                          'Excitation729.duration729': 'MicromotionCalibration.sideband_time'}),
+                (micromotion_sideband_2, {'Excitation729.sideband_selection': [0,0,0,2,0],
+                                          'Excitation729.duration729': 'MicromotionCalibration.sideband_time'})
                 ]
 
 

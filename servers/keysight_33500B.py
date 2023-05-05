@@ -497,31 +497,55 @@ class KEYSIGHT_33500B(LabradServer):
 
         #self.read_error_queue()
 
-    @setting(6, "Rotation run initial", state_prep_time='v')
-    def rotation_run_initial(self, c, state_prep_time):
+    @setting(6, "Rotation run initial", state_prep_time='v', scan_param_name='s', scan_param_value='v')
+    def rotation_run_initial(self, c, state_prep_time, scan_param_name=None, scan_param_value=None):
         # To be added to the run_initial method of scripts conditioned on rotation being enabled
-        sc = self.client.scriptscanner
-        voltage_pp = yield sc.get_parameter('Rotation', 'voltage_pp')
-        drive_frequency = yield sc.get_parameter('Rotation', 'drive_frequency')
-        start_phase = yield sc.get_parameter('Rotation', 'start_phase')
-        start_hold = yield sc.get_parameter('Rotation', 'start_hold')
-        frequency_ramp_time = yield sc.get_parameter('Rotation', 'frequency_ramp_time')
-        middle_hold = yield sc.get_parameter('Rotation', 'middle_hold')
-        ramp_down_time = yield sc.get_parameter('Rotation', 'ramp_down_time')
-        end_hold = yield sc.get_parameter('Rotation', 'end_hold')
+
+        # This function begins by constructing a dictionary called rp which stores the parameters for rotation
+        # This is basically a reconstruction of parameters_dict from the script scanner
+        # Done this way because I can't find a way to pass the full parameters_dict to a server like the Keysight through labrad.
+        # One parameter (presumably the one being scanned) nay be overwritten;
+            # this requires passing its name and value as the two optional arguments since the scriptscanner server doesn't know the current scan parameter value
+
+        ss = self.client.scriptscanner
+
+        # create a dictionary with all the rotation parameters
+        rotation_parameter_names = ['voltage_pp',
+                                    'drive_frequency',
+                                    'start_phase',
+                                    'start_hold',
+                                    'middle_hold',
+                                    'ramp_down_time', 
+                                    'end_hold',
+                                    'frequency_ramp_time']
+        rp = {} # rotation parameters dictionary
+        for param_name in rotation_parameter_names:
+            if param_name == scan_param_name:
+                rp[param_name] = scan_param_value
+            else:
+                rp[param_name] = yield ss.get_parameter('Rotation', param_name)
 
         state_prep_time -= U(0.4, 'ms')  # Compensate for 400 us cushion put into state prep
-        state_prep_time_minus_rotation = state_prep_time - (start_hold + frequency_ramp_time + middle_hold + ramp_down_time + end_hold)
+        state_prep_time_minus_rotation = state_prep_time - (rp['start_hold'] + rp['frequency_ramp_time'] + rp['middle_hold'] + rp['ramp_down_time'] + rp['end_hold'])
 
-        self.program_awf(c, start_phase['deg'], state_prep_time_minus_rotation['ms'] + 0.2 + start_hold['ms'], frequency_ramp_time['ms'], middle_hold['ms'], ramp_down_time['ms'], end_hold['ms'], voltage_pp['V'], drive_frequency['kHz'], 'free_rotation_sin_spin')
+        self.program_awf(c,
+                         rp['start_phase']['deg'],
+                         state_prep_time_minus_rotation['ms'] + 0.2 + rp['start_hold']['ms'],
+                         rp['frequency_ramp_time']['ms'],
+                         rp['middle_hold']['ms'],
+                         rp['ramp_down_time']['ms'],
+                         rp['end_hold']['ms'],
+                         rp['voltage_pp']['V'],
+                         rp['drive_frequency']['kHz'],
+                         'free_rotation_sin_spin')
 
     @setting(7, "Rotation run finally")
     def rotation_run_finally(self, c):
         # To be added to the run_finally method of scripts conditioned on rotation being enabled
-        sc = self.client.scriptscanner
-        old_freq = yield sc.get_parameter('RotationCW', 'drive_frequency')
-        old_amp = yield sc.get_parameter('RotationCW', 'voltage_pp')
-        old_phase = yield sc.get_parameter('RotationCW', 'start_phase')
+        ss = self.client.scriptscanner
+        old_freq = yield ss.get_parameter('RotationCW', 'drive_frequency')
+        old_amp = yield ss.get_parameter('RotationCW', 'voltage_pp')
+        old_phase = yield ss.get_parameter('RotationCW', 'start_phase')
         self.update_awg(c, old_freq['Hz'], old_amp['V'], old_phase['deg'])   
 
 __server__ = KEYSIGHT_33500B()

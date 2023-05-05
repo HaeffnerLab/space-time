@@ -10,7 +10,7 @@ class DriftTrackerRamsey_global(pulse_sequence):
     fixed_params = {#'StatePreparation.aux_optical_pumping_enable': False,
                     #'StatePreparation.sideband_cooling_enable': True,
                     'StateReadout.readout_mode':'pmt',
-                    'Excitation_729.channel_729': "729DP",
+                    'Excitation729.channel_729': "729DP",
                     }
 
     show_params= ['CalibrationScans.calibration_channel_729',
@@ -56,21 +56,21 @@ class DriftTrackerRamsey_global(pulse_sequence):
         
         self.addSequence(TurnOffAll)
         self.addSequence(StatePreparation)
-        self.addSequence(RabiExcitation,{'Excitation_729.channel_729': channel_729,
-                                         'Excitation_729.rabi_excitation_frequency': freq_729,
-                                         'Excitation_729.rabi_excitation_amplitude': amp,
-                                         'Excitation_729.rabi_excitation_duration':  0.5*duration,
-                                         'Excitation_729.rabi_excitation_phase': U(0, 'deg')
+        self.addSequence(RabiExcitation,{'Excitation729.channel_729': channel_729,
+                                         'Excitation729.rabi_excitation_frequency': freq_729,
+                                         'Excitation729.rabi_excitation_amplitude': amp,
+                                         'Excitation729.rabi_excitation_duration':  0.5*duration,
+                                         'Excitation729.rabi_excitation_phase': U(0, 'deg')
                                           })
   
         
         self.addSequence(EmptySequence,  { "EmptySequence.empty_sequence_duration" : ramsey_time})
         
-        self.addSequence(RabiExcitation,{'Excitation_729.channel_729': channel_729,
-                                         'Excitation_729.rabi_excitation_frequency': freq_729,
-                                         'Excitation_729.rabi_excitation_amplitude': amp,
-                                         'Excitation_729.rabi_excitation_duration':  0.5*duration,
-                                         'Excitation_729.rabi_excitation_phase': phase_2nd_pulse
+        self.addSequence(RabiExcitation,{'Excitation729.channel_729': channel_729,
+                                         'Excitation729.rabi_excitation_frequency': freq_729,
+                                         'Excitation729.rabi_excitation_amplitude': amp,
+                                         'Excitation729.rabi_excitation_duration':  0.5*duration,
+                                         'Excitation729.rabi_excitation_phase': phase_2nd_pulse
                                           })
         
         self.addSequence(StateReadout)

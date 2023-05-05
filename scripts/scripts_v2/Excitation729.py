@@ -10,8 +10,8 @@ class Excitation729(pulse_sequence):
         'DopplerCooling.doppler_cooling_frequency_866':  [(60., 85., .5, 'MHz'), 'calib_doppler'],
         'DopplerCooling.doppler_cooling_amplitude_866':  [(-20., -6., .5, 'dBm'), 'other'],
         'SidebandCooling.sideband_cooling_amplitude_854': [(-25.,-5., 1., 'dBm'), 'scan_854'],
-        'Excitation_729.duration729':  [(0., 200., 2., 'us'), 'rabi'],
-        'Excitation_729.frequency729': [(-50., 50., 5., 'kHz'), 'spectrum',True],
+        'Excitation729.duration729':  [(0., 200., 2., 'us'), 'rabi'],
+        'Excitation729.frequency729': [(-50., 50., 5., 'kHz'), 'spectrum',True],
         #'SidebandCooling.stark_shift': [(-20., 20., 2., 'kHz'), 'other'],
         #'EmptySequence.empty_sequence_readout_duration': [(0.,1000.,100.,'us'),'rabi'],
         'OpticalPumping.optical_pumping_amplitude_854':  [(-30., -10., .5, 'dBm'), 'other'],
@@ -21,12 +21,12 @@ class Excitation729(pulse_sequence):
               }
 
     show_params= [
-                  'Excitation_729.line_selection',
-                  'Excitation_729.amplitude729',
-                  'Excitation_729.duration729',
-                  'Excitation_729.sideband_selection',
-                  'Excitation_729.channel729',
-                  'Excitation_729.stark_shift_729',
+                  'Excitation729.line_selection',
+                  'Excitation729.amplitude729',
+                  'Excitation729.duration729',
+                  'Excitation729.sideband_selection',
+                  'Excitation729.channel729',
+                  'Excitation729.stark_shift_729',
                   'Rotation.drive_frequency',
                   'Rotation.end_hold',
                   'Rotation.frequency_ramp_time',
@@ -36,6 +36,7 @@ class Excitation729(pulse_sequence):
                   'Rotation.start_phase',
                   'Rotation.voltage_pp',
                   'EmptySequence.empty_sequence_duration',
+                  'EmptySequence.noise_enable',
                   # 'EmptySequence.empty_sequence_readout_duration',
                   'SidebandCoolingContinuous.sideband_cooling_continuous_cycles',
                   'SidebandCoolingContinuous.sideband_cooling_continuous_duration',
@@ -56,7 +57,7 @@ class Excitation729(pulse_sequence):
         from subsequences.RabiExcitation import RabiExcitation
         from subsequences.StateReadout import StateReadout
 
-        e = self.parameters.Excitation_729
+        e = self.parameters.Excitation729
         es = self.parameters.EmptySequence
         rot = self.parameters.Rotation
 
@@ -74,9 +75,9 @@ class Excitation729(pulse_sequence):
         ## build the sequence
         self.addSequence(StatePreparation)
         self.addSequence(EmptySequence)
-        self.addSequence(RabiExcitation,{'Excitation_729.frequency729': freq_729,
-                                         'Excitation_729.rabi_change_DDS': True})
-        self.addSequence(EmptySequence,{'EmptySequence.empty_sequence_duration':es.empty_sequence_readout_duration})
+        self.addSequence(RabiExcitation,{'Excitation729.frequency729': freq_729,
+                                         'Excitation729.rabi_change_DDS': True})
+        #self.addSequence(EmptySequence,{'EmptySequence.empty_sequence_duration':es.empty_sequence_readout_duration})
         self.addSequence(StateReadout)
         
     @classmethod
@@ -87,7 +88,7 @@ class Excitation729(pulse_sequence):
             state_prep_time = StatePreparation(parameters_dict).end
             cxn.keysight_33500b.rotation_run_initial(state_prep_time)
         
-        e = parameters_dict.Excitation_729
+        e = parameters_dict.Excitation729
 
         ###### add shift for spectra purposes
         carrier_translation = {'S+1/2D-3/2':'c0',
@@ -107,16 +108,16 @@ class Excitation729(pulse_sequence):
         shift = U(0.,'MHz')
         if parameters_dict.Display.relative_frequencies:
             # shift by sideband only (spectrum "0" will be carrier frequency)
-            for order,sideband_frequency in zip([sb*e.invert_sb for sb in e.sideband_selection], sideband_frequencies):
+            for order, sideband_frequency in zip([sb*e.invert_sb for sb in e.sideband_selection], sideband_frequencies):
                 shift += order * sideband_frequency
         else:
             #shift by sideband + carrier (spectrum "0" will be AO center frequency)
             shift += parameters_dict.Carriers[carrier_translation[e.line_selection]]
-            for order,sideband_frequency in zip([sb*e.invert_sb for sb in e.sideband_selection], sideband_frequencies):
+            for order, sideband_frequency in zip([sb*e.invert_sb for sb in e.sideband_selection], sideband_frequencies):
                 shift += order * sideband_frequency
 
         pv = cxn.parametervault
-        pv.set_parameter('Display','shift',shift)
+        pv.set_parameter('Display','shift', shift)
 
     @classmethod
     def run_in_loop(cls,cxn, parameters_dict, data, x):

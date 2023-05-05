@@ -9,21 +9,22 @@ class Excitation729_Calibration1(pulse_sequence):
         'DopplerCooling.doppler_cooling_amplitude_397':  [(-30., -15., .5, 'dBm'), 'other'],
         'DopplerCooling.doppler_cooling_frequency_866':  [(60., 85., .5, 'MHz'), 'calib_doppler'],
         'DopplerCooling.doppler_cooling_amplitude_866':  [(-20., -6., .5, 'dBm'), 'other'],
-        'Excitation_729.duration729':  [(0., 200., 2., 'us'), 'rabi'],
-        'Excitation_729.frequency729': [(-50., 50., 5., 'kHz'), 'spectrum',True],
+        'Excitation729Cal1.duration729':  [(0., 200., 2., 'us'), 'rabi'],
+        'Excitation729Cal1.frequency729': [(-50., 50., 5., 'kHz'), 'spectrum',True],
         'SidebandCooling.sideband_cooling_amplitude_854': [(-30.,-10., 1., 'dBm'), 'scan_854'],
               }
 
     show_params= [
-                  'Excitation_729_Cal1.line_selection',
-                  'Excitation_729_Cal1.amplitude729',
-                  'Excitation_729_Cal1.duration729',
-                  'Excitation_729_Cal1.sideband_selection',
-                  'Excitation_729_Cal1.channel729',
-                  'Excitation_729_Cal1.stark_shift_729',
-                  'Excitation_729_Cal1.sideband_cooling_enable',
-                  'Excitation_729_Cal1.rotation_enable',
-                  'Excitation_729_Cal1.empty_sequence_duration',
+                  'Excitation729Cal1.line_selection',
+                  'Excitation729Cal1.amplitude729',
+                  'Excitation729Cal1.duration729',
+                  'Excitation729Cal1.sideband_selection',
+                  'Excitation729Cal1.channel729',
+                  'Excitation729Cal1.stark_shift_729',
+                  'Excitation729Cal1.sideband_cooling_enable',
+                  'Excitation729Cal1.rotation_enable',
+                  'Excitation729Cal1.empty_sequence_duration',
+                  'Excitation729Cal1.readout_mode',
                   'Rotation.drive_frequency',
                   'Rotation.end_hold',
                   'Rotation.frequency_ramp_time',
@@ -32,7 +33,6 @@ class Excitation729_Calibration1(pulse_sequence):
                   'Rotation.start_hold',
                   'Rotation.start_phase',
                   'Rotation.voltage_pp',
-
                   ]
 
 
@@ -40,21 +40,23 @@ class Excitation729_Calibration1(pulse_sequence):
 
       from Excitation729 import Excitation729
 
-      e729c = self.parameters.Excitation_729_Cal1
+      e729c = self.parameters.Excitation729Cal1
 
-      self.addSequence(Excitation729,{  'Excitation_729.amplitude729': e729c.amplitude729,
-                                        'Excitation_729.channel729': e729c.channel729,
-                                        'Excitation_729.duration729': e729c.duration729,
-                                        'Excitation_729.line_selection': e729c.line_selection,
-                                        'Excitation_729.sideband_selection': e729c.sideband_selection,
-                                        'Excitation_729.stark_shift_729': e729c.stark_shift_729,
-                                        'StatePreparation.sideband_cooling_enable': e729c.sideband_cooling_enable,
-                                        'StatePreparation.rotation_enable': e729c.rotation_enable,
-                                        'EmptySequence.empty_sequence_duration': e729c.empty_sequence_duration,})
+      self.addSequence(Excitation729,{'Excitation729.amplitude729': e729c.amplitude729,
+                                      'Excitation729.channel729': e729c.channel729,
+                                      'Excitation729.duration729': e729c.duration729,
+                                      'Excitation729.frequency729': e729c.frequency729,
+                                      'Excitation729.line_selection': e729c.line_selection,
+                                      'Excitation729.sideband_selection': e729c.sideband_selection,
+                                      'Excitation729.stark_shift_729': e729c.stark_shift_729,
+                                      'StatePreparation.sideband_cooling_enable': e729c.sideband_cooling_enable,
+                                      'StatePreparation.rotation_enable': e729c.rotation_enable,
+                                      'EmptySequence.empty_sequence_duration': e729c.empty_sequence_duration,
+                                      'StateReadout.readout_mode': e729c.readout_mode})
         
     @classmethod
     def run_initial(cls,cxn, parameters_dict):
-      e729c = parameters_dict.Excitation_729_Cal1
+      e729c = parameters_dict.Excitation729Cal1
       
       # Add rotation if necessary
       if e729c.rotation_enable:
@@ -96,7 +98,7 @@ class Excitation729_Calibration1(pulse_sequence):
             shift += order * sideband_frequency
 
       pv = cxn.parametervault
-      pv.set_parameter('Display','shift',shift)
+      pv.set_parameter('Display','shift', shift)
 
     @classmethod
     def run_in_loop(cls,cxn, parameters_dict, data, x):
@@ -104,5 +106,5 @@ class Excitation729_Calibration1(pulse_sequence):
 
     @classmethod
     def run_finally(cls,cxn, parameters_dict, data, x):
-        if parameters_dict.Excitation_729_Cal1.rotation_enable:
+        if parameters_dict.Excitation729Cal1.rotation_enable:
             cxn.keysight_33500b.rotation_run_finally()

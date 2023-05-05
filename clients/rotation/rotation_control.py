@@ -93,7 +93,7 @@ class rotation_widget(QtGui.QWidget):
         self.amplitude = QtGui.QDoubleSpinBox()
         self.amplitude.setSuffix(' Vpp')
         amp = yield ss.get_parameter('RotationCW','voltage_pp')
-        self.amplitude.setRange(0.0,14.0)
+        self.amplitude.setRange(0.0,20.0)
         self.amplitude.setValue(amp['V'])
         self.amplitude.setDecimals(2)
         self.amplitude.setKeyboardTracking(False)
