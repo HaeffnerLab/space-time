@@ -66,7 +66,7 @@ class MULTIPOLE_CONTROL(QtGui.QWidget):
         
     def sendToServer(self):
         if self.inputUpdated:
-            self.dacserver.set_multipole_values(self.multipoleValues.items())
+            self.dacserver.set_multipole_values(list(self.multipoleValues.items()))
             self.inputUpdated = False
     
     @inlineCallbacks        
@@ -102,8 +102,8 @@ class CHANNEL_CONTROL (QtGui.QWidget):
         self.connect()
      
     def makeGUI(self):
-        self.dacDict = dict(hc.elec_dict.items() + hc.sma_dict.items())
-        self.controls = {k: QCustomSpinBox(k, self.dacDict[k].allowedVoltageRange) for k in self.dacDict.keys()}
+        self.dacDict = dict(list(hc.elec_dict.items()) + list(hc.sma_dict.items()))
+        self.controls = {k: QCustomSpinBox(k, self.dacDict[k].allowedVoltageRange) for k in list(self.dacDict.keys())}
         layout = QtGui.QGridLayout()
         if bool(hc.sma_dict):
             smaBox = QtGui.QGroupBox('SMA Out')
@@ -118,7 +118,7 @@ class CHANNEL_CONTROL (QtGui.QWidget):
 
         for s in hc.sma_dict:
             smaLayout.addWidget(self.controls[s], alignment = QtCore.Qt.AlignRight)
-        elecList = hc.elec_dict.keys()
+        elecList = list(hc.elec_dict.keys())
         elecList.sort()
             
         for i,e in enumerate(elecList): #i is the number value of the elec, e is the name
@@ -173,7 +173,7 @@ class CHANNEL_CONTROL (QtGui.QWidget):
         self.timer.timeout.connect(self.sendToServer)
         self.timer.start(UpdateTime)
         
-        for k in self.dacDict.keys():
+        for k in list(self.dacDict.keys()):
             self.controls[k].onNewValues.connect(self.inputHasUpdated(k))
 
         layout.setColumnStretch(1, 1)                   
@@ -290,7 +290,7 @@ class MULTIPOLE_MONITOR(QtGui.QWidget):  #######################################
             el = self.fields[self.counter]
             yield self.setmultipole(el)
             self.counter = self.counter + 1
-            print(str((n**3- self.counter)*ScanWait/1000/60) + ' minutes left')
+            print((str((n**3- self.counter)*ScanWait/1000/60) + ' minutes left'))
             if self.counter == len(self.fields):
                 self.counter = 0
                 self.scan = False
@@ -329,7 +329,7 @@ class MULTIPOLE_MONITOR(QtGui.QWidget):  #######################################
         darkness = 255 - brightness           
         for (k, v) in av:
      #       print k
-            print v
+            print(v)
             self.displays[k].display(float(v)) 
 
     def closeEvent(self, x):
@@ -345,8 +345,8 @@ class CHANNEL_MONITOR(QtGui.QWidget):
        
         
     def makeGUI(self):      
-        self.dacDict = dict(hc.elec_dict.items() + hc.sma_dict.items())
-        self.displays = {k: QtGui.QLCDNumber() for k in self.dacDict.keys()}               
+        self.dacDict = dict(list(hc.elec_dict.items()) + list(hc.sma_dict.items()))
+        self.displays = {k: QtGui.QLCDNumber() for k in list(self.dacDict.keys())}               
         layout = QtGui.QGridLayout()
         if bool(hc.sma_dict):        
             smaBox = QtGui.QGroupBox('SMA Out')
@@ -368,7 +368,7 @@ class CHANNEL_MONITOR(QtGui.QWidget):
                 smaLayout.addWidget(self.displays[k], self.dacDict[k].smaOutNumber, 1)
                 s = hc.sma_dict[k].smaOutNumber+1
 
-        elecList = hc.elec_dict.keys()
+        elecList = list(hc.elec_dict.keys())
         elecList.sort()
         if bool(hc.centerElectrode):
             elecList.pop(hc.centerElectrode-1)

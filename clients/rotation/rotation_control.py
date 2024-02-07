@@ -61,13 +61,13 @@ class rotation_widget(QtGui.QWidget):
 
         try:
             yield self.set_up_GUI()
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
         
         try:
             self.connect_layout()
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             self.setDisabled(True)
     
     @inlineCallbacks       
@@ -152,8 +152,8 @@ class rotation_widget(QtGui.QWidget):
                 self.server.update_awg(self.frequency.value()*1e3,self.amplitude.value(),self.phase.value())
             #if self.frequency.value != 0:
                 #yield self.server.sync_phases()
-        except Exception, e:
-                print e
+        except Exception as e:
+                print(e)
              
     @inlineCallbacks
     def update_awg(self,value):
@@ -163,8 +163,8 @@ class rotation_widget(QtGui.QWidget):
             yield ss.set_parameter('RotationCW','start_phase',self.WithUnit(self.phase.value(),'deg'))
             yield ss.set_parameter('RotationCW','voltage_pp',self.WithUnit(self.amplitude.value(),'V'))
             yield self.server.update_awg(self.frequency.value()*1e3,self.amplitude.value(),self.phase.value())
-        except Exception,e:
-            print e
+        except Exception as e:
+            print(e)
 
 
     # @inlineCallbacks           

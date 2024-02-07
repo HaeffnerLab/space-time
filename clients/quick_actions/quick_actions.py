@@ -18,30 +18,30 @@ class actions_widget(QtGui.QWidget):
         #self.second_397_SD_box = QtGui.QCheckBox('Second 397 SD')
         # self.loading_button = QtGui.QPushButton('Loading')
         self.fromload_button = QtGui.QPushButton('From Loading')
-    	self.fromdc_button = QtGui.QPushButton('From Doppler Cooling')
-    	self.fromstate_button = QtGui.QPushButton('From State Detection')
+        self.fromdc_button = QtGui.QPushButton('From Doppler Cooling')
+        self.fromstate_button = QtGui.QPushButton('From State Detection')
         self.toload_button = QtGui.QPushButton('To Loading')
-    	self.todc_button = QtGui.QPushButton('To Doppler Cooling')
-    	self.tostate_button = QtGui.QPushButton('To State Detection')
+        self.todc_button = QtGui.QPushButton('To Doppler Cooling')
+        self.tostate_button = QtGui.QPushButton('To State Detection')
 
         self.eject_button = QtGui.QPushButton('EJECT ION')
         #widget_ui.__init__(self)
     
-    	#self.setFrameStyle(QtGui.QFrame.Panel  | QtGui.QFrame.Sunken)
+        #self.setFrameStyle(QtGui.QFrame.Panel  | QtGui.QFrame.Sunken)
         self.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed)
     
-    	layout = QtGui.QGridLayout()
-    	layout.addWidget(self.fromload_button, 0, 0)
+        layout = QtGui.QGridLayout()
+        layout.addWidget(self.fromload_button, 0, 0)
         layout.addWidget(self.toload_button, 0, 1)
-    	layout.addWidget(self.fromdc_button, 1, 0)
-    	layout.addWidget(self.todc_button, 1, 1)
-    	layout.addWidget(self.fromstate_button, 2, 0)
-    	layout.addWidget(self.tostate_button, 2, 1)
+        layout.addWidget(self.fromdc_button, 1, 0)
+        layout.addWidget(self.todc_button, 1, 1)
+        layout.addWidget(self.fromstate_button, 2, 0)
+        layout.addWidget(self.tostate_button, 2, 1)
         layout.addWidget(self.eject_button, 3, 0)
         #layout.addWidget(self.second_397_DC_box, 3, 0) #used if there are two doppler cooling beams
         #layout.addWidget(self.second_397_SD_box, 3, 1)
     
-    	self.setLayout(layout)
+        self.setLayout(layout)
 
         self.connect()   
         
@@ -59,8 +59,8 @@ class actions_widget(QtGui.QWidget):
         self.context = yield self.cxn.context()
         try:
             self.connect_layout()
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             self.setDisabled(True)
     
     def connect_layout(self):
@@ -117,7 +117,7 @@ class actions_widget(QtGui.QWidget):
         yesbutton.setText('...Do it.')
         nobutton = msg.button(QtGui.QMessageBox.No)
         nobutton.setText('Nooo!')
-	   # If yes, call eject_ion(), defined below, to eject the ion. Otherwise, do nothing.
+       # If yes, call eject_ion(), defined below, to eject the ion. Otherwise, do nothing.
         result = msg.exec_()
         if result == QtGui.QMessageBox.Yes:
             self.eject_ion()

@@ -28,14 +28,14 @@ class switchWidgetCustom(QtGui.QFrame):
             self.Error = Error
         
         self.context = yield self.cxn.context()
-        print "connect"
+        print("connect")
         try:
             displayed_channels = yield self.get_displayed_channels()
             yield self.initializeGUI(displayed_channels)
             yield self.setupListeners()
-        except Exception, e:
-            print e
-            print 'SWTICH CONTROL: Pulser not available'
+        except Exception as e:
+            print(e)
+            print('SWTICH CONTROL: Pulser not available')
             self.setDisabled(True)
         self.cxn.add_on_connect('Pulser', self.reinitialize)
         self.cxn.add_on_disconnect('Pulser', self.disable)
@@ -77,7 +77,7 @@ class switchWidgetCustom(QtGui.QFrame):
         server = yield self.cxn.get_server('Pulser')
         if self.initialized:
             yield server.signal__switch_toggled(SIGNALID, context = self.context)
-            for name in self.d.keys():
+            for name in list(self.d.keys()):
                 self.setStateNoSignals(name, server)
         else:
             yield self.initializeGUI()
@@ -189,8 +189,9 @@ class switchWidgetCustom(QtGui.QFrame):
         yield server.signal__switch_toggled(SIGNALID, context = self.context)
         yield server.addListener(listener = self.followSignal, source = None, ID = SIGNALID, context = self.context)
     
-    def followSignal(self, x, (switchName, state)):
-        if switchName not in self.d.keys(): return None
+    def followSignal(self, x, switchName_state_tuple):
+        (switchName, state) = switchName_state_tuple
+        if switchName not in list(self.d.keys()): return None
         if state == 'Auto':
             button = self.d[switchName]['AUTO']
         elif state == 'ManualOn':
