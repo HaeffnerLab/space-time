@@ -1,7 +1,7 @@
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 from twisted.internet.defer import inlineCallbacks
 
-class SPACETIME_GUI(QtGui.QMainWindow):
+class SPACETIME_GUI(QtWidgets.QMainWindow):
     def __init__(self, reactor, clipboard, parent=None):
         super(SPACETIME_GUI, self).__init__(parent)
         self.clipboard = clipboard
@@ -18,8 +18,8 @@ class SPACETIME_GUI(QtGui.QMainWindow):
     def create_layout(self, cxn):
 
 
-        centralWidget = QtGui.QWidget()
-        layout = QtGui.QHBoxLayout() 
+        centralWidget = QtWidgets.QWidget()
+        layout = QtWidgets.QHBoxLayout() 
 
         laser_room = self.makeLaserRoomWidget(reactor, cxn)
         laser_control = self.makeControlWidget(reactor, cxn)
@@ -28,7 +28,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         drift_tracker_global = self.makeDriftTrackerGlobalWidget(reactor, cxn)
         config_editor = self.make_config_editor_widget(reactor, cxn)
 
-        self.tabWidget = QtGui.QTabWidget()
+        self.tabWidget = QtWidgets.QTabWidget()
         self.tabWidget.addTab(laser_room,'&Laser Room')
         self.tabWidget.addTab(laser_control,'&Control')
         self.tabWidget.addTab(script_scannerv2, '&Script Scanner v2')
@@ -61,13 +61,13 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         return widget
 
     def makeLaserRoomWidget(self, reactor, cxn):
-        widget = QtGui.QWidget()
+        widget = QtWidgets.QWidget()
  
 
         from common.clients.LASERDAC_CONTROL import DAC_Control as laserdac_control_widget
         from common.clients.multiplexer.MULTIPLEXER_CONTROL import multiplexerWidget
         #from common.clients.InjectionLock_GUI import InjectionLock_Control
-        gridLayout = QtGui.QGridLayout()
+        gridLayout = QtWidgets.QGridLayout()
 
         gridLayout.addWidget(laserdac_control_widget(reactor),             0,0)
         #gridLayout.addWidget(InjectionLock_Control(reactor),    1,0)
@@ -77,28 +77,28 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         return widget
 
     def make_histogram_widget(self, reactor, cxn):
-        histograms_tab = QtGui.QTabWidget()
+        histograms_tab = QtWidgets.QTabWidget()
         from common.clients.readout_histogram import readout_histogram
         pmt_readout = readout_histogram(reactor, cxn)
         histograms_tab.addTab(pmt_readout, "PMT")
         return histograms_tab
     
     def makeDriftTrackerWidget(self, reactor, cxn):
-        dt_tab = QtGui.QTabWidget()
+        dt_tab = QtWidgets.QTabWidget()
         from common.clients.drift_tracker.drift_tracker import drift_tracker
         tracker = drift_tracker(reactor, cxn)
         dt_tab.addTab(tracker,"Drift Tracker")
         return dt_tab
 
     def makeDriftTrackerGlobalWidget(self, reactor, cxn):
-        dt_tab = QtGui.QTabWidget()
+        dt_tab = QtWidgets.QTabWidget()
         from common.clients.drift_tracker_global.drift_tracker_global import drift_tracker_global
         tracker = drift_tracker_global(reactor, cxn)
         dt_tab.addTab(tracker,"Drift Tracker Global")
         return dt_tab
  
     def make_config_editor_widget(self, reactor, cxn):
-        config_editor_tab = QtGui.QTabWidget()
+        config_editor_tab = QtWidgets.QTabWidget()
         from common.clients.CONFIG_EDITOR import CONFIG_EDITOR
         config_editor = CONFIG_EDITOR(reactor, cxn)
         config_editor_tab.addTab(config_editor,"Config Editor")
@@ -106,7 +106,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
        
     
     def makeControlWidget(self, reactor, cxn):
-        widget = QtGui.QWidget()
+        widget = QtWidgets.QWidget()
 
         from common.clients.PMT_CONTROL    import pmtWidget
         from common.clients.SWITCH_CONTROL import switchWidget
@@ -116,7 +116,7 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         from quick_actions.quick_actions import actions_widget
         from rotation.rotation_control import rotation_widget
         #from common.clients.LINETRIGGER_CONTROL import linetriggerWidget
-        gridLayout = QtGui.QGridLayout()
+        gridLayout = QtWidgets.QGridLayout()
 
         gridLayout.addWidget(switchWidget(reactor, cxn),        2,3,1,1)
         gridLayout.addWidget(switchWidgetCustom(reactor, cxn),  1,3,1,1)
@@ -135,10 +135,10 @@ class SPACETIME_GUI(QtGui.QMainWindow):
         
 
 if __name__=="__main__":
-    a = QtGui.QApplication( [] )
+    a = QtWidgets.QApplication( [] )
     clipboard = a.clipboard()
-    import common.clients.qt4reactor as qt4reactor
-    qt4reactor.install()
+    import qt5reactor
+    qt5reactor.install()
     from twisted.internet import reactor
     spacetimeGUI = SPACETIME_GUI(reactor, clipboard)
     spacetimeGUI.setWindowTitle('Space-Time GUI')

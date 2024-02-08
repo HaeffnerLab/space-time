@@ -1,7 +1,7 @@
 import sys
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore, QtGui, QtWidgets
 
-class Rings(QtGui.QWidget):
+class Rings(QtWidgets.QWidget):
     
     def __init__(self):
         super(Rings, self).__init__()
@@ -29,7 +29,7 @@ class Rings(QtGui.QWidget):
         
 def main():
     
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     ex = Rings()
     sys.exit(app.exec_())
     

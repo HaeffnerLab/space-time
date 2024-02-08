@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, uic
+from PyQt5 import QtGui, QtWidgets, uic
 import os
 #from common.clients.connection import connection
 from twisted.internet.defer import inlineCallbacks
@@ -6,31 +6,31 @@ from labrad.units import WithUnit
 import time
 
 
-class actions_widget(QtGui.QWidget):
+class actions_widget(QtWidgets.QWidget):
     def __init__(self,reactor,cxn = None, parent=None):
         super(actions_widget, self).__init__(parent)
         self.reactor = reactor
         self.cxn = cxn
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         self.use_second_397 = False
 
         #self.second_397_DC_box = QtGui.QCheckBox('Second 397 DC') #used if there are two doppler cooling beams
         #self.second_397_SD_box = QtGui.QCheckBox('Second 397 SD')
         # self.loading_button = QtGui.QPushButton('Loading')
-        self.fromload_button = QtGui.QPushButton('From Loading')
-        self.fromdc_button = QtGui.QPushButton('From Doppler Cooling')
-        self.fromstate_button = QtGui.QPushButton('From State Detection')
-        self.toload_button = QtGui.QPushButton('To Loading')
-        self.todc_button = QtGui.QPushButton('To Doppler Cooling')
-        self.tostate_button = QtGui.QPushButton('To State Detection')
+        self.fromload_button = QtWidgets.QPushButton('From Loading')
+        self.fromdc_button = QtWidgets.QPushButton('From Doppler Cooling')
+        self.fromstate_button = QtWidgets.QPushButton('From State Detection')
+        self.toload_button = QtWidgets.QPushButton('To Loading')
+        self.todc_button = QtWidgets.QPushButton('To Doppler Cooling')
+        self.tostate_button = QtWidgets.QPushButton('To State Detection')
 
-        self.eject_button = QtGui.QPushButton('EJECT ION')
+        self.eject_button = QtWidgets.QPushButton('EJECT ION')
         #widget_ui.__init__(self)
     
         #self.setFrameStyle(QtGui.QFrame.Panel  | QtGui.QFrame.Sunken)
-        self.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed)
+        self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
     
-        layout = QtGui.QGridLayout()
+        layout = QtWidgets.QGridLayout()
         layout.addWidget(self.fromload_button, 0, 0)
         layout.addWidget(self.toload_button, 0, 1)
         layout.addWidget(self.fromdc_button, 1, 0)
@@ -107,19 +107,19 @@ class actions_widget(QtGui.QWidget):
 
     def on_eject_ion(self):
         # Bring up a window to confirm ion ejection
-        w = QtGui.QWidget()
-        msg = QtGui.QMessageBox(w)
-        msg.setIcon(QtGui.QMessageBox.Warning)
+        w = QtWidgets.QWidget()
+        msg = QtWidgets.QMessageBox(w)
+        msg.setIcon(QtWidgets.QMessageBox.Warning)
         msg.setWindowTitle("You pressed eject!")
         msg.setText("Are you sure you want to eject the ion(s)?")
-        msg.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-        yesbutton = msg.button(QtGui.QMessageBox.Yes)
+        msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        yesbutton = msg.button(QtWidgets.QMessageBox.Yes)
         yesbutton.setText('...Do it.')
-        nobutton = msg.button(QtGui.QMessageBox.No)
+        nobutton = msg.button(QtWidgets.QMessageBox.No)
         nobutton.setText('Nooo!')
        # If yes, call eject_ion(), defined below, to eject the ion. Otherwise, do nothing.
         result = msg.exec_()
-        if result == QtGui.QMessageBox.Yes:
+        if result == QtWidgets.QMessageBox.Yes:
             self.eject_ion()
         else:
             pass
@@ -287,9 +287,9 @@ class actions_widget(QtGui.QWidget):
         self.reactor.stop()  
         
 if __name__=="__main__":
-    a = QtGui.QApplication( [] )
-    from common.clients import qt4reactor
-    qt4reactor.install()
+    a = QtWidgets.QApplication( [] )
+    import qt5reactor
+    qt5reactor.install()
     from twisted.internet import reactor
     from common.clients.connection import connection
     from labrad.units import WithUnit
