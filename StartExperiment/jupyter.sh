@@ -1,8 +1,5 @@
 #!/bin/bash
-source virtualenvwrapper.sh 
-workon 'labrad'
 
+source ~/jupyter-env/bin/activate
 cd /home/space-time/Science
 jupyter notebook
-
-

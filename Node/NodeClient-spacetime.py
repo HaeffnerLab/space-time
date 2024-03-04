@@ -15,7 +15,7 @@ except:
 
 nodeDict = {
 			#'node spacetime-exp-control':
-			'node space-time-exp-comp':
+			'node_spacetime_pc':
 				['Pulser',
 				'DAC Server', 
 				'Data Vault', 
