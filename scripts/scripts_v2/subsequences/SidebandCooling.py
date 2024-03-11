@@ -206,6 +206,6 @@ class SBCTwoTonePulse(pulse_sequence):
         self.end = self.start + duration_866
         self.addDDS(sc.channel_729,              self.start, duration_729, freq729_1, sc.sideband_cooling_amplitude_729)
         self.addDDS(scctt.channel_729_secondary, self.start, duration_729, freq729_2, sc.sideband_cooling_amplitude_729)
-        self.addDDS('AAAAAA', self.start, duration_854, sc.sideband_cooling_frequency_854, sc.sideband_cooling_amplitude_854)
+        self.addDDS('854DP', self.start, duration_854, sc.sideband_cooling_frequency_854, sc.sideband_cooling_amplitude_854)
         self.addDDS('866DP', self.start, duration_866, freq866,                           sc.sideband_cooling_amplitude_866)
 

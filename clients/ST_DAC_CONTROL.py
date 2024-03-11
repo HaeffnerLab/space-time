@@ -106,7 +106,7 @@ class CHANNEL_CONTROL (QtWidgets.QWidget):
         self.controls = {k: QCustomSpinBox(k, self.dacDict[k].allowedVoltageRange) for k in list(self.dacDict.keys())}
         layout = QtWidgets.QGridLayout()
         if bool(hc.sma_dict):
-            smaBox = QtWidgets.QGroupBox('SMA Out')
+            smaBox = QtWidgets.QGroupBox('BNC Out')
             smaLayout = QtWidgets.QVBoxLayout()
             smaBox.setLayout(smaLayout)
         elecBox = QtWidgets.QGroupBox('Electrodes')
@@ -349,7 +349,7 @@ class CHANNEL_MONITOR(QtWidgets.QWidget):
         self.displays = {k: QtWidgets.QLCDNumber() for k in list(self.dacDict.keys())}               
         layout = QtWidgets.QGridLayout()
         if bool(hc.sma_dict):        
-            smaBox = QtWidgets.QGroupBox('SMA Out')
+            smaBox = QtWidgets.QGroupBox('BNC Out')
             smaLayout = QtWidgets.QGridLayout()
             smaBox.setLayout(smaLayout)       
         elecBox = QtWidgets.QGroupBox('Electrodes')

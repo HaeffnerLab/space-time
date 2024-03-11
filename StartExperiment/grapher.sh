@@ -1,8 +1,4 @@
 #!/bin/bash
-source virtualenvwrapper.sh 
-workon 'labrad'
 
-cd /home/space-time/LabRAD/RealSimpleGrapher
-python rsg.py
-
-
+source ~/gui-env/bin/activate
+python ~/LabRAD/RealSimpleGrapher/rsg.py

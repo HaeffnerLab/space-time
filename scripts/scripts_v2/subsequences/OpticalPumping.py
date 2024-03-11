@@ -42,7 +42,7 @@ class OpticalPumping(pulse_sequence):
             
             self.addDDS(sp.channel_729, self.start, opc.optical_pumping_continuous_duration, freq_729, op.optical_pumping_amplitude_729)
             #self.addTTL('854TTL',self.start, duration_854)
-            self.addDDS('AAAAAA', self.start, duration_854, freq854, ampl854)
+            self.addDDS('854DP', self.start, duration_854, freq854, ampl854)
             self.addDDS('866DP', self.start, duration_866, freq866, ampl866)
         elif op.optical_pumping_type == 'pulsed':
             cycles = int(opp.optical_pumping_pulsed_cycles)
@@ -62,7 +62,7 @@ class OpticalPumping(pulse_sequence):
                 duration_866 =  opp.optical_pumping_pulsed_duration_repumps + opp.optical_pumping_pulsed_duration_additional_866
                 self.addDDS(sp.channel_729, start, opp.optical_pumping_pulsed_duration_729 , freq_729 , ampl729)
                 #self.addTTL('854TTL',start_repumps, opp.optical_pumping_pulsed_duration_repumps)
-                self.addDDS('AAAAAA', start_repumps, opp.optical_pumping_pulsed_duration_repumps, freq854, ampl854)
+                self.addDDS('854DP', start_repumps, opp.optical_pumping_pulsed_duration_repumps, freq854, ampl854)
                 self.addDDS('866DP', start_repumps, duration_866, freq866 , ampl866)
         elif op.optical_pumping_type == '397sigma':
             duration_866 = ops.optical_pumping_397sigma_duration + ops.optical_pumping_397sigma_additional
