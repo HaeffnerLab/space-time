@@ -4,5 +4,5 @@
 
 ~/LabRAD/scalabrad-web-server-1.1.0/bin/labrad-web &
 
-source ~/labrad-env/bin/activate
+source ~/virtual-envs/labrad-env/bin/activate
 python -m labrad.node
