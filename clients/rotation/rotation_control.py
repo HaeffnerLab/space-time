@@ -1,17 +1,17 @@
 from twisted.internet.defer import inlineCallbacks
-from PyQt4 import QtGui, uic, QtCore
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
 import os
 #from common.clients.connection import connection
 from common.clients.qtui.QCustomSpinBox import QCustomSpinBox
 
 
-class TextChangingButton(QtGui.QPushButton):
+class TextChangingButton(QtWidgets.QPushButton):
     """Button that changes its text to ON or OFF and colors when it's pressed""" 
     def __init__(self, parent = None):
         super(TextChangingButton, self).__init__(parent)
         self.setCheckable(False)
         self.setFont(QtGui.QFont('MS Shell Dlg 2',pointSize=10))
-        self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         #connect signal for appearance changing
         self.toggled.connect(self.setAppearance)
         self.setAppearance(self.isDown())
@@ -34,13 +34,13 @@ class TextChangingButton(QtGui.QPushButton):
         return QtCore.QSize(37, 26)
 
 
-class rotation_widget(QtGui.QWidget):
+class rotation_widget(QtWidgets.QWidget):
     
     def __init__(self,reactor,cxn = None, parent=None):
         super(rotation_widget, self).__init__(parent)
         self.reactor = reactor
         self.cxn = cxn      
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         self.connect()  
 
     @inlineCallbacks
@@ -61,20 +61,20 @@ class rotation_widget(QtGui.QWidget):
 
         try:
             yield self.set_up_GUI()
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
         
         try:
             self.connect_layout()
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
             self.setDisabled(True)
     
     @inlineCallbacks       
     def set_up_GUI(self):
         ss = yield self.cxn.get_server('ScriptScanner')
 
-        self.frequency = QtGui.QDoubleSpinBox()
+        self.frequency = QtWidgets.QDoubleSpinBox()
         self.frequency.setSuffix(' kHz')
         freq = yield ss.get_parameter('RotationCW','drive_frequency')
         self.frequency.setRange(0.0,1.0e4)
@@ -82,7 +82,7 @@ class rotation_widget(QtGui.QWidget):
         self.frequency.setDecimals(6)
         self.frequency.setKeyboardTracking(False)
 
-        self.phase = QtGui.QDoubleSpinBox()
+        self.phase = QtWidgets.QDoubleSpinBox()
         self.phase.setSuffix(' degrees')
         phi = yield ss.get_parameter('RotationCW','start_phase')
         self.phase.setRange(0.0,360.0)
@@ -90,7 +90,7 @@ class rotation_widget(QtGui.QWidget):
         self.phase.setDecimals(1)
         self.phase.setKeyboardTracking(False)
                
-        self.amplitude = QtGui.QDoubleSpinBox()
+        self.amplitude = QtWidgets.QDoubleSpinBox()
         self.amplitude.setSuffix(' Vpp')
         amp = yield ss.get_parameter('RotationCW','voltage_pp')
         self.amplitude.setRange(0.0,20.0)
@@ -101,21 +101,21 @@ class rotation_widget(QtGui.QWidget):
         self.state_button = TextChangingButton()
         self.state_button.setCheckable(False)
  
-        self.reset_button = QtGui.QPushButton('')
+        self.reset_button = QtWidgets.QPushButton('')
         
-        self.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed)
+        self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
     
-        layout = QtGui.QGridLayout()
-        label = QtGui.QLabel("Sinusoid Status")
+        layout = QtWidgets.QGridLayout()
+        label = QtWidgets.QLabel("Sinusoid Status")
         layout.addWidget(label, 0, 0)
         layout.addWidget(self.state_button, 0, 1)
-        label = QtGui.QLabel("Frequency")
+        label = QtWidgets.QLabel("Frequency")
         layout.addWidget(label, 1, 0)
         layout.addWidget(self.frequency, 1, 1)
-        label = QtGui.QLabel("Amplitude")
+        label = QtWidgets.QLabel("Amplitude")
         layout.addWidget(label, 2, 0)
         layout.addWidget(self.amplitude, 2, 1)
-        label = QtGui.QLabel("Phase")
+        label = QtWidgets.QLabel("Phase")
         layout.addWidget(label, 3, 0)
         layout.addWidget(self.phase, 3, 1)
         #label = QtGui.QLabel("Reset CW")
@@ -152,8 +152,8 @@ class rotation_widget(QtGui.QWidget):
                 self.server.update_awg(self.frequency.value()*1e3,self.amplitude.value(),self.phase.value())
             #if self.frequency.value != 0:
                 #yield self.server.sync_phases()
-        except Exception, e:
-                print e
+        except Exception as e:
+                print(e)
              
     @inlineCallbacks
     def update_awg(self,value):
@@ -163,8 +163,8 @@ class rotation_widget(QtGui.QWidget):
             yield ss.set_parameter('RotationCW','start_phase',self.WithUnit(self.phase.value(),'deg'))
             yield ss.set_parameter('RotationCW','voltage_pp',self.WithUnit(self.amplitude.value(),'V'))
             yield self.server.update_awg(self.frequency.value()*1e3,self.amplitude.value(),self.phase.value())
-        except Exception,e:
-            print e
+        except Exception as e:
+            print(e)
 
 
     # @inlineCallbacks           
@@ -216,9 +216,9 @@ class rotation_widget(QtGui.QWidget):
         self.reactor.stop()  
         
 if __name__=="__main__":
-    a = QtGui.QApplication( [] )
-    from common.clients import qt4reactor
-    qt4reactor.install()
+    a = QtWidgets.QApplication( [] )
+    import qt5reactor
+    qt5reactor.install()
     from twisted.internet import reactor
     from common.clients.connection import connection
     rotationwidget = rotation_widget(reactor)

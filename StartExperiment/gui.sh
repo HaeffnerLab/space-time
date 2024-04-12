@@ -1,6 +1,4 @@
 #!/bin/bash
-source virtualenvwrapper.sh 
-workon 'labrad'
 
-cd /home/space-time/LabRAD/space_time/clients
-python Space_Time_GUI.py
+source ~/virtual-envs/gui-env/bin/activate
+python ~/LabRAD/space_time/clients/Space_Time_GUI.py

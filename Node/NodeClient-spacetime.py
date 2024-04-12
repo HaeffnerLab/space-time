@@ -15,13 +15,13 @@ except:
 
 nodeDict = {
 			#'node spacetime-exp-control':
-			'node space-time-exp-comp':
-				['Pulser',
+			'node_spacetime_pc':
+				['ParameterVault',
+				'Pulser',
 				'DAC Server', 
-				'Data Vault', 
 				'KEYSIGHT_33500B',
+				'Data Vault', 
 				'NormalPMTFlow',
-				'ParameterVault',
 				#'SD Tracker Global', # Turns out since this is running on the laser room computer, this is totally unneccessary!
 				'ScriptScanner',
 				],
@@ -65,5 +65,5 @@ if pulser_on:
 
 
 
-time.sleep(10)
+#time.sleep(10)
 

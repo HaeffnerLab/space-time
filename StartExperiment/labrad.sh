@@ -1,14 +1,9 @@
 #!/bin/bash
 
+~/LabRAD/scalabrad/scalabrad-0.7.2/bin/labrad --tls-required=false &
 
+~/LabRAD/scalabrad/scalabrad-web-server-1.1.0/bin/labrad-web &
 
-/home/space-time/LabRAD/scalabrad-0.7.2/bin/labrad --tls-required=false &
-
-~/LabRAD/scalabrad-web-server-1.1.0/bin/labrad-web &
-
-source virtualenvwrapper.sh 
-workon 'labrad'
-
-# start node server
+source ~/virtual-envs/labrad-env/bin/activate
 python -m labrad.node
 

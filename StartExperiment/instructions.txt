@@ -1,10 +1,11 @@
 For each in a new terminal window:
 
 To start the experiment:
-- Run ./labrad.sh to start labrad
-- Run ./servers.sh to turn on all necessary labrad servers. This is equivalent to simply manually starting the servers on Chrome at localhost:7667/nodes. This terminal window doesn't need to stay open once the servers are running.
-- Run ./grapher.sh to open the grapher
-- Run ./gui.sh to open the GUI
+- Run ./labrad.sh to start labrad.
+- Run ./chromium.sh to open up Chromium. Click the bookmark LabRAD or enter the address localhost:7667/nodes to open the LabRAD web interface. Leave the password field blank and click login.
+- Run ./servers.sh to turn on all labrad servers. This is equivalent to simply manually starting the servers on Chromium. This terminal window doesn't need to stay open once the servers are running.
+- Run ./grapher.sh to open the grapher.
+- Run ./gui.sh to open the GUI.
 
 To run a jupyter notebook server:
 - Run ./jupyter.sh

@@ -1,7 +1,7 @@
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 from twisted.internet.defer import inlineCallbacks
 
-class PMT_GUI(QtGui.QMainWindow):
+class PMT_GUI(QtWidgets.QMainWindow):
     def __init__(self, reactor, clipboard, parent=None):
         super(PMT_GUI, self).__init__(parent)
         self.clipboard = clipboard
@@ -20,13 +20,13 @@ class PMT_GUI(QtGui.QMainWindow):
        # laser_control = self.makeControlWidget(reactor, cxn)
         histogram = self.make_histogram_widget(reactor, cxn)
 #       drift_tracker = self.make_drift_tracker_widget(reactor, cxn)
-        centralWidget = QtGui.QWidget()
-        layout = QtGui.QHBoxLayout() 
+        centralWidget = QtWidgets.QWidget()
+        layout = QtWidgets.QHBoxLayout() 
 #      from common.clients.script_scanner_gui.script_scanner_gui import script_scanner_gui
   #      script_scanner = script_scanner_gui(reactor, cxn)
   #      script_scanner.show()
 
-        self.tabWidget = QtGui.QTabWidget()
+        self.tabWidget = QtWidgets.QTabWidget()
        # self.tabWidget.addTab(laser_room,'&Laser Room')
         #self.tabWidget.addTab(laser_control,'&Control')
 #       self.tabWidget.addTab(translationStageWidget,'&Translation Stages')
@@ -38,7 +38,7 @@ class PMT_GUI(QtGui.QMainWindow):
 
     
     def make_histogram_widget(self, reactor, cxn):
-        histograms_tab = QtGui.QTabWidget()
+        histograms_tab = QtWidgets.QTabWidget()
         from common.clients.readout_histogram import readout_histogram
         pmt_readout = readout_histogram(reactor, cxn)
         histograms_tab.addTab(pmt_readout, "PMT")
@@ -48,10 +48,10 @@ class PMT_GUI(QtGui.QMainWindow):
         self.reactor.stop()
 
 if __name__=="__main__":
-    a = QtGui.QApplication( [] )
+    a = QtWidgets.QApplication( [] )
     clipboard = a.clipboard()
-    import common.clients.qt4reactor as qt4reactor
-    qt4reactor.install()
+    import qt5reactor
+    qt5reactor.install()
     from twisted.internet import reactor
     pmtGUI = PMT_GUI(reactor, clipboard)
     pmtGUI.setWindowTitle('PMT Readout')
