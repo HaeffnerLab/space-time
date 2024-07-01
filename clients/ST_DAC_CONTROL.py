@@ -103,7 +103,8 @@ class CHANNEL_CONTROL (QtWidgets.QWidget):
      
     def makeGUI(self):
         self.dacDict = dict(list(hc.elec_dict.items()) + list(hc.sma_dict.items()))
-        self.controls = {k: QCustomSpinBox(k, self.dacDict[k].allowedVoltageRange) for k in list(self.dacDict.keys())}
+        step_sizes = {k:(0.01 if k=='RF bias' else 0.001) for k in list(self.dacDict.keys())} #Make the bias voltage step size 10x larger than the others to make it easy to change
+        self.controls = {k: QCustomSpinBox(k, self.dacDict[k].allowedVoltageRange, step_size=step_sizes[k]) for k in list(self.dacDict.keys())}
         layout = QtWidgets.QGridLayout()
         if bool(hc.sma_dict):
             smaBox = QtWidgets.QGroupBox('BNC Out')

@@ -8,4 +8,4 @@ To start the experiment:
 - Run ./gui.sh to open the GUI.
 
 To run a jupyter notebook server:
-- Run ./jupyter.sh
+- Run ./jupyter.sh in the home directory

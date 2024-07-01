@@ -4,24 +4,17 @@ from labrad.units import WithUnit
 class OpticalPumping(pulse_sequence):
     
     '''
-    Optical pumping unig a frequency selective transition  
+    Optical pumping using a frequency selective transition  
     '''
 
 
     def sequence(self):
-
-
         op = self.parameters.OpticalPumping
         opc = self.parameters.OpticalPumpingContinuous
         opp = self.parameters.OpticalPumpingPulsed 
         ops = self.parameters.OpticalPumping397Sigma
         sp = self.parameters.StatePreparation
-        # choose the carrier frequency
-        #freq_729=self.calc_freq_from_array(op.line_selection)
-        freq_729 = op.optical_pumping_frequency_729
-        # print "Optical pumping 729 freq:.{}".format(freq_729)        
-        # print "Optical pumping line selection:.{}".format(op.line_selection)
-        # print freq_729
+        freq_729 = op.optical_pumping_frequency_729  # This is basically a dummy parameter that will get replaced by higher-level sequences calling this one
         if op.optical_pumping_type == 'continuous':
             continuous = True
         elif op.optical_pumping_type == 'pulsed':
