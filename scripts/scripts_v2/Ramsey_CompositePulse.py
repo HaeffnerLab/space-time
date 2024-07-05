@@ -1,9 +1,5 @@
 from common.devel.bum.sequences.pulse_sequence import pulse_sequence
 from labrad.units import WithUnit as U
-from treedict import TreeDict
-import numpy as np
-import math as m
-import time
 
 class Ramsey_CompositePulse(pulse_sequence):
     """
@@ -69,6 +65,9 @@ class Ramsey_CompositePulse(pulse_sequence):
                    'Rotation.start_hold',
                    'Rotation.start_phase',
                    'Rotation.voltage_pp',
+                   
+                   'RFModulation.enable',
+                   'RFModulation.turn_on_before',
 
                    'EmptySequence.empty_sequence_duration',
                    ]
@@ -80,6 +79,7 @@ class Ramsey_CompositePulse(pulse_sequence):
         from subsequences.RabiExcitation import RabiExcitation
         from subsequences.StateReadout import StateReadout
         from subsequences.EmptySequence import EmptySequence
+        from subsequences.RFModulation import RFModulation
 
         ampl_off = U(-63.0, 'dBm')
         frequency_advance_duration = U(6, 'us')
@@ -170,7 +170,12 @@ class Ramsey_CompositePulse(pulse_sequence):
             add_pulse_n(n)
         add_pulse_n(1, final_pulse=True)
 
+        time_start_readout = self.end # This is for RF modulation
         self.addSequence(StateReadout)
+
+        # Add RF modulation TTL pulse if applicable
+        if self.parameters.RFModulation.enable:
+            RFModulation(self, time_start_readout)
 
 
     @classmethod

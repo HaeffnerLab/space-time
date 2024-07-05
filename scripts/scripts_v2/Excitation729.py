@@ -5,7 +5,7 @@ import numpy as np
 
 class Excitation729(pulse_sequence):
     scannable_params = {
-        'DopplerCooling.doppler_cooling_frequency_397':  [(180., 210., .5, 'MHz'), 'calib_doppler'],
+        'DopplerCooling.doppler_cooling_frequency_397':  [(170., 195., .5, 'MHz'), 'calib_doppler'],
         'DopplerCooling.doppler_cooling_amplitude_397':  [(-30., -15., .5, 'dBm'), 'other'],
         'DopplerCooling.doppler_cooling_frequency_866':  [(60., 85., .5, 'MHz'), 'calib_doppler'],
         'DopplerCooling.doppler_cooling_amplitude_866':  [(-20., -6., .5, 'dBm'), 'other'],
@@ -47,6 +47,8 @@ class Excitation729(pulse_sequence):
                   'SidebandCoolingContTwoTone.stage3_line',
                   'SidebandCoolingContTwoTone.stage4_line',
                   'SidebandCoolingContTwoTone.stage5_line',
+                  'RFModulation.enable',
+                  'RFModulation.turn_on_before',
                   ]
 
 
@@ -56,10 +58,9 @@ class Excitation729(pulse_sequence):
         from subsequences.EmptySequence import EmptySequence
         from subsequences.RabiExcitation import RabiExcitation
         from subsequences.StateReadout import StateReadout
-
+        from subsequences.RFModulation import RFModulation
         e = self.parameters.Excitation729
-        es = self.parameters.EmptySequence
-        rot = self.parameters.Rotation
+        #es = self.parameters.EmptySequence
 
           
         ## calculate the scan params
@@ -78,7 +79,14 @@ class Excitation729(pulse_sequence):
         self.addSequence(RabiExcitation,{'Excitation729.frequency729': freq_729,
                                          'Excitation729.rabi_change_DDS': True})
         #self.addSequence(EmptySequence,{'EmptySequence.empty_sequence_duration':es.empty_sequence_readout_duration})
+        time_start_readout = self.end # This is for RF modulation
         self.addSequence(StateReadout)
+
+        # Add RF modulation TTL pulse if applicable
+        if self.parameters.RFModulation.enable:
+            RFModulation(self, time_start_readout)
+                
+        
         
     @classmethod
     def run_initial(cls, cxn, parameters_dict):

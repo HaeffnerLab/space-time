@@ -504,7 +504,7 @@ class KEYSIGHT_33500B(LabradServer):
         # This function begins by constructing a dictionary called rp which stores the parameters for rotation
         # This is basically a reconstruction of parameters_dict from the script scanner
         # Done this way because I can't find a way to pass the full parameters_dict to a server like the Keysight through labrad.
-        # One parameter (presumably the one being scanned) nay be overwritten;
+        # One parameter (presumably the one being scanned) may be overwritten;
             # this requires passing its name and value as the two optional arguments since the scriptscanner server doesn't know the current scan parameter value
 
         ss = self.client.scriptscanner
@@ -530,7 +530,7 @@ class KEYSIGHT_33500B(LabradServer):
 
         self.program_awf(c,
                          rp['start_phase']['deg'],
-                         state_prep_time_minus_rotation['ms'] + 0.2 + rp['start_hold']['ms'],
+                         state_prep_time_minus_rotation['ms'] + 0.2 + rp['start_hold']['ms'], # 200 us cushion at the beginning (the other 200 us is thus at the end)
                          rp['frequency_ramp_time']['ms'],
                          rp['middle_hold']['ms'],
                          rp['ramp_down_time']['ms'],

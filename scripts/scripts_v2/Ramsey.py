@@ -48,9 +48,11 @@ class Ramsey(pulse_sequence):
                   'Rotation.start_phase',
                   'Rotation.voltage_pp',
 
+                  'RFModulation.enable',
+                  'RFModulation.turn_on_before',
+
                   'EmptySequence.empty_sequence_duration',
                   'EmptySequence.noise_enable',
-                  'StateReadout.repeat_each_measurement',
                       ]
 
     
@@ -61,11 +63,9 @@ class Ramsey(pulse_sequence):
         from subsequences.StateReadout import StateReadout
         from subsequences.DynamicalDecoupling import DynamicalDecoupling
         from subsequences.EmptySequence import EmptySequence
-        
+        from subsequences.RFModulation import RFModulation
         
         r = self.parameters.Ramsey   
-        rot = self.parameters.Rotation
-        dd = self.parameters.DynamicalDecoupling
         initial_freq_729 = self.calc_freq_from_array(r.first_pulse_line, r.first_pulse_sideband)
         final_freq_729 = self.calc_freq_from_array(r.second_pulse_line, r.second_pulse_sideband)
 
@@ -98,9 +98,14 @@ class Ramsey(pulse_sequence):
                                            "Excitation729.channel729":r.channel_729,
                                            "Excitation729.rabi_change_DDS":False
                                           })
-
+        
+        time_start_readout = self.end # This is for RF modulation
         self.addSequence(StateReadout)
         
+        # Add RF modulation TTL pulse if applicable
+        if self.parameters.RFModulation.enable:
+            RFModulation(self, time_start_readout)
+
     @classmethod
     def run_initial(cls,cxn, parameters_dict):
         # Add rotation if necessary
