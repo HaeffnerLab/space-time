@@ -546,10 +546,21 @@ class KEYSIGHT_33500B(LabradServer):
         old_freq = yield ss.get_parameter('RotationCW', 'drive_frequency')
         old_amp = yield ss.get_parameter('RotationCW', 'voltage_pp')
         old_phase = yield ss.get_parameter('RotationCW', 'start_phase')
-        self.update_awg(c, old_freq['Hz'], old_amp['V'], old_phase['deg'])   
+        self.update_awg(c, old_freq['Hz'], old_amp['V'], old_phase['deg'])
+
+    @setting(8, "Program Square Wave", frequency='v', amplitude='v', offset='v', dutyCycle='v')
+    def program_square_wave(self, c, frequency, amplitude, offset, dutyCycle):
+        # Input parameters must be floats rather than integers for some reason
+        frequency = abs(frequency)*1e6  #originally in MHz
+        self.write(self.instr,'FUNC SQU')
+        self.write(self.instr,'FUNC:SQU:DCYC ' + str(dutyCycle))
+        self.write(self.instr,'FREQ ' + str(frequency))
+        self.write(self.instr,'SOUR:VOLT ' + str(amplitude))
+        self.write(self.instr,'SOUR:VOLT:OFFS ' + str(offset))
+        self.set_state(c, 1, 1)
 
 __server__ = KEYSIGHT_33500B()
         
 if __name__ == '__main__':
     from labrad import util
-    util.runServer(__server__)    
+    util.runServer(__server__)

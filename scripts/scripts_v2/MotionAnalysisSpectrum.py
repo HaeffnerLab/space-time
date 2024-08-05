@@ -31,7 +31,7 @@ class MotionAnalysisSpectrum(pulse_sequence):
     @classmethod
     def run_initial(cls, cxn, parameters_dict):
         
-        awg = cxn.keysight_33600a
+        awg = cxn.keysight_33500b
 
         tf = parameters_dict.TrapFrequencies
         ma = parameters_dict.MotionAnalysis
@@ -43,28 +43,28 @@ class MotionAnalysisSpectrum(pulse_sequence):
             freq += order * sideband_frequency
 
         freq = freq + ma.detuning
-        awg.program_square_wave(freq['kHz'],5.,0.,50.)
+        awg.program_square_wave(freq['MHz'],5.,0.,50.)
     
     @classmethod
     def run_in_loop(cls, cxn, parameters_dict, data_so_far,data_x):
-        awg = cxn.keysight_33600a
+        awg = cxn.keysight_33500b
 
         tf = parameters_dict.TrapFrequencies
         ma = parameters_dict.MotionAnalysis
         sideband_selection = ma.diagnosis_sideband
         sideband_frequencies = [tf.radial_frequency_1, tf.radial_frequency_2, tf.axial_frequency, tf.rf_drive_frequency, tf.rotation_frequency]
-        
+         
         freq = U(0,'MHz')
         for order,sideband_frequency in zip(sideband_selection, sideband_frequencies):
             freq += order * sideband_frequency
 
         freq = freq + ma.detuning
-        awg.program_square_wave(freq['kHz'],5.,0.,50.)
+        awg.program_square_wave(freq['MHz'],5.,0.,50.)
         
 
     @classmethod
     def run_finally(cls,cxn, parameters_dict, data, x):
-        awg = cxn.keysight_33600a
+        awg = cxn.keysight_33500b
         awg.set_state(1,0) 
 
         
