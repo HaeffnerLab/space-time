@@ -55,7 +55,7 @@ class SPACETIME_GUI(QtWidgets.QMainWindow):
     #     return widget
 
     def makeScriptControlWidgetv2(self, reactor, cxn):
-        from common.devel.bum.gui_scriptscanner2.script_scanner_gui import script_scanner_gui
+        from common.abstractdevices.script_scanner2.gui_scriptscanner2.script_scanner_gui import script_scanner_gui
         widget = script_scanner_gui(reactor,cxn)
 
         return widget
