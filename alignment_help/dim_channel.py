@@ -1,4 +1,4 @@
-CHANNEL = '729vert'
+CHANNEL = '397DP'
 
 import labrad
 import time
