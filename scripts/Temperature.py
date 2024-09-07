@@ -6,7 +6,7 @@ from Excitation729 import Excitation729
 
 class rsb(Excitation729):
 
-    scannable_params = {'Excitation729.frequency729': [(-30., 30., 2., 'kHz'), 'temp_rsb',True]}
+    scannable_params = {'Excitation729.frequency729': [(-30., 30., 2., 'kHz'), 'temperature__rsb', True]}
 
     @classmethod
     def run_finally(cls, cxn, parameter_dict, data, data_x):
@@ -28,7 +28,7 @@ class rsb(Excitation729):
 
 class bsb(Excitation729):
 
-    scannable_params = {'Excitation729.frequency729': [(-30., 30., 2., 'kHz'), 'temp_bsb',True]}
+    scannable_params = {'Excitation729.frequency729': [(-30., 30., 2., 'kHz'), 'temperature__bsb',True]}
 
     @classmethod
     def run_finally(cls, cxn, parameter_dict, data, data_x):
@@ -63,6 +63,6 @@ class Temperature(pulse_sequence):
 
 class Heating_Rate(pulse_sequence):
 
-    scannable_params = {'EmptySequence.empty_sequence_duration': [(0., 5., .5, 'ms'), 'nbar']}
+    scannable_params = {'EmptySequence.empty_sequence_duration': [(0., 5., .5, 'ms'), 'temperature__nbar']}
 
     sequence = Temperature

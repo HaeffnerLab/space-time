@@ -11,8 +11,8 @@ class Ramsey(pulse_sequence):
 
     scannable_params = {
                         
-        'Ramsey.ramsey_time': [(100.0, 1000.0, 50.0, 'us') ,'ramsey'],
-        'Ramsey.second_pulse_phase': [(0, 360., 36, 'deg') ,'ramsey_phase_scan'],
+        'Ramsey.ramsey_time': [(100.0, 1000.0, 50.0, 'us') ,'ramsey_gap__gap'],
+        'Ramsey.second_pulse_phase': [(0, 360., 36, 'deg') ,'ramsey_phase__phase'],
 
         }
 

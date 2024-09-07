@@ -6,7 +6,7 @@ from Ramsey import Ramsey
 
 class ramsey_phase(Ramsey):
 
-    scannable_params = {'Ramsey.second_pulse_phase': [(0, 360., 36, 'deg') ,'ramsey_phase_scan'],}
+    scannable_params = {'Ramsey.second_pulse_phase': [(0, 360., 36, 'deg') ,'ramsey_phase__phase'],}
 
 
     @classmethod
@@ -30,7 +30,7 @@ class ramsey_phase(Ramsey):
 
 class ramsey_contrast(pulse_sequence):
     
-    scannable_params = {'Ramsey.ramsey_time': [(100, 1000.0, 50.0, 'us'), 'ramsey_contrast'],}
+    scannable_params = {'Ramsey.ramsey_time': [(100, 1000.0, 50.0, 'us'), 'ramsey_phase__contrast'],}
 
 
     @classmethod
@@ -59,7 +59,7 @@ class ramsey_contrast(pulse_sequence):
 
 class RotSpinup_ScanRamseyContrast(pulse_sequence):
 
-    scannable_params = {'Rotation.frequency_ramp_time': [(45.0, 70.0, 1.0, 'us'), 'sigma_ell']}
+    scannable_params = {'Rotation.frequency_ramp_time': [(45.0, 70.0, 1.0, 'us'), 'ramsey_gap__sigma_ell']}
 
     show_params = ['RotRamseyFit.horizontal_trap_frequency',
                    'RotRamseyFit.rotation_frequency',

@@ -5,19 +5,19 @@ import numpy as np
 
 class Excitation729(pulse_sequence):
     scannable_params = {
-        'DopplerCooling.doppler_cooling_frequency_397':  [(170., 195., .5, 'MHz'), 'calib_doppler'],
-        'DopplerCooling.doppler_cooling_amplitude_397':  [(-30., -15., .5, 'dBm'), 'other'],
-        'DopplerCooling.doppler_cooling_frequency_866':  [(60., 85., .5, 'MHz'), 'calib_doppler'],
-        'DopplerCooling.doppler_cooling_amplitude_866':  [(-20., -6., .5, 'dBm'), 'other'],
-        'SidebandCooling.sideband_cooling_amplitude_854': [(-25.,-5., 1., 'dBm'), 'scan_854'],
+        'DopplerCooling.doppler_cooling_frequency_397':  [(170., 195., .5, 'MHz'), 'doppler_cooling__frequency'],
+        'DopplerCooling.doppler_cooling_amplitude_397':  [(-30., -15., .5, 'dBm'), 'doppler_cooling__amplitude'],
+        'DopplerCooling.doppler_cooling_frequency_866':  [(60., 85., .5, 'MHz'), 'doppler_cooling__frequency'],
+        'DopplerCooling.doppler_cooling_amplitude_866':  [(-20., -6., .5, 'dBm'), 'doppler_cooling__amplitude'],
+        'SidebandCooling.sideband_cooling_amplitude_854': [(-25.,-5., 1., 'dBm'), 'sideband_cooling__854_power'],
         'Excitation729.duration729':  [(0., 200., 2., 'us'), 'rabi'],
-        'Excitation729.frequency729': [(-50., 50., 5., 'kHz'), 'spectrum',True],
+        'Excitation729.frequency729': [(-50., 50., 5., 'kHz'), 'spectrum', True],
         #'SidebandCooling.stark_shift': [(-20., 20., 2., 'kHz'), 'other'],
         #'EmptySequence.empty_sequence_readout_duration': [(0.,1000.,100.,'us'),'rabi'],
-        'OpticalPumping.optical_pumping_amplitude_854':  [(-30., -10., .5, 'dBm'), 'other'],
-        'SidebandCoolingContinuous.sideband_cooling_continuous_duration':  [(0., 3., 0.5, 'ms'), 'other'],
-        'SidebandCoolingContTwoTone.sideband_cooling_cont_twotone_duration':  [(0., 30., 1., 'ms'), 'other'],
-        'SidebandCooling.stark_shift': [(-20., 20., 1., 'kHz'), 'other']
+        'OpticalPumping.optical_pumping_amplitude_854':  [(-30., -10., .5, 'dBm'), 'optical_pumping__854_power'],
+        'SidebandCoolingContinuous.sideband_cooling_continuous_duration':  [(0., 3., 0.5, 'ms'), 'sideband_cooling__duration'],
+        'SidebandCoolingContTwoTone.sideband_cooling_cont_twotone_duration':  [(0., 30., 1., 'ms'), 'sideband_cooling__duration'],
+        'SidebandCooling.stark_shift': [(-20., 20., 1., 'kHz'), 'sideband_cooling__stark_shift']
               }
 
     show_params= [

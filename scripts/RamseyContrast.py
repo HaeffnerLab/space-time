@@ -5,7 +5,7 @@ from treedict import TreeDict
 from Ramsey import Ramsey
 
 class contrast(Ramsey):
-    scannable_params = {'Ramsey.second_pulse_phase': [(0, 360., 36, 'deg') ,'ramsey_phase_scan'],}
+    scannable_params = {'Ramsey.second_pulse_phase': [(0, 360., 36, 'deg') ,'ramsey_phase__phase'],}
     
     @classmethod
     def run_finally(cls, cxn, parameters_dict, data, data_x):
@@ -18,6 +18,6 @@ class contrast(Ramsey):
 
 class RamseyContrast(pulse_sequence):
 
-    scannable_params = {'Ramsey.ramsey_time': [(0.1, 8., .1, 'ms'), 'ramsey_contrast']}
+    scannable_params = {'Ramsey.ramsey_time': [(0.1, 8., .1, 'ms'), 'ramsey_phase__contrast']}
 
     sequence = contrast

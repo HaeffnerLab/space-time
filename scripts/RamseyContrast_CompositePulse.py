@@ -5,7 +5,7 @@ from treedict import TreeDict
 from Ramsey_CompositePulse import Ramsey_CompositePulse
 
 class contrast_composite(Ramsey_CompositePulse):
-    scannable_params = {'RamseyComposite.final_pulse_phase': [(0.0, 360.0, 36.0, 'deg') ,'ramsey_phase_scan'],}
+    scannable_params = {'RamseyComposite.final_pulse_phase': [(0.0, 360.0, 36.0, 'deg') ,'ramsey_phase__phase'],}
     @classmethod
     def run_finally(cls, cxn, parameters_dict, data, data_x):
         if parameters_dict.StatePreparation.rotation_enable:
@@ -17,6 +17,6 @@ class contrast_composite(Ramsey_CompositePulse):
 
 class RamseyContrast_CompositePulse(pulse_sequence):
 
-    scannable_params = {'RamseyComposite.ramsey_time': [(0.2, 10, 0.2, 'ms'), 'ramsey_contrast']}
+    scannable_params = {'RamseyComposite.ramsey_time': [(0.2, 10, 0.2, 'ms'), 'ramsey_phase__contrast']}
 
     sequence = contrast_composite

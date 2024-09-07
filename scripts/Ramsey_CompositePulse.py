@@ -16,8 +16,8 @@ class Ramsey_CompositePulse(pulse_sequence):
 
     scannable_params = {
 
-                'RamseyComposite.ramsey_time': [(0.1, 10, 0.1, 'ms'), 'ramsey'],
-                'RamseyComposite.final_pulse_phase': [(0.0, 360.0, 36.0, 'deg'), 'ramsey_phase_scan'],
+                'RamseyComposite.ramsey_time': [(0.1, 10, 0.1, 'ms'), 'ramsey_gap__gap'],
+                'RamseyComposite.final_pulse_phase': [(0.0, 360.0, 36.0, 'deg'), 'ramsey_phase__phase'],
 
     }
 

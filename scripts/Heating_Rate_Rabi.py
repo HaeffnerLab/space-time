@@ -6,7 +6,7 @@ from Excitation729 import Excitation729
 
 class Rabi(Excitation729):
 
-    scannable_params = {'Excitation729.duration729':  [(0., 50., 1.5, 'us'), 'temp_rabi']}
+    scannable_params = {'Excitation729.duration729':  [(0., 50., 1.5, 'us'), 'temperature__rabi']}
 
     @classmethod
     def run_finally(cls, cxn, parameter_dict, data, data_x):
@@ -23,6 +23,6 @@ class Heating_Rate_Rabi(pulse_sequence):
     show_params = ['HeatingRateRabiFit.lamb_dicke',
                     ]
 
-    scannable_params = {'EmptySequence.empty_sequence_duration': [(0., 40., 10., 'ms'), 'nbar']}
+    scannable_params = {'EmptySequence.empty_sequence_duration': [(0., 40., 10., 'ms'), 'temperature__rabi']}
 
     sequence = Rabi

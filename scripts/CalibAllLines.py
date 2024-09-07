@@ -6,7 +6,7 @@ from common.client_config import client_info as cl
 
 class CalibLine1(pulse_sequence):
 
-    scannable_params = {'Excitation729.frequency729' : [(-10, 10, 1, 'kHz'), 'car1',True]}
+    scannable_params = {'Excitation729.frequency729':[(-10, 10, 1, 'kHz'), 'calibrations__carrier1', True]}
 
     def sequence(self):
         from subsequences.StatePreparation import StatePreparation
@@ -85,7 +85,7 @@ class CalibLine1(pulse_sequence):
 
 class CalibLine2(pulse_sequence):
 
-    scannable_params = {'Excitation729.frequency729':[(-30, 30, 3, 'kHz'),'car2',True]}
+    scannable_params = {'Excitation729.frequency729':[(-30, 30, 3, 'kHz'), 'calibrations__carrier2', True]}
 
     def sequence(self):
         from subsequences.StatePreparation import StatePreparation

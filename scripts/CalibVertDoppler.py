@@ -4,7 +4,7 @@ from treedict import TreeDict
 import numpy as np
 
 class CalibVertDoppler(pulse_sequence):
-    scannable_params = {'DopplerCooling.doppler_cooling_frequency_866':  [(60., 85., .5, 'MHz'), 'calib_doppler']}
+    scannable_params = {'DopplerCooling.doppler_cooling_frequency_866':  [(60., 85., .5, 'MHz'), 'doppler_cooling__frequency']}
 
     show_params= [
                   'CalibVertDoppler.line_selection',

@@ -6,7 +6,7 @@ from common.client_config import client_info as cl
 
 class CalibSideband1(pulse_sequence):
 
-    scannable_params = {'CalibTrapFreqs.sideband1_detuning' : [(-150, 150, 15, 'kHz'), 'sideband1', True]}
+    scannable_params = {'CalibTrapFreqs.sideband1_detuning' : [(-150, 150, 15, 'kHz'), 'calibrations__sideband1', True]}
 
     def sequence(self):
 
@@ -95,7 +95,7 @@ class CalibSideband1(pulse_sequence):
 
 class CalibSideband2(pulse_sequence):
 
-    scannable_params = {'CalibTrapFreqs.sideband2_detuning' : [(-150, 150, 15, 'kHz'), 'sideband2', True]}
+    scannable_params = {'CalibTrapFreqs.sideband2_detuning' : [(-150, 150, 15, 'kHz'), 'calibrations__sideband2', True]}
 
     def sequence(self):
 

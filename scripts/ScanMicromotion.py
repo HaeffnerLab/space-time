@@ -112,7 +112,7 @@ class Scan3points(pulse_sequence):
 class ScanMicromotion(pulse_sequence):
 
     scannable_params = {
-        'MicromotionCalibration.multipole_value' : [(-.02, .02, .002, 'Vmm'),'scan_Efields'],
+        'MicromotionCalibration.multipole_value' : [(-.02, .02, .002, 'Vmm'),'Efields'],
               }
 
     sequence = Scan3points

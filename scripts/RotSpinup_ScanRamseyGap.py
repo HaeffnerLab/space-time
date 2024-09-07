@@ -6,7 +6,7 @@ from Ramsey import Ramsey
 
 class ramsey_gap(Ramsey):
     
-    scannable_params = {'Ramsey.ramsey_time': [(100, 1000.0, 50.0, 'us') ,'ramsey']}
+    scannable_params = {'Ramsey.ramsey_time': [(100, 1000.0, 50.0, 'us') ,'ramsey_gap__gap']}
 
     
     @classmethod
@@ -45,7 +45,7 @@ class ramsey_gap(Ramsey):
 
 class RotSpinup_ScanRamseyGap(pulse_sequence):
 
-    scannable_params = {'Rotation.frequency_ramp_time': [(45.0, 70.0, 1.0, 'us'), 'sigma_ell']}
+    scannable_params = {'Rotation.frequency_ramp_time': [(45.0, 70.0, 1.0, 'us'), 'ramsey_gap__sigma_ell']}
 
     show_params = ['RotRamseyFit.horizontal_trap_frequency',
                    'RotRamseyFit.rotation_frequency',

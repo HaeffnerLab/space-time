@@ -6,7 +6,7 @@ import numpy as np
 class MotionAnalysisRamsey(pulse_sequence):
 
     scannable_params = {
-        'MotionAnalysis.ramsey_time': [(0, 10.0, 0.5, 'ms') ,'ramsey']
+        'MotionAnalysis.ramsey_time': [(0, 10.0, 0.5, 'ms') ,'ramsey_gap__gap']
         }
 
     show_params= [

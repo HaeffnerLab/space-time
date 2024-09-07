@@ -6,10 +6,10 @@ import numpy as np
 class MotionAnalysisSpectrum(pulse_sequence):
     
                           
-    scannable_params = {   'MotionAnalysis.detuning': [(-5.0, 5.0, 0.5, 'kHz'),'spectrum'],
-                           'MotionAnalysis.amplitude_397': [(-25.0,-13.0, 1.0, 'dBm'),'other'],
-                           'MotionAnalysis.duration729': [(0.0, 100.0, 10.0, 'us'),'rabi'],
-                           'MotionAnalysis.pulse_width_397': [(0.0, 1000.0, 10.0, 'us'),'other'] }
+    scannable_params = {'MotionAnalysis.detuning': [(-5.0, 5.0, 0.5, 'kHz'), 'spectrum'],
+                        'MotionAnalysis.amplitude_397': [(-25.0,-13.0, 1.0, 'dBm'), 'other'],
+                        'MotionAnalysis.duration729': [(0.0, 100.0, 10.0, 'us'), 'rabi'],
+                        'MotionAnalysis.pulse_width_397': [(0.0, 1000.0, 10.0, 'us'), 'other'] }
  
 
     show_params= [

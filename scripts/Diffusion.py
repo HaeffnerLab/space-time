@@ -5,7 +5,7 @@ from treedict import TreeDict
 from Ramsey import Ramsey
 
 class ramsey_gap(Ramsey):
-    scannable_params = {'Ramsey.ramsey_time': [(100, 1000.0, 50.0, 'us') ,'ramsey'],}
+    scannable_params = {'Ramsey.ramsey_time':[(100, 1000.0, 50.0, 'us'), 'ramsey_gap__gap'],}
     
     @classmethod
     def run_finally(cls, cxn, parameters_dict, data, data_x):
@@ -32,7 +32,7 @@ class ramsey_gap(Ramsey):
 
 class Diffusion(pulse_sequence):
 
-    scannable_params = {'EmptySequence.empty_sequence_duration': [(0.0, 80.0, 10.0, 'ms'), 'sigma_ell']}
+    scannable_params = {'EmptySequence.empty_sequence_duration':[(0.0, 80.0, 10.0, 'ms'), 'ramsey_gap__sigma_ell']}
 
     show_params= ['RotRamseyFit.horizontal_trap_frequency',
                   'RotRamseyFit.rotation_frequency',

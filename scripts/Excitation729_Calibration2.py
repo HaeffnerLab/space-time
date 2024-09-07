@@ -5,13 +5,13 @@ import numpy as np
 
 class Excitation729_Calibration2(pulse_sequence):
     scannable_params = {
-        'DopplerCooling.doppler_cooling_frequency_397':  [(180., 210., .5, 'MHz'), 'calib_doppler'],
-        'DopplerCooling.doppler_cooling_amplitude_397':  [(-30., -15., .5, 'dBm'), 'other'],
-        'DopplerCooling.doppler_cooling_frequency_866':  [(60., 85., .5, 'MHz'), 'calib_doppler'],
-        'DopplerCooling.doppler_cooling_amplitude_866':  [(-20., -6., .5, 'dBm'), 'other'],
+        'DopplerCooling.doppler_cooling_frequency_397':  [(180., 210., .5, 'MHz'), 'doppler_cooling__frequency'],
+        'DopplerCooling.doppler_cooling_amplitude_397':  [(-30., -15., .5, 'dBm'), 'doppler_cooling__amplitude'],
+        'DopplerCooling.doppler_cooling_frequency_866':  [(60., 85., .5, 'MHz'), 'doppler_cooling__frequency'],
+        'DopplerCooling.doppler_cooling_amplitude_866':  [(-20., -6., .5, 'dBm'), 'doppler_cooling__amplitude'],
         'Excitation729Cal2.duration729':  [(0., 200., 2., 'us'), 'rabi'],
-        'Excitation729Cal2.frequency729': [(-50., 50., 5., 'kHz'), 'spectrum',True],
-        'SidebandCooling.sideband_cooling_amplitude_854': [(-30.,-10., 1., 'dBm'), 'scan_854'],
+        'Excitation729Cal2.frequency729': [(-50., 50., 5., 'kHz'), 'spectrum', True],
+        'SidebandCooling.sideband_cooling_amplitude_854': [(-30.,-10., 1., 'dBm'), 'sideband_cooling__854_power'],
               }
 
     show_params= [
