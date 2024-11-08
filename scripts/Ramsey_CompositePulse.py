@@ -7,7 +7,7 @@ class Ramsey_CompositePulse(pulse_sequence):
     Each "pi/2" pulse can be composite, made up of up to 5 729 pulses immediately following one another.
     Once this composite "pi/2" pulse is defined, the rest of the pulses are defined as well. In particular...
         The final "pi/2" composite pulse is the same as the initial one but with the constituent pulses in reverse order. E.g. for 3 pulses, the first "pi/2" is pulse1+pulse2+pulse3, while the last one is pulse3+pulse2+pulse1
-        The detuning RamseyComposite.detuning is applied only to pulse1. The Ramsey phase RamseyComposite.final_pulse_phase is applied only to the FINAL instance of pulse1, in the final "pi/2" composite pulse.
+        The Ramsey phase RamseyComposite.final_pulse_phase is applied only to the FINAL instance of pulse1, in the final "pi/2" composite pulse.
         The intermediate composite "pi" pulses, if any are chosen, are comprised of the consituent pulses in reverse order and then in forward order. E.g. for a composite pulse of 3 consituent pulses the "pi" pulse looks like 3+2+1+1+2+3.
     The spacing between pulses is calculated such that the appropriate wait times are between centers of the composite pulses. The math to calculate this is somewhat ugly.
     There is no frequency switching wait time ("frequency advance duration") inserted between pulses in a composite pulse; it's assumed that if they're at different frequencies, then the user wants them to remain phase-coherent and thus uses different channels for the different frequencies.
@@ -16,13 +16,12 @@ class Ramsey_CompositePulse(pulse_sequence):
 
     scannable_params = {
 
-                'RamseyComposite.ramsey_time': [(0.1, 10, 0.1, 'ms'), 'ramsey_gap__gap'],
+                'RamseyComposite.ramsey_time': [(100, 2000, 50, 'us'), 'ramsey_gap__gap'],
                 'RamseyComposite.final_pulse_phase': [(0.0, 360.0, 36.0, 'deg'), 'ramsey_phase__phase'],
 
     }
 
     show_params = ['RamseyComposite.pulses',
-                   'RamseyComposite.detuning',
                    'RamseyComposite.final_pulse_phase',
                    'RamseyComposite.dd_repetitions',
                    'RamseyComposite.ramsey_time',
@@ -30,30 +29,35 @@ class Ramsey_CompositePulse(pulse_sequence):
                    'RamseyComposite.pulse1_channel',
                    'RamseyComposite.pulse1_line',
                    'RamseyComposite.pulse1_sideband',
+                   'RamseyComposite.pulse1_detuning',
                    'RamseyComposite.pulse1_amplitude',
                    'RamseyComposite.pulse1_duration',
 
                    'RamseyComposite.pulse2_channel',
                    'RamseyComposite.pulse2_line',
                    'RamseyComposite.pulse2_sideband',
+                   'RamseyComposite.pulse2_detuning',
                    'RamseyComposite.pulse2_amplitude',
                    'RamseyComposite.pulse2_duration',
 
                    'RamseyComposite.pulse3_channel',
                    'RamseyComposite.pulse3_line',
                    'RamseyComposite.pulse3_sideband',
+                   'RamseyComposite.pulse3_detuning',
                    'RamseyComposite.pulse3_amplitude',
                    'RamseyComposite.pulse3_duration',
 
                    'RamseyComposite.pulse4_channel',
                    'RamseyComposite.pulse4_line',
                    'RamseyComposite.pulse4_sideband',
+                   'RamseyComposite.pulse4_detuning',
                    'RamseyComposite.pulse4_amplitude',
                    'RamseyComposite.pulse4_duration',
 
                    'RamseyComposite.pulse5_channel',
                    'RamseyComposite.pulse5_line',
                    'RamseyComposite.pulse5_sideband',
+                   'RamseyComposite.pulse5_detuning',
                    'RamseyComposite.pulse5_amplitude',
                    'RamseyComposite.pulse5_duration',
 
@@ -91,12 +95,11 @@ class Ramsey_CompositePulse(pulse_sequence):
                              rc.pulse3_channel,
                              rc.pulse4_channel,
                              rc.pulse5_channel]
-        pulse_frequencies = [self.calc_freq_from_array(rc.pulse1_line, rc.pulse1_sideband) + rc.detuning,
-                             self.calc_freq_from_array(rc.pulse2_line, rc.pulse2_sideband),
-                             self.calc_freq_from_array(rc.pulse3_line, rc.pulse3_sideband),
-                             self.calc_freq_from_array(rc.pulse4_line, rc.pulse4_sideband),
-                             self.calc_freq_from_array(rc.pulse5_line, rc.pulse5_sideband),
-                            ]
+        pulse_frequencies = [self.calc_freq_from_array(rc.pulse1_line, rc.pulse1_sideband) + rc.pulse1_detuning,
+                             self.calc_freq_from_array(rc.pulse2_line, rc.pulse2_sideband) + rc.pulse2_detuning,
+                             self.calc_freq_from_array(rc.pulse3_line, rc.pulse3_sideband) + rc.pulse3_detuning,
+                             self.calc_freq_from_array(rc.pulse4_line, rc.pulse4_sideband) + rc.pulse4_detuning,
+                             self.calc_freq_from_array(rc.pulse5_line, rc.pulse5_sideband) + rc.pulse5_detuning]
         pulse_amplitudes =  [rc.pulse1_amplitude,
                              rc.pulse2_amplitude,
                              rc.pulse3_amplitude,

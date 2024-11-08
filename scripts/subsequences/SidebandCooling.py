@@ -30,7 +30,8 @@ class SidebandCooling(pulse_sequence):
                 scseq.stage2_amplitude_854,
                 scseq.stage3_amplitude_854,
                 scseq.stage4_amplitude_854,
-                scseq.stage5_amplitude_854]
+                scseq.stage5_amplitude_854,
+                scseq.stage6_amplitude_854]
 
         freq854 = sc.sideband_cooling_frequency_854
 
@@ -38,21 +39,44 @@ class SidebandCooling(pulse_sequence):
                 scseq.stage2_amplitude_729,
                 scseq.stage3_amplitude_729,
                 scseq.stage4_amplitude_729,
-                scseq.stage5_amplitude_729]
+                scseq.stage5_amplitude_729,
+                scseq.stage6_amplitude_729]
 
         channels729 = [sc.channel_729,
                 scseq.stage2_channel_729,
                 scseq.stage3_channel_729,
                 scseq.stage4_channel_729,
-                scseq.stage5_channel_729]
-
+                scseq.stage5_channel_729,
+                scseq.stage6_channel_729]
+        duration_arr = [scc.sideband_cooling_continuous_duration,
+                        scc.sideband_cooling_continuous_duration_stage2,
+                        scc.sideband_cooling_continuous_duration_stage3,
+                        scc.sideband_cooling_continuous_duration_stage4,
+                        scc.sideband_cooling_continuous_duration_stage5,
+                        scc.sideband_cooling_continuous_duration_stage6
+        ]
+        Nc_arr = [int(scc.sideband_cooling_continuous_cycles),
+                  int(scc.sideband_cooling_continuous_cycles_stage2),
+                  int(scc.sideband_cooling_continuous_cycles_stage3),
+                  int(scc.sideband_cooling_continuous_cycles_stage4),
+                  int(scc.sideband_cooling_continuous_cycles_stage5),
+                  int(scc.sideband_cooling_continuous_cycles_stage6) 
+        ]
+        stark_shift_arr = [sc.stark_shift,
+            scseq.stage2_stark_shift,
+            scseq.stage3_stark_shift,
+            scseq.stage4_stark_shift,
+            scseq.stage5_stark_shift,
+            scseq.stage6_stark_shift
+        ]
         freq729_base = sc.line_selection
 
         sidebands = [sc.sideband_selection,
                     scseq.stage2_sideband_selection,
                     scseq.stage3_sideband_selection,
                     scseq.stage4_sideband_selection,
-                    scseq.stage5_sideband_selection]
+                    scseq.stage5_sideband_selection,
+                    scseq.stage6_sideband_selection]
         freq729_op = self.calc_freq_from_array(self.parameters.OpticalPumping.line_selection)
 
         sbc_op_duration = sc.sideband_cooling_optical_pumping_duration
@@ -89,11 +113,15 @@ class SidebandCooling(pulse_sequence):
             else:
                 for j in range(Nsb):
                     freq729 = self.calc_freq_from_array(sc.line_selection, sidebands[j])
-                    freq729 += sc.stark_shift
-                    for i in range(Nc):
-                        duration += sc.sideband_cooling_duration_729_increment_per_cycle
-                        add_sbc_sequence(duration, freq729, j)
+                    freq729 += stark_shift_arr[j]
+                    for i in range(Nc_arr[j]):
+                        add_sbc_sequence(duration_arr[j], freq729, j)
                         add_sbc_op_sequence()
+
+                    # for i in range(Nc):
+                    #     duration += sc.sideband_cooling_duration_729_increment_per_cycle
+                    #     add_sbc_sequence(duration, freq729, j)
+                    #     add_sbc_op_sequence()
 
 
         elif sc.sideband_cooling_type == 'pulsed':
@@ -111,7 +139,7 @@ class SidebandCooling(pulse_sequence):
             else:
                 for j in range(Nsb):
                     freq729 = self.calc_freq_from_array(sc.line_selection, sidebands[j])
-                    freq729 += sc.stark_shift
+                    freq729 += stark_shift_arr[j]
                     for i in range(Nc):
                         duration += sc.sideband_cooling_duration_729_increment_per_cycle
                         add_sbc_sequence(duration, freq729, j)
