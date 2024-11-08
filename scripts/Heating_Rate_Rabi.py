@@ -23,6 +23,6 @@ class Heating_Rate_Rabi(pulse_sequence):
     show_params = ['HeatingRateRabiFit.lamb_dicke',
                     ]
 
-    scannable_params = {'EmptySequence.empty_sequence_duration': [(0., 40., 10., 'ms'), 'temperature__rabi']}
+    scannable_params = {'EmptySequence.empty_sequence_duration': [(0., 40., 10., 'ms'), 'temperature__nbar']}
 
     sequence = Rabi
