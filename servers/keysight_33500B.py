@@ -111,7 +111,7 @@ class KEYSIGHT_33500B(LabradServer):
 
     @setting(2, "Update AWG", frequency = 'v', amplitude= 'v', phase='v')
     def update_awg(self,c,frequency,amplitude,phase):
-    	amplitude = amplitude/2.0
+        amplitude = amplitude/2.0
         self.write(self.instr,'SOUR1:BURS:STAT OFF')
         self.write(self.instr,'SOUR2:BURS:STAT OFF')
         if frequency != 0.0:
@@ -324,6 +324,55 @@ class KEYSIGHT_33500B(LabradServer):
         final_wf = np.append(waveform1,waveform2)
     
         return self.pack_keysight_packet(final_wf)
+    
+    def free_rotation_no_amp_ramp(self, start_phase,start_hold,freq_ramp_time,middle_hold, amp_ramp_time,end_hold,sin_freq,channel): #in s and Hz
+        
+        #makes string with values to form arbitrary wave form. 
+        # freq ramp up,hold spinning, amplitude ramp down, hold with no pinning
+        
+        total_time = start_hold+freq_ramp_time + middle_hold + amp_ramp_time+end_hold
+        num_points = self.samp_rate * total_time
+
+        print "Number of points = ", num_points
+        print "Total time = ", total_time, "s"
+
+        freq_ramp_points = round(num_points*freq_ramp_time/total_time)
+        start_points = int(round(num_points*start_hold/total_time))
+        middle_points = int(round(num_points*middle_hold/total_time))
+        amp_ramp_points = round(num_points*amp_ramp_time/total_time)
+        end_points = int(round(num_points*end_hold/total_time))
+        
+        #define amplitude curve
+        awf = np.ones(int(num_points))
+    
+
+        #definte frequency curve
+        frequency = np.zeros(start_points)
+        frequency = np.append(frequency, np.arange(int(freq_ramp_points))*sin_freq/(2.*float(freq_ramp_points)))
+        frequency = np.append(frequency, sin_freq*np.ones(middle_points + int(amp_ramp_points)+end_points))
+   
+
+        time_step = total_time/float(num_points)
+
+        i1 = start_points
+        i2 = int(freq_ramp_points+start_points)
+
+        ##definition through frequency ramp
+        if channel == 1:
+            waveform1 = np.multiply(np.sin(start_phase + 2*np.pi*np.multiply(frequency, np.subtract(range(len(awf)),i1))*time_step), awf)
+        if channel == 2:
+            waveform1 = np.multiply(np.sin(start_phase + 2*np.pi*np.multiply(frequency, np.subtract(range(len(awf)),i1))*time_step + np.pi/2.), awf)
+        waveform1 = waveform1[:i2]
+
+        #defination after frequency ramp
+        phi_0= 2.*np.pi*((0.5*frequency[i2])*(i2-i1)*time_step)
+        if channel == 1:
+            waveform2 = np.multiply(np.sin(start_phase + phi_0 + 2*np.pi*np.multiply(frequency, np.subtract(range(len(awf)),i2))*time_step), awf)
+        if channel == 2:
+            waveform2 = np.multiply(np.sin(start_phase + phi_0 + 2*np.pi*np.multiply(frequency, np.subtract(range(len(awf)),i2))*time_step + np.pi/2.), awf)
+        waveform2 = waveform2[i2:]
+        final_wf = np.append(waveform1,waveform2)
+        return self.pack_keysight_packet(final_wf)
 
     def free_rotation_sin_spin(self, start_phase,start_hold,freq_ramp_time,middle_hold, amp_ramp_time,end_hold,sin_freq,channel): #in s and Hz
         
@@ -350,6 +399,52 @@ class KEYSIGHT_33500B(LabradServer):
         awf = np.ones(start_points+int(freq_ramp_points)+middle_points)
         awf = np.append(awf, 1.-np.arange(int(amp_ramp_points))/amp_ramp_points)
         awf = np.append(awf, np.zeros(end_points))
+        
+        #definte phase curve
+        frequency = np.zeros(start_points)
+        frequency = np.append(frequency, np.arange(int(freq_ramp_points))*sin_freq/(2.*float(freq_ramp_points)))
+        frequency = np.append(frequency, sin_freq*np.ones(middle_points + int(amp_ramp_points)+end_points))
+   
+        time_step = total_time/float(num_points)
+
+        times_start     = time_step * np.arange(start_points)
+        times_spin_up   = time_step * np.arange(freq_ramp_points)
+        times_final   = time_step * np.arange(middle_points+amp_ramp_points+end_points)
+
+        phase_curve = phi0*np.ones(start_points)
+        phase_curve = np.append(phase_curve, phi0 + 2*np.pi*sin_freq * (times_spin_up/2 - freq_ramp_time/(2*np.pi)*np.sin(np.pi*times_spin_up/freq_ramp_time)))
+        phase_curve = np.append(phase_curve, phi1 + 2*np.pi*sin_freq*times_final)
+
+        ##definition through frequency ramp
+        if channel == 1:
+            final_wf = np.multiply(np.sin(phase_curve), awf)
+        if channel == 2:
+            final_wf = np.multiply(np.sin(phase_curve + np.pi/2.), awf)
+    
+        return self.pack_keysight_packet(final_wf)
+    
+    def free_rotation_sin_spin_no_amp_ramp(self, start_phase,start_hold,freq_ramp_time,middle_hold, amp_ramp_time,end_hold,sin_freq,channel): #in s and Hz
+        
+        #makes string with values to form arbitrary wave form. 
+        # freq ramp up,hold spinning, amplitude ramp down, hold with no pinning
+        
+        phi0 = start_phase                                  #phase where spin-up starts
+        phi1 = phi0 + 1/2.0*2*np.pi*sin_freq*freq_ramp_time #phase where spin-up ends
+
+        total_time = start_hold+freq_ramp_time + middle_hold + amp_ramp_time+end_hold
+        num_points = self.samp_rate * total_time
+
+        print "Number of points = ", num_points
+        print "Total time = ", total_time, "s"
+
+        freq_ramp_points = round(num_points*freq_ramp_time/total_time)
+        start_points = int(round(num_points*start_hold/total_time))
+        middle_points = int(round(num_points*middle_hold/total_time))
+        amp_ramp_points = round(num_points*amp_ramp_time/total_time)
+        end_points = int(round(num_points*end_hold/total_time))
+        
+        awf = np.ones(int(freq_ramp_points + start_points + middle_points + amp_ramp_points + end_points))
+
         
         #definte phase curve
         frequency = np.zeros(start_points)
@@ -430,7 +525,7 @@ class KEYSIGHT_33500B(LabradServer):
     
     
     @setting(5, "Program Awf", start_phase='v', start_hold='v', freq_ramp_time='v', middle_hold='v', amp_ramp_time='v', end_hold='v', vpp='v', sin_freq='v', waveform_label='s')
-    def program_awf(self, c, start_phase, start_hold, freq_ramp_time, middle_hold, amp_ramp_time, end_hold, vpp, sin_freq, waveform_label='free_rotation'): #in ms and kHz
+    def program_awf(self, c, start_phase, start_hold, freq_ramp_time, middle_hold, amp_ramp_time, end_hold, vpp, sin_freq, waveform_label): #in ms and kHz
         start_phase = start_phase * np.pi/180.0
         start_hold = start_hold * 1e-3
         amp_ramp_time = amp_ramp_time * 1e-3
@@ -439,6 +534,7 @@ class KEYSIGHT_33500B(LabradServer):
         sin_freq = sin_freq * 1e3
         freq_ramp_time = freq_ramp_time*1e-3
         total_time = start_hold+freq_ramp_time + middle_hold + amp_ramp_time+end_hold
+        print(waveform_label)
 
         if waveform_label == 'free_rotation': #with frequency ramp and amplitude ramp to get free rotation
             wf_str1 = self.free_rotation(start_phase,start_hold,freq_ramp_time, middle_hold, amp_ramp_time,end_hold,sin_freq,1)
@@ -455,6 +551,12 @@ class KEYSIGHT_33500B(LabradServer):
         elif waveform_label ==  'spin_up_spin_down_sin':
             wf_str1 = self.spin_up_spin_down_sin(start_phase,start_hold,freq_ramp_time,middle_hold,end_hold,sin_freq,1)
             wf_str2 = self.spin_up_spin_down_sin(start_phase,start_hold,freq_ramp_time,middle_hold,end_hold,sin_freq,2)
+        elif waveform_label == 'free_rotation_no_amp_ramp':
+            wf_str1 = self.free_rotation_no_amp_ramp(start_phase,start_hold,freq_ramp_time, middle_hold, amp_ramp_time,end_hold,sin_freq,1)
+            wf_str2 = self.free_rotation_no_amp_ramp(start_phase,start_hold,freq_ramp_time, middle_hold, amp_ramp_time,end_hold,sin_freq,2)
+        elif waveform_label == 'free_rotation_sin_spin_no_amp_ramp':
+            wf_str1 = self.free_rotation_sin_spin_no_amp_ramp(start_phase,start_hold,freq_ramp_time, middle_hold, amp_ramp_time, end_hold,sin_freq,1)
+            wf_str2 = self.free_rotation_sin_spin_no_amp_ramp(start_phase,start_hold,freq_ramp_time, middle_hold, amp_ramp_time, end_hold,sin_freq,2)
         else:
             print "Error: no waveform by the name {}".format(waveform_label)
 
@@ -497,8 +599,8 @@ class KEYSIGHT_33500B(LabradServer):
 
         #self.read_error_queue()
 
-    @setting(6, "Rotation run initial", state_prep_time='v', scan_param_name='s', scan_param_value='v')
-    def rotation_run_initial(self, c, state_prep_time, scan_param_name=None, scan_param_value=None):
+    @setting(6, "Rotation run initial", state_prep_time='v', total_time='v', scan_param_name='s', scan_param_value='v')
+    def rotation_run_initial(self, c, state_prep_time, total_time, scan_param_name=None, scan_param_value=None):
         # To be added to the run_initial method of scripts conditioned on rotation being enabled
 
         # This function begins by constructing a dictionary called rp which stores the parameters for rotation
@@ -517,7 +619,8 @@ class KEYSIGHT_33500B(LabradServer):
                                     'middle_hold',
                                     'ramp_down_time', 
                                     'end_hold',
-                                    'frequency_ramp_time']
+                                    'frequency_ramp_time',
+                                    'waveform_label']
         rp = {} # rotation parameters dictionary
         for param_name in rotation_parameter_names:
             if param_name == scan_param_name:
@@ -528,16 +631,28 @@ class KEYSIGHT_33500B(LabradServer):
         state_prep_time -= U(0.4, 'ms')  # Compensate for 400 us cushion put into state prep
         state_prep_time_minus_rotation = state_prep_time - (rp['start_hold'] + rp['frequency_ramp_time'] + rp['middle_hold'] + rp['ramp_down_time'] + rp['end_hold'])
 
-        self.program_awf(c,
-                         rp['start_phase']['deg'],
-                         state_prep_time_minus_rotation['ms'] + 0.2 + rp['start_hold']['ms'], # 200 us cushion at the beginning (the other 200 us is thus at the end)
-                         rp['frequency_ramp_time']['ms'],
-                         rp['middle_hold']['ms'],
-                         rp['ramp_down_time']['ms'],
-                         rp['end_hold']['ms'],
-                         rp['voltage_pp']['V'],
-                         rp['drive_frequency']['kHz'],
-                         'free_rotation_sin_spin')
+        if rp['waveform_label'] == 'free_rotation_no_amp_ramp' or rp['waveform_label'] == 'free_rotation_sin_spin_no_amp_ramp':
+            self.program_awf(c,
+                            rp['start_phase']['deg'],
+                            state_prep_time_minus_rotation['ms'] + 0.2 + rp['start_hold']['ms'], # 200 us cushion at the beginning (the other 200 us is thus at the end)
+                            rp['frequency_ramp_time']['ms'],
+                            rp['middle_hold']['ms'],
+                            rp['ramp_down_time']['ms'],
+                            total_time['ms'] - (state_prep_time_minus_rotation['ms'] + 0.2 + rp['start_hold']['ms']) - rp['frequency_ramp_time']['ms'] -1,
+                            rp['voltage_pp']['V'],
+                            rp['drive_frequency']['kHz'],
+                            rp['waveform_label'])
+        else:
+            self.program_awf(c,
+                            rp['start_phase']['deg'],
+                            state_prep_time_minus_rotation['ms'] + 0.2 + rp['start_hold']['ms'], # 200 us cushion at the beginning (the other 200 us is thus at the end)
+                            rp['frequency_ramp_time']['ms'],
+                            rp['middle_hold']['ms'],
+                            rp['ramp_down_time']['ms'],
+                            rp['end_hold']['ms'],
+                            rp['voltage_pp']['V'],
+                            rp['drive_frequency']['kHz'],
+                            rp['waveform_label'])
 
     @setting(7, "Rotation run finally")
     def rotation_run_finally(self, c):
