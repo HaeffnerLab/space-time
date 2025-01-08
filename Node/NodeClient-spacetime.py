@@ -2,7 +2,7 @@
 import labrad
 import numpy as np
 import time
-from space_time.scripts.PulseSequences.resetDACs import reset_DACs
+from space_time.scripts.subsequences.resetDACs import reset_DACs
 from treedict import TreeDict
 
 #connect to LabRAD
