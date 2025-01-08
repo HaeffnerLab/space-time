@@ -21,7 +21,7 @@ class Ramsey_CompositePulse(pulse_sequence):
 
     }
 
-    show_params = ['RamseyComposite.pulses',
+    show_params = ['RamseyComposite.n_pulses',
                    'RamseyComposite.final_pulse_phase',
                    'RamseyComposite.dd_repetitions',
                    'RamseyComposite.ramsey_time',
@@ -60,6 +60,43 @@ class Ramsey_CompositePulse(pulse_sequence):
                    'RamseyComposite.pulse5_detuning',
                    'RamseyComposite.pulse5_amplitude',
                    'RamseyComposite.pulse5_duration',
+                   'RamseyComposite.auto_dd_pulse_construction',
+
+                   'DynamicalDecouplingComposite.pulse1_channel',
+                   'DynamicalDecouplingComposite.pulse1_line',
+                   'DynamicalDecouplingComposite.pulse1_sideband',
+                   'DynamicalDecouplingComposite.pulse1_detuning',
+                   'DynamicalDecouplingComposite.pulse1_amplitude',
+                   'DynamicalDecouplingComposite.pulse1_duration',
+
+                   'DynamicalDecouplingComposite.pulse2_channel',
+                   'DynamicalDecouplingComposite.pulse2_line',
+                   'DynamicalDecouplingComposite.pulse2_sideband',
+                   'DynamicalDecouplingComposite.pulse2_detuning',
+                   'DynamicalDecouplingComposite.pulse2_amplitude',
+                   'DynamicalDecouplingComposite.pulse2_duration',
+
+                   'DynamicalDecouplingComposite.pulse3_channel',
+                   'DynamicalDecouplingComposite.pulse3_line',
+                   'DynamicalDecouplingComposite.pulse3_sideband',
+                   'DynamicalDecouplingComposite.pulse3_detuning',
+                   'DynamicalDecouplingComposite.pulse3_amplitude',
+                   'DynamicalDecouplingComposite.pulse3_duration',
+
+                   'DynamicalDecouplingComposite.pulse4_channel',
+                   'DynamicalDecouplingComposite.pulse4_line',
+                   'DynamicalDecouplingComposite.pulse4_sideband',
+                   'DynamicalDecouplingComposite.pulse4_detuning',
+                   'DynamicalDecouplingComposite.pulse4_amplitude',
+                   'DynamicalDecouplingComposite.pulse4_duration',
+
+                   'DynamicalDecouplingComposite.pulse5_channel',
+                   'DynamicalDecouplingComposite.pulse5_line',
+                   'DynamicalDecouplingComposite.pulse5_sideband',
+                   'DynamicalDecouplingComposite.pulse5_detuning',
+                   'DynamicalDecouplingComposite.pulse5_amplitude',
+                   'DynamicalDecouplingComposite.pulse5_duration',
+                   'DynamicalDecouplingComposite.n_pulses',
 
                    'Rotation.drive_frequency',
                    'Rotation.end_hold',
@@ -88,6 +125,7 @@ class Ramsey_CompositePulse(pulse_sequence):
         ampl_off = U(-63.0, 'dBm')
         frequency_advance_duration = U(6, 'us')
 
+        dd_composite = self.parameters.DynamicalDecouplingComposite 
         rc = self.parameters.RamseyComposite
         
         pulse_channels =    [rc.pulse1_channel,
@@ -110,6 +148,35 @@ class Ramsey_CompositePulse(pulse_sequence):
                              rc.pulse3_duration,
                              rc.pulse4_duration,
                              rc.pulse5_duration,]
+        
+        dd_composite_pulse_channels = [
+            dd_composite.pulse1_channel,
+            dd_composite.pulse2_channel,
+            dd_composite.pulse3_channel,
+            dd_composite.pulse4_channel,
+            dd_composite.pulse5_channel
+        ]
+        dd_composite_pulse_frequencies =[
+            self.calc_freq_from_array(dd_composite.pulse1_line, dd_composite.pulse1_sideband) + dd_composite.pulse1_detuning,
+            self.calc_freq_from_array(dd_composite.pulse2_line, dd_composite.pulse2_sideband) + dd_composite.pulse2_detuning,
+            self.calc_freq_from_array(dd_composite.pulse3_line, dd_composite.pulse3_sideband) + dd_composite.pulse3_detuning,
+            self.calc_freq_from_array(dd_composite.pulse4_line, dd_composite.pulse4_sideband) + dd_composite.pulse4_detuning,
+            self.calc_freq_from_array(dd_composite.pulse5_line, dd_composite.pulse5_sideband) + dd_composite.pulse5_detuning
+        ]
+        dd_composite_pulse_amplitudes = [
+            dd_composite.pulse1_amplitude,
+            dd_composite.pulse2_amplitude,
+            dd_composite.pulse3_amplitude,
+            dd_composite.pulse4_amplitude,
+            dd_composite.pulse5_amplitude
+        ]
+        dd_composite_pulse_durations = [
+            dd_composite.pulse1_duration,
+            dd_composite.pulse2_duration,
+            dd_composite.pulse3_duration,
+            dd_composite.pulse4_duration,
+            dd_composite.pulse5_duration,
+        ]
 
         def add_pulse_n(n, final_pulse=False):
             if final_pulse:
@@ -128,8 +195,16 @@ class Ramsey_CompositePulse(pulse_sequence):
                                                    "Excitation729.phase729": U(0, 'deg'),
                                                    "Excitation729.rabi_change_DDS": False
                                                   })
-
-        N = int(rc.pulses)
+        def add_dd_composite_pulse_n(n):
+            self.addSequence(RabiExcitation, {"Excitation729.channel729": dd_composite_pulse_channels[n-1],
+                                                   "Excitation729.frequency729": dd_composite_pulse_frequencies[n-1],
+                                                   "Excitation729.amplitude729": dd_composite_pulse_amplitudes[n-1],
+                                                   "Excitation729.duration729": dd_composite_pulse_durations[n-1],
+                                                   "Excitation729.phase729": U(0, 'deg'),
+                                                   "Excitation729.rabi_change_DDS": False
+                                                  })
+        N = int(rc.n_pulses)
+        N_dd = int(dd_composite.n_pulses)
         dd_reps = int(rc.dd_repetitions)
 
         self.addSequence(StatePreparation)
@@ -151,7 +226,7 @@ class Ramsey_CompositePulse(pulse_sequence):
         # add dd pulses if necessary
         if dd_reps == 0:
             self.addSequence(EmptySequence, {"EmptySequence.empty_sequence_duration":T-t_pulse})
-        else:
+        elif rc.auto_dd_pulse_construction:
             tau = T/(2.0*dd_reps)   # time between centers of pi/2 pulse and pi pulse
             t_wait_1 = tau - 1.5*t_pulse      # actual wait time between pi/2 pulse and pi pulse
             t_wait_2 = 2*tau - 2*t_pulse      # actual wait time between pi pulses
@@ -167,6 +242,23 @@ class Ramsey_CompositePulse(pulse_sequence):
                 add_pulse_n(n)
             # Add the final wait time until the final pi/2 pulse
             self.addSequence(EmptySequence, {"EmptySequence.empty_sequence_duration":t_wait_1})
+        else: 
+            tau = T/(2.0*dd_reps)   # time between centers of pi/2 pulse and pi pulse
+            t_wait_1 = tau - 1.5*t_pulse      # actual wait time between pi/2 pulse and pi pulse
+            t_wait_2 = 2*tau - 2*t_pulse      # actual wait time between pi pulses
+            # Wait time until first dd pulse
+            self.addSequence(EmptySequence, {"EmptySequence.empty_sequence_duration":t_wait_1})
+            # Each dd pulse is composed of the composite pulse backwards then forwards. Add the first dd_reps-1 dd pulses, each followed by a wait time
+            for i in range(dd_reps-1):
+                for n in range(N_dd, 0, -1)+range(1, N_dd+1):
+                    add_dd_composite_pulse_n(n)
+                self.addSequence(EmptySequence, {"EmptySequence.empty_sequence_duration":t_wait_2})
+            # Add the final dd pulse
+            for n in range(N_dd, 0, -1)+range(1, N_dd+1):
+                add_dd_composite_pulse_n(n)
+            # Add the final wait time until the final pi/2 pulse
+            self.addSequence(EmptySequence, {"EmptySequence.empty_sequence_duration":t_wait_1})
+
 
         # Final composite "pi/2" pulse
         for n in range(N, 1, -1):
