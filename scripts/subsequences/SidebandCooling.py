@@ -92,7 +92,7 @@ class SidebandCooling(pulse_sequence):
                 "OpticalPumping.optical_pumping_frequency_866":freq866,
                 "OpticalPumping.optical_pumping_amplitude_866":amp866,
                 "OpticalPumping.match_866_frequency_to_doppler":sc.match_866_frequency_to_doppler,
-                "StatePreparation.channel_729":channels729[index]})
+                "OpticalPumping.channel_729":channels729[index]})
 
         def add_sbc_op_sequence():
             self.addSequence(OpticalPumping,{'OpticalPumping.optical_pumping_frequency_729':freq729_op,
