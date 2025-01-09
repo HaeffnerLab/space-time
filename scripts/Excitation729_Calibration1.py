@@ -26,14 +26,13 @@ class Excitation729_Calibration1(pulse_sequence):
                   'Excitation729Cal1.empty_sequence_duration',
                   'Excitation729Cal1.readout_mode',
                   'Excitation729Cal1.rf_modulation_enable',
-                  'Rotation.drive_frequency',
-                  'Rotation.end_hold',
-                  'Rotation.frequency_ramp_time',
+                  'Rotation.final_drive_frequency',
+                  'Rotation.spinup_time',
                   'Rotation.middle_hold',
-                  'Rotation.ramp_down_time',
-                  'Rotation.start_hold',
+                  'Rotation.release_time',
                   'Rotation.start_phase',
                   'Rotation.voltage_pp',
+                  'Rotation.waveform_label'
                   ]
 
 

@@ -16,7 +16,8 @@ class ramsey_gap(Ramsey):
             from subsequences.StatePreparation import StatePreparation
             state_prep_time = StatePreparation(parameters_dict).end
             frequency_ramp_time = parameters_dict.Rotation.frequency_ramp_time
-            cxn.keysight_33500b.rotation_run_initial(state_prep_time, 'frequency_ramp_time', frequency_ramp_time)
+            total_time = cls(parameters_dict).end
+            cxn.keysight_33500b.rotation_run_initial(state_prep_time, total_time, 'frequency_ramp_time', frequency_ramp_time)
 
 
     @classmethod
