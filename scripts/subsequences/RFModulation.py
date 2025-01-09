@@ -3,6 +3,7 @@ from labrad.units import WithUnit as U
 
 from TurnOffAll import TurnOffAll
 from RepumpD import RepumpD
+from SOSBeam import SOSBeam
 from DopplerCooling import DopplerCooling
 from OpticalPumping import OpticalPumping
 from SidebandCooling import SidebandCooling
@@ -15,6 +16,8 @@ def RFModulation(sequence, time_start_readout, pad_time=U(1200, 'us')):
     rfmod = params.RFModulation
 
     time_other_stateprep = TurnOffAll(params).end + RepumpD(params).end + DopplerCooling(params).end + U(10., 'us')
+    if params.StatePreparation.sos_enable:
+        time_other_stateprep += SOSBeam(params).end
     if params.StatePreparation.optical_pumping_enable:
         time_other_stateprep += OpticalPumping(params).end
     
