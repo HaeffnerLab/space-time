@@ -98,14 +98,13 @@ class Ramsey_CompositePulse(pulse_sequence):
                    'DynamicalDecouplingComposite.pulse5_duration',
                    'DynamicalDecouplingComposite.n_pulses',
 
-                   'Rotation.drive_frequency',
-                   'Rotation.end_hold',
-                   'Rotation.frequency_ramp_time',
-                   'Rotation.middle_hold',
-                   'Rotation.ramp_down_time',
-                   'Rotation.start_hold',
-                   'Rotation.start_phase',
-                   'Rotation.voltage_pp',
+                  'Rotation.final_drive_frequency',
+                  'Rotation.spinup_time',
+                  'Rotation.middle_hold',
+                  'Rotation.release_time',
+                  'Rotation.start_phase',
+                  'Rotation.voltage_pp',
+                  'Rotation.waveform_label',
                    
                    'RFModulation.enable',
                    'RFModulation.turn_on_before',
@@ -279,7 +278,8 @@ class Ramsey_CompositePulse(pulse_sequence):
         if parameters_dict.StatePreparation.rotation_enable:
             from subsequences.StatePreparation import StatePreparation
             state_prep_time = StatePreparation(parameters_dict).end
-            cxn.keysight_33500b.rotation_run_initial(state_prep_time)
+            total_time = cls(parameters_dict).end
+            cxn.keysight_33500b.rotation_run_initial(state_prep_time, total_time)
 
     @classmethod
     def run_in_loop(cls, cxn, parameters_dict, data, x):

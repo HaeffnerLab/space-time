@@ -16,22 +16,32 @@ class StatePreparation(pulse_sequence):
     def sequence(self):
         from TurnOffAll import TurnOffAll
         from RepumpD import RepumpD
+        from SOSBeam import SOSBeam
         from DopplerCooling import DopplerCooling
         from OpticalPumping import OpticalPumping
         from SidebandCooling import SidebandCooling
         from Rotation import Rotation
 
         sp = self.parameters.StatePreparation
-        
+
         self.end = U(10., 'us')
+
         self.addSequence(TurnOffAll)
-        self.addSequence(RepumpD) # initializing the state of the ion
+
+        self.addSequence(RepumpD)
+
+        if sp.sos_enable:
+            self.addSequence(SOSBeam)
+
         self.addSequence(DopplerCooling) 
-        
+
         if sp.optical_pumping_enable:
             freq729 = self.calc_freq_from_array(self.parameters.OpticalPumping.line_selection)
-            self.addSequence(OpticalPumping,{'OpticalPumping.optical_pumping_frequency_729':freq729})
+            self.addSequence(OpticalPumping, {'OpticalPumping.optical_pumping_frequency_729':freq729})
+
         if sp.sideband_cooling_enable:
             self.addSequence(SidebandCooling)
+
         if sp.rotation_enable:
             self.addSequence(Rotation)
+            

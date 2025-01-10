@@ -29,12 +29,10 @@ class Excitation729(pulse_sequence):
                   'Excitation729.sideband_selection',
                   'Excitation729.channel729',
                   'Excitation729.stark_shift_729',
-                  'Rotation.drive_frequency',
-                  'Rotation.end_hold',
-                  'Rotation.frequency_ramp_time',
+                  'Rotation.final_drive_frequency',
+                  'Rotation.spinup_time',
                   'Rotation.middle_hold',
-                  'Rotation.ramp_down_time',
-                  'Rotation.start_hold',
+                  'Rotation.release_time',
                   'Rotation.start_phase',
                   'Rotation.voltage_pp',
                   'Rotation.waveform_label',
@@ -105,7 +103,8 @@ class Excitation729(pulse_sequence):
         if parameters_dict.StatePreparation.rotation_enable:
             from subsequences.StatePreparation import StatePreparation
             state_prep_time = StatePreparation(parameters_dict).end
-            cxn.keysight_33500b.rotation_run_initial(state_prep_time)
+            total_time = cls(parameters_dict).end
+            cxn.keysight_33500b.rotation_run_initial(state_prep_time, total_time)
         
         e = parameters_dict.Excitation729
 
