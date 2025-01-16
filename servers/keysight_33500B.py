@@ -336,7 +336,7 @@ class KEYSIGHT_33500B(LabradServer):
 
 
     ################ Spin up then hold at constant rotation frequency ################
-    def linear_spinup__no_release(self, start_phase, start_hold, spinup_time, time_after_spinup, final_drive_freq):
+    def linear_spinup__continue_rotation(self, start_phase, start_hold, spinup_time, time_after_spinup, final_drive_freq):
         final_drive_angular_freq = 2*np.pi * final_drive_freq
         
         # Reference times (labelled by the time at which a section begins, NOT by the duration of that section)
@@ -363,7 +363,7 @@ class KEYSIGHT_33500B(LabradServer):
 
         return amplitude_curve, phase_curve
         
-    def sin2_spinup__no_release(self, start_phase, start_hold, spinup_time, time_after_spinup, final_drive_freq):
+    def sin2_spinup__continue_rotation(self, start_phase, start_hold, spinup_time, time_after_spinup, final_drive_freq):
         final_drive_angular_freq = 2*np.pi * final_drive_freq
 
         # Reference times (labelled by the time at which a section begins, NOT by the duration of that section)
@@ -555,14 +555,14 @@ class KEYSIGHT_33500B(LabradServer):
                                                            rp.spinup_time['s'],
                                                            rp.middle_hold['s'],
                                                            rp.final_drive_frequency['Hz'])
-        elif rp.waveform_label == 'linear_spinup__no_release':
-            (amp, phase) = self.linear_spinup__no_release(rp.start_phase['rad'],
+        elif rp.waveform_label == 'linear_spinup__continue_rotation':
+            (amp, phase) = self.linear_spinup__continue_rotation(rp.start_phase['rad'],
                                                           state_prep_time_minus_rotation['s'],
                                                           rp.spinup_time['s'],
                                                           time_after_spinup['s'],
                                                           rp.final_drive_frequency['Hz'])
-        elif rp.waveform_label == 'sin2_spinup__no_release':
-            (amp, phase) = self.sin2_spinup__no_release(rp.start_phase['rad'],
+        elif rp.waveform_label == 'sin2_spinup__continue_rotation':
+            (amp, phase) = self.sin2_spinup__continue_rotation(rp.start_phase['rad'],
                                                         state_prep_time_minus_rotation['s'],
                                                         rp.spinup_time['s'],
                                                         time_after_spinup['s'],
