@@ -37,20 +37,8 @@ class CalibLine1(pulse_sequence):
 
     @classmethod
     def run_initial(cls,cxn, parameters_dict):
-        carrier_translation = {'S+1/2D-3/2':'c0',
-                               'S-1/2D-5/2':'c1',
-                               'S+1/2D-1/2':'c2',
-                               'S-1/2D-3/2':'c3',
-                               'S+1/2D+1/2':'c4',
-                               'S-1/2D-1/2':'c5',
-                               'S+1/2D+3/2':'c6',
-                               'S-1/2D+1/2':'c7',
-                               'S+1/2D+5/2':'c8',
-                               'S-1/2D+3/2':'c9',
-                               }
         line = parameters_dict.CalibrateLines.line_selection_1
-        shift = parameters_dict.Carriers[carrier_translation[line]]
-
+        shift = cls.calc_spectrum_shift(parameters_dict, line)
         pv = cxn.parametervault
         pv.set_parameter('Display','shift',shift)
 
@@ -116,20 +104,8 @@ class CalibLine2(pulse_sequence):
 
     @classmethod
     def run_initial(cls,cxn, parameters_dict):
-        carrier_translation = {'S+1/2D-3/2':'c0',
-                               'S-1/2D-5/2':'c1',
-                               'S+1/2D-1/2':'c2',
-                               'S-1/2D-3/2':'c3',
-                               'S+1/2D+1/2':'c4',
-                               'S-1/2D-1/2':'c5',
-                               'S+1/2D+3/2':'c6',
-                               'S-1/2D+1/2':'c7',
-                               'S+1/2D+5/2':'c8',
-                               'S-1/2D+3/2':'c9',
-                               }
         line = parameters_dict.CalibrateLines.line_selection_2
-        shift = parameters_dict.Carriers[carrier_translation[line]]
-
+        shift = cls.calc_spectrum_shift(parameters_dict, line)
         pv = cxn.parametervault
         pv.set_parameter('Display','shift',shift)
 

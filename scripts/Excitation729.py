@@ -37,16 +37,16 @@ class Excitation729(pulse_sequence):
                   'Rotation.voltage_pp',
                   'Rotation.waveform_label',
                   'EmptySequence.empty_sequence_duration',
-                  'EmptySequence.noise_enable',
-                  'EmptySequence.enable729',
-                  'EmptySequence.channel729',
-                  'EmptySequence.amplitude729',
-                  'EmptySequence.enable866',
-                  'EmptySequence.frequency866',
-                  'EmptySequence.amplitude866',
-                  'EmptySequence.line_selection',
-                  'EmptySequence.stark_shift_729',
-                  # 'EmptySequence.empty_sequence_readout_duration',
+                #   'EmptySequence.noise_enable',
+                #   'EmptySequence.enable729',
+                #   'EmptySequence.channel729',
+                #   'EmptySequence.amplitude729',
+                #   'EmptySequence.enable866',
+                #   'EmptySequence.frequency866',
+                #   'EmptySequence.amplitude866',
+                #   'EmptySequence.line_selection',
+                #   'EmptySequence.stark_shift_729',
+                #   'EmptySequence.empty_sequence_readout_duration',
                   'SidebandCoolingContinuous.sideband_cooling_continuous_cycles',
                   'SidebandCoolingContinuous.sideband_cooling_continuous_duration',
                   'SidebandCoolingContTwoTone.sideband_cooling_cont_twotone_cycles',
@@ -106,34 +106,9 @@ class Excitation729(pulse_sequence):
             total_time = cls(parameters_dict).end
             cxn.keysight_33500b.rotation_run_initial(state_prep_time, total_time)
         
-        e = parameters_dict.Excitation729
-
         ###### add shift for spectra purposes
-        carrier_translation = {'S+1/2D-3/2':'c0',
-                              'S-1/2D-5/2':'c1',
-                              'S+1/2D-1/2':'c2',
-                              'S-1/2D-3/2':'c3',
-                              'S+1/2D+1/2':'c4',
-                              'S-1/2D-1/2':'c5',
-                              'S+1/2D+3/2':'c6',
-                              'S-1/2D+1/2':'c7',
-                              'S+1/2D+5/2':'c8',
-                              'S-1/2D+3/2':'c9',
-                                 }
-
-        trapfreq = parameters_dict.TrapFrequencies
-        sideband_frequencies = [trapfreq.radial_frequency_1, trapfreq.radial_frequency_2, trapfreq.axial_frequency, trapfreq.rf_drive_frequency, trapfreq.rotation_frequency]
-        shift = U(0.,'MHz')
-        if parameters_dict.Display.relative_frequencies:
-            # shift by sideband only (spectrum "0" will be carrier frequency)
-            for order, sideband_frequency in zip([sb*e.invert_sb for sb in e.sideband_selection], sideband_frequencies):
-                shift += order * sideband_frequency
-        else:
-            #shift by sideband + carrier (spectrum "0" will be AO center frequency)
-            shift += parameters_dict.Carriers[carrier_translation[e.line_selection]]
-            for order, sideband_frequency in zip([sb*e.invert_sb for sb in e.sideband_selection], sideband_frequencies):
-                shift += order * sideband_frequency
-
+        e = parameters_dict.Excitation729
+        shift = cls.calc_spectrum_shift(parameters_dict, e.line_selection, [sb*e.invert_sb for sb in e.sideband_selection])
         pv = cxn.parametervault
         pv.set_parameter('Display','shift', shift)
 

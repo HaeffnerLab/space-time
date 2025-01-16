@@ -4,6 +4,24 @@ from labrad.units import WithUnit as U
 from treedict import TreeDict
 from common.client_config import client_info as cl
 
+# This order must match the other stuff (whatever it is, haven't figured it all out)
+sidebands = ['radial_frequency_1', 'radial_frequency_2', 'axial_frequency', 'rf_drive_frequency', 'rotation_frequency']
+
+def construct_sideband_selection(parameters, index):
+    # Construct sideband_selection list from selection of sideband and its order
+    ctf = parameters.CalibTrapFreqs
+    sideband_selection = [0, 0, 0, 0, 0]
+    if index == 1:
+        sideband_index = sidebands.index(ctf.sideband1_sideband_selection)
+        sideband_selection[sideband_index] = ctf.sideband1_order
+    elif index == 2:
+        sideband_index = sidebands.index(ctf.sideband2_sideband_selection)
+        sideband_selection[sideband_index] = ctf.sideband2_order
+    else:
+        ValueError('Incorrect sideband index')
+    return sideband_selection
+
+
 class CalibSideband1(pulse_sequence):
 
     scannable_params = {'CalibTrapFreqs.sideband1_detuning' : [(-150, 150, 15, 'kHz'), 'calibrations__sideband1', True]}
@@ -13,19 +31,12 @@ class CalibSideband1(pulse_sequence):
         from Excitation729 import Excitation729
 
         ctf = self.parameters.CalibTrapFreqs
-        
-        # Construct sideband_selection list from selection of sideband and its order
-        sideband_selection = [0, 0, 0, 0, 0]
-        sidebands = ['radial_frequency_1', 'radial_frequency_2', 'axial_frequency', 'rf_drive_frequency', 'rotation_frequency']
-        sideband_index = sidebands.index(ctf.sideband1_sideband_selection)
-        sideband_selection[sideband_index] = ctf.sideband1_order
-
         self.addSequence(Excitation729,{'Excitation729.amplitude729': ctf.sideband1_amplitude729,
                                         'Excitation729.channel729': ctf.sideband1_channel729,
                                         'Excitation729.duration729': ctf.sideband1_duration729,
                                         'Excitation729.frequency729': ctf.sideband1_detuning,
                                         'Excitation729.line_selection': ctf.sideband1_line_selection_729,
-                                        'Excitation729.sideband_selection': sideband_selection,
+                                        'Excitation729.sideband_selection': construct_sideband_selection(self.parameters, 1),
                                         'Excitation729.stark_shift_729': U(0, 'kHz'),
                                         'StatePreparation.sideband_cooling_enable': False,
                                         'StatePreparation.rotation_enable': False,
@@ -37,35 +48,11 @@ class CalibSideband1(pulse_sequence):
 
     @classmethod
     def run_initial(cls, cxn, parameters_dict):
-        ctf = parameters_dict.CalibTrapFreqs
-
+        
         ###### add shift for spectra purposes
-        carrier_translation = {'S+1/2D-3/2':'c0',
-                              'S-1/2D-5/2':'c1',
-                              'S+1/2D-1/2':'c2',
-                              'S-1/2D-3/2':'c3',
-                              'S+1/2D+1/2':'c4',
-                              'S-1/2D-1/2':'c5',
-                              'S+1/2D+3/2':'c6',
-                              'S-1/2D+1/2':'c7',
-                              'S+1/2D+5/2':'c8',
-                              'S-1/2D+3/2':'c9',}
-
-        trapfreq = parameters_dict.TrapFrequencies
-        sidebands = ['radial_frequency_1', 'radial_frequency_2', 'axial_frequency', 'rf_drive_frequency', 'rotation_frequency']
-        sideband_frequencies = [trapfreq.radial_frequency_1, trapfreq.radial_frequency_2, trapfreq.axial_frequency, trapfreq.rf_drive_frequency, trapfreq.rotation_frequency]
-        shift = U(0.,'MHz')
-        if parameters_dict.Display.relative_frequencies:
-            # shift by sideband only (spectrum "0" will be carrier frequency)
-            sideband_index = sidebands.index(ctf.sideband1_sideband_selection)
-            order = ctf.sideband1_order
-            shift += order*sideband_frequencies[sideband_index]
-            print "shift"
-            print shift
-        else:
-            #shift by sideband + carrier (spectrum "0" will be AO center frequency)
-            shift += parameters_dict.Carriers[carrier_translation[ctf.sideband1_line_selection_729]]
-
+        line = parameters_dict.CalibTrapFreqs.sideband1_line_selection_729
+        sideband_selection = construct_sideband_selection(parameters_dict, 1)
+        shift = cls.calc_spectrum_shift(parameters_dict, line, sideband_selection)
         pv = cxn.parametervault
         pv.set_parameter('Display', 'shift', shift)
 
@@ -79,6 +66,10 @@ class CalibSideband1(pulse_sequence):
     def run_finally(cls, cxn, parameters_dict, data, x):
         if parameters_dict.CalibrationControl.save_calibrations:
             ctf = parameters_dict.CalibTrapFreqs
+
+            # Compensate for can window shift if necessary
+            if not parameters_dict.Display.relative_frequencies:
+                x -= cls.calc_spectrum_shift(parameters_dict, ctf.sideband1_line_selection_729)['MHz']
 
             # Fit peak and compute sideband frequency
             data_y = data.sum(1)
@@ -102,19 +93,12 @@ class CalibSideband2(pulse_sequence):
         from Excitation729 import Excitation729
 
         ctf = self.parameters.CalibTrapFreqs
-        
-        # Construct sideband_selection list from selection of sideband and its order
-        sideband_selection = [0, 0, 0, 0, 0]
-        sidebands = ['radial_frequency_1', 'radial_frequency_2', 'axial_frequency', 'rf_drive_frequency', 'rotation_frequency']
-        sideband_index = sidebands.index(ctf.sideband2_sideband_selection)
-        sideband_selection[sideband_index] = ctf.sideband2_order
-
         self.addSequence(Excitation729,{'Excitation729.amplitude729': ctf.sideband2_amplitude729,
                                         'Excitation729.channel729': ctf.sideband2_channel729,
                                         'Excitation729.duration729': ctf.sideband2_duration729,
                                         'Excitation729.frequency729': ctf.sideband2_detuning,
                                         'Excitation729.line_selection': ctf.sideband2_line_selection_729,
-                                        'Excitation729.sideband_selection': sideband_selection,
+                                        'Excitation729.sideband_selection': construct_sideband_selection(self.parameters, 2),
                                         'Excitation729.stark_shift_729': U(0, 'kHz'),
                                         'StatePreparation.sideband_cooling_enable': False,
                                         'StatePreparation.rotation_enable': False,
@@ -126,35 +110,11 @@ class CalibSideband2(pulse_sequence):
 
     @classmethod
     def run_initial(cls, cxn, parameters_dict):
-        ctf = parameters_dict.CalibTrapFreqs
-
+        
         ###### add shift for spectra purposes
-        carrier_translation = {'S+1/2D-3/2':'c0',
-                              'S-1/2D-5/2':'c1',
-                              'S+1/2D-1/2':'c2',
-                              'S-1/2D-3/2':'c3',
-                              'S+1/2D+1/2':'c4',
-                              'S-1/2D-1/2':'c5',
-                              'S+1/2D+3/2':'c6',
-                              'S-1/2D+1/2':'c7',
-                              'S+1/2D+5/2':'c8',
-                              'S-1/2D+3/2':'c9',}
-
-        trapfreq = parameters_dict.TrapFrequencies
-        sidebands = ['radial_frequency_1', 'radial_frequency_2', 'axial_frequency', 'rf_drive_frequency', 'rotation_frequency']
-        sideband_frequencies = [trapfreq.radial_frequency_1, trapfreq.radial_frequency_2, trapfreq.axial_frequency, trapfreq.rf_drive_frequency, trapfreq.rotation_frequency]
-        shift = U(0.,'MHz')
-        if parameters_dict.Display.relative_frequencies:
-            # shift by sideband only (spectrum "0" will be carrier frequency)
-            sideband_index = sidebands.index(ctf.sideband2_sideband_selection)
-            order = ctf.sideband2_order
-            shift += order*sideband_frequencies[sideband_index]
-            print "shift"
-            print shift
-        else:
-            #shift by sideband + carrier (spectrum "0" will be AO center frequency)
-            shift += parameters_dict.Carriers[carrier_translation[ctf.sideband2_line_selection_729]]
-
+        line = parameters_dict.CalibTrapFreqs.sideband2_line_selection_729
+        sideband_selection = construct_sideband_selection(parameters_dict, 2)
+        shift = cls.calc_spectrum_shift(parameters_dict, line, sideband_selection)
         pv = cxn.parametervault
         pv.set_parameter('Display', 'shift', shift)
 
@@ -168,6 +128,10 @@ class CalibSideband2(pulse_sequence):
     def run_finally(cls, cxn, parameters_dict, data, x):
         if parameters_dict.CalibrationControl.save_calibrations:
             ctf = parameters_dict.CalibTrapFreqs
+
+            # Compensate for can window shift if necessary
+            if not parameters_dict.Display.relative_frequencies:
+                x -= cls.calc_spectrum_shift(parameters_dict, ctf.sideband2_line_selection_729)['MHz']
 
             # Fit peak and compute sideband frequency
             peak_fit = cls.gaussian_fit(x, data[:,0])
