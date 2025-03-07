@@ -110,6 +110,15 @@ class Ramsey_CompositePulse(pulse_sequence):
                    'RFModulation.turn_on_before',
 
                    'EmptySequence.empty_sequence_duration',
+                   'GatePulse.gate_pulse_duration',
+                   'GatePulse.enable729',
+                   'GatePulse.channel729',
+                  'GatePulse.amplitude729',
+                  'GatePulse.enable866',
+                  'GatePulse.frequency866',
+                  'GatePulse.amplitude866',
+                  'GatePulse.line_selection',
+                  'GatePulse.stark_shift_729'
                    ]
 
 
@@ -179,21 +188,17 @@ class Ramsey_CompositePulse(pulse_sequence):
 
         def add_pulse_n(n, final_pulse=False):
             if final_pulse:
-                 self.addSequence(RabiExcitation, {"Excitation729.channel729": pulse_channels[n-1],
-                                                   "Excitation729.frequency729": pulse_frequencies[n-1],
-                                                   "Excitation729.amplitude729": pulse_amplitudes[n-1],
-                                                   "Excitation729.duration729": pulse_durations[n-1],
-                                                   "Excitation729.phase729": rc.final_pulse_phase,
-                                                   "Excitation729.rabi_change_DDS": False
-                                                  })
+                pulse_phase = rc.final_pulse_phase
             else:
-                 self.addSequence(RabiExcitation, {"Excitation729.channel729": pulse_channels[n-1],
-                                                   "Excitation729.frequency729": pulse_frequencies[n-1],
-                                                   "Excitation729.amplitude729": pulse_amplitudes[n-1],
-                                                   "Excitation729.duration729": pulse_durations[n-1],
-                                                   "Excitation729.phase729": U(0, 'deg'),
-                                                   "Excitation729.rabi_change_DDS": False
-                                                  })
+                pulse_phase =  U(0, 'deg')
+            self.addSequence(RabiExcitation, {"Excitation729.channel729": pulse_channels[n-1],
+                                              "Excitation729.frequency729": pulse_frequencies[n-1],
+                                              "Excitation729.amplitude729": pulse_amplitudes[n-1],
+                                              "Excitation729.duration729": pulse_durations[n-1],
+                                              "Excitation729.phase729": pulse_phase,
+                                              "Excitation729.rabi_change_DDS": False
+                                                })
+                 
         def add_dd_composite_pulse_n(n):
             self.addSequence(RabiExcitation, {"Excitation729.channel729": dd_composite_pulse_channels[n-1],
                                                    "Excitation729.frequency729": dd_composite_pulse_frequencies[n-1],
@@ -202,12 +207,15 @@ class Ramsey_CompositePulse(pulse_sequence):
                                                    "Excitation729.phase729": U(0, 'deg'),
                                                    "Excitation729.rabi_change_DDS": False
                                                   })
+            
         N = int(rc.n_pulses)
         N_dd = int(dd_composite.n_pulses)
         dd_reps = int(rc.dd_repetitions)
 
         self.addSequence(StatePreparation)
         self.addSequence(EmptySequence)
+
+        # First, add a 6 microsecond frequency-advance-delay to set the frequency of all channels
         for n in range(1, N+1):
             self.addDDS(pulse_channels[n-1], self.end, frequency_advance_duration, pulse_frequencies[n-1], ampl_off)
             self.end = self.end + frequency_advance_duration
@@ -217,14 +225,20 @@ class Ramsey_CompositePulse(pulse_sequence):
             add_pulse_n(n)
 
         ## Wait time, including dynamical decoupling if necessary
-        # calculate wait times
         T = rc.ramsey_time                # total ramsey time
+
         t_pulse = U(0, 'us')              # total time of composite pulse
         for n in range(1, N+1):
             t_pulse = t_pulse + pulse_durations[n-1]
+
+        dd_t_pulse = U(0, 'us')           # total time of dynamical decoupling pulse
+        for n in range(N_dd, 0, -1)+range(1, N_dd+1):
+            dd_t_pulse = dd_t_pulse + dd_composite_pulse_durations[n-1]
+
         # add dd pulses if necessary
         if dd_reps == 0:
             self.addSequence(EmptySequence, {"EmptySequence.empty_sequence_duration":T-t_pulse})
+
         elif rc.auto_dd_pulse_construction:
             tau = T/(2.0*dd_reps)   # time between centers of pi/2 pulse and pi pulse
             t_wait_1 = tau - 1.5*t_pulse      # actual wait time between pi/2 pulse and pi pulse
@@ -241,13 +255,14 @@ class Ramsey_CompositePulse(pulse_sequence):
                 add_pulse_n(n)
             # Add the final wait time until the final pi/2 pulse
             self.addSequence(EmptySequence, {"EmptySequence.empty_sequence_duration":t_wait_1})
+
         else: 
-            tau = T/(2.0*dd_reps)   # time between centers of pi/2 pulse and pi pulse
-            t_wait_1 = tau - 1.5*t_pulse      # actual wait time between pi/2 pulse and pi pulse
-            t_wait_2 = 2*tau - 2*t_pulse      # actual wait time between pi pulses
+            tau = T/(2.0*dd_reps)              # time between centers of pi/2 pulse and pi pulse
+            t_wait_1 = tau - 0.5*t_pulse - 0.5*dd_t_pulse    # actual wait time between pi/2 pulse and pi pulse
+            t_wait_2 = 2*tau - dd_t_pulse      # actual wait time between pi pulses
             # Wait time until first dd pulse
             self.addSequence(EmptySequence, {"EmptySequence.empty_sequence_duration":t_wait_1})
-            # Each dd pulse is composed of the composite pulse backwards then forwards. Add the first dd_reps-1 dd pulses, each followed by a wait time
+            # Add the first dd_reps-1 dd pulses, each followed by a wait time
             for i in range(dd_reps-1):
                 for n in range(N_dd, 0, -1)+range(1, N_dd+1):
                     add_dd_composite_pulse_n(n)
@@ -257,6 +272,23 @@ class Ramsey_CompositePulse(pulse_sequence):
                 add_dd_composite_pulse_n(n)
             # Add the final wait time until the final pi/2 pulse
             self.addSequence(EmptySequence, {"EmptySequence.empty_sequence_duration":t_wait_1})
+
+        # else: 
+        #     tau = T/(2.0*dd_reps)   # time between centers of pi/2 pulse and pi pulse
+        #     t_wait_1 = tau - 1.5*t_pulse      # actual wait time between pi/2 pulse and pi pulse
+        #     t_wait_2 = 2*tau - 2*t_pulse      # actual wait time between pi pulses
+        #     # Wait time until first dd pulse
+        #     self.addSequence(EmptySequence, {"EmptySequence.empty_sequence_duration":t_wait_1})
+        #     # Add the first dd_reps-1 dd pulses, each followed by a wait time
+        #     for i in range(dd_reps-1):
+        #         for n in range(N_dd, 0, -1)+range(1, N_dd+1):
+        #             add_dd_composite_pulse_n(n)
+        #         self.addSequence(EmptySequence, {"EmptySequence.empty_sequence_duration":t_wait_2})
+        #     # Add the final dd pulse
+        #     for n in range(N_dd, 0, -1)+range(1, N_dd+1):
+        #         add_dd_composite_pulse_n(n)
+        #     # Add the final wait time until the final pi/2 pulse
+        #     self.addSequence(EmptySequence, {"EmptySequence.empty_sequence_duration":t_wait_1})
 
 
         # Final composite "pi/2" pulse

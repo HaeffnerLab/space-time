@@ -29,6 +29,7 @@ class Excitation729(pulse_sequence):
                   'Excitation729.sideband_selection',
                   'Excitation729.channel729',
                   'Excitation729.stark_shift_729',
+                  'Excitation729.phase729',
                   'Rotation.final_drive_frequency',
                   'Rotation.spinup_time',
                   'Rotation.middle_hold',
@@ -37,16 +38,17 @@ class Excitation729(pulse_sequence):
                   'Rotation.voltage_pp',
                   'Rotation.waveform_label',
                   'EmptySequence.empty_sequence_duration',
-                #   'EmptySequence.noise_enable',
-                #   'EmptySequence.enable729',
-                #   'EmptySequence.channel729',
-                #   'EmptySequence.amplitude729',
-                #   'EmptySequence.enable866',
-                #   'EmptySequence.frequency866',
-                #   'EmptySequence.amplitude866',
-                #   'EmptySequence.line_selection',
-                #   'EmptySequence.stark_shift_729',
-                #   'EmptySequence.empty_sequence_readout_duration',
+                  'EmptySequence.noise_enable',
+                  'GatePulse.gate_pulse_duration',
+                  'GatePulse.enable729',
+                  'GatePulse.channel729',
+                  'GatePulse.amplitude729',
+                  'GatePulse.enable866',
+                  'GatePulse.frequency866',
+                  'GatePulse.amplitude866',
+                  'GatePulse.line_selection',
+                  'GatePulse.stark_shift_729',
+                  'EmptySequence.empty_sequence_readout_duration',
                   'SidebandCoolingContinuous.sideband_cooling_continuous_cycles',
                   'SidebandCoolingContinuous.sideband_cooling_continuous_duration',
                   'SidebandCoolingContTwoTone.sideband_cooling_cont_twotone_cycles',
@@ -58,6 +60,8 @@ class Excitation729(pulse_sequence):
                   'SidebandCoolingContTwoTone.stage5_line',
                   'RFModulation.enable',
                   'RFModulation.turn_on_before',
+                  'BiasPulse.voltage',
+                  'BiasPulse.enable',
                   ]
 
 
@@ -91,20 +95,28 @@ class Excitation729(pulse_sequence):
         time_start_readout = self.end # This is for RF modulation
         self.addSequence(StateReadout)
 
-        # Add RF modulation TTL pulse if applicable
+        #Add RF modulation TTL pulse if applicable
         if self.parameters.RFModulation.enable:
             RFModulation(self, time_start_readout)
-                
         
         
+
     @classmethod
     def run_initial(cls, cxn, parameters_dict):
         # Add rotation if necessary
+        
         if parameters_dict.StatePreparation.rotation_enable:
             from subsequences.StatePreparation import StatePreparation
             state_prep_time = StatePreparation(parameters_dict).end
             total_time = cls(parameters_dict).end
             cxn.keysight_33500b.rotation_run_initial(state_prep_time, total_time)
+
+        if parameters_dict.BiasPulse.enable:
+            if parameters_dict.StatePreparation.rotation_enable == False:
+                from subsequences.StatePreparation import StatePreparation
+                state_prep_time = StatePreparation(parameters_dict).end
+                total_time = cls(parameters_dict).end    
+            cxn.keysight_33600a.biaspulse_run_initial(state_prep_time-U(1200, 'us'), total_time, total_time)
         
         ###### add shift for spectra purposes
         e = parameters_dict.Excitation729
@@ -120,3 +132,5 @@ class Excitation729(pulse_sequence):
     def run_finally(cls,cxn, parameters_dict, data, x):
         if parameters_dict.StatePreparation.rotation_enable:
             cxn.keysight_33500b.rotation_run_finally()
+        if parameters_dict.BiasPulse.enable:
+            cxn.keysight_33600a.biaspulse_run_finally()

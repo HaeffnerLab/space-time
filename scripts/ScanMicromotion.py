@@ -17,6 +17,8 @@ class point(pulse_sequence):
                   'MicromotionCalibration.amplitude729',
                   'MicromotionCalibration.line_selection',
                   'MicromotionCalibration.channel729',
+                  'RFModulation.enable',
+                  'RFModulation.turn_on_before',
                         ] 
                   
    
@@ -26,6 +28,7 @@ class point(pulse_sequence):
         from subsequences.RabiExcitation import RabiExcitation
         from subsequences.StateReadout import StateReadout
         from subsequences.TurnOffAll import TurnOffAll
+        from subsequences.RFModulation import RFModulation
            
                 
         # building the sequence
@@ -41,9 +44,12 @@ class point(pulse_sequence):
                                          'Excitation729.amplitude729': mc.amplitude729,
                                          'Excitation729.channel729': mc.channel729
                                          })
+        time_start_readout = self.end # This is for RF modulation
         self.addSequence(StateReadout)
- 
 
+        #Add RF modulation TTL pulse if applicable
+        if self.parameters.RFModulation.enable:
+            RFModulation(self, time_start_readout)
 
 class carrier(point):
 

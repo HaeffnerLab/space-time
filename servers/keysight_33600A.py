@@ -20,7 +20,6 @@ timeout = 20
 
 from labrad.server import LabradServer, setting, inlineCallbacks
 from twisted.internet.defer import DeferredLock, Deferred
-
 from socket import *
 import select
 import numpy as np
@@ -28,19 +27,20 @@ import struct
 from warnings import warn
 import cmath
 import time
-
 from labrad.units import WithUnit as U
+from treedict import TreeDict
 
 #SERVERNAME = 'KEYSIGHT_33600A'
 #SIGNALID = 190234 ## this needs to change
 
 
 class KEYSIGHT_33600A(LabradServer):
+
     name = 'KEYSIGHT_33600A'
     instr = None
     
     def initServer(self):
-        serverHost = '192.168.169.103' #IP address of the awg
+        serverHost = '192.168.169.142' #IP address of the awg
         serverPort = 5025 
         self.instr = socket(AF_INET, SOCK_STREAM)
 
@@ -98,49 +98,6 @@ class KEYSIGHT_33600A(LabradServer):
                 break
             return errors
 
-    @setting(0, "Set State", channel = 'i', state = 'i')
-    def set_state(self, c, channel, state):
-        if state == 1:
-            self.write(self.instr,':OUTPut' +str(channel) + ' ON')
-        if state == 0:
-            self.write(self.instr,':OUTPut' +str(channel) + ' OFF')
-
-    @setting(1, "Get State", channel = 'i')
-    def get_state(self, c, channel):
-        self.ask(self.instr,':OUTPut' +str(channel) + ':STATe?')
-
-    @setting(2, "Update AWG", frequency = 'v', amplitude= 'v', phase='v')
-    def update_awg(self,c,frequency,amplitude,phase):
-    	amplitude = amplitude/2.0
-        self.write(self.instr,'SOUR1:BURS:STAT OFF')
-        self.write(self.instr,'SOUR2:BURS:STAT OFF')
-        if frequency != 0.0:
-            self.write(self.instr,'SOUR1:APPL:SIN')
-            self.write(self.instr,'SOUR2:APPL:SIN')
-            self.write(self.instr,'SOUR1:FREQ ' + str(frequency))
-            self.write(self.instr,'SOUR2:FREQ ' + str(frequency))
-            self.write(self.instr,'SOUR1:VOLT ' + str(amplitude))
-            self.write(self.instr,'SOUR2:VOLT ' + str(amplitude))
-            self.set_phase(c,1,phase)
-            self.set_phase(c,2,(phase + 90) % 360)
-            self.write(self.instr,'PHAS:SYNC')
-        else:
-            offset1 = 0.5 * amplitude * np.sin(np.pi*phase/180.)
-            offset2 = 0.5 * amplitude * np.sin(np.pi*(phase+90.)/180.)
-            self.write(self.instr,'SOUR1:APPL:DC DEF,DEF,'+str(offset1))
-            self.write(self.instr,'SOUR2:APPL:DC DEF,DEF,'+str(offset2))
-            
-
-    @setting(3, "Set Phase", channel = 'i', phase = 'v')        
-    def set_phase(self, c, channel, phase):
-        if not 0<=phase<=360:
-            phase = phase % 360
-        self.write(self.instr,'SOURce' +str(channel) + ':PHASe ' + str(phase))
-
-    @setting(4, "Sync Phases")
-    def sync_phases(self,c):
-        self.write(self.instr,'PHAS:SYNC')
-        
     def pack_keysight_packet(self, data):
         """Constructs a binary datapacket as described in the keysight documentation:
         http://literature.cdn.keysight.com/litweb/pdf/33500-90901.pdf?id=2197440
@@ -160,8 +117,12 @@ class KEYSIGHT_33600A(LabradServer):
         len_of_binary_len = len(str(binary_len))
 
         return "#{}{}{}".format(len_of_binary_len, binary_len, packed_binary)
-                       
+    
+    
+    ################################# WAVEFORMS #################################
+
     def noise_waveform(self, bandwidth, center_frequency): #in Hz
+        
         #makes string with values to form arbitrary wave form. 
         
         total_time = 20e-3 #one second waveform
@@ -183,8 +144,52 @@ class KEYSIGHT_33600A(LabradServer):
 
         return self.pack_keysight_packet(awf)
 
+    def biasPulse_waveform(self, t_biasOn, t_biasOff, total_time):
+        
+        # Note that rotation waveforms in the keysight_33500B class take durations; 
+        # here, the arguments are reference times.
 
-    @setting(5, "Program Noise", center_frequency = 'v', bandwidth= 'v',amplitude = 'v')
+        # Time array 
+        t = np.linspace(0, total_time, int(self.samp_rate * total_time))
+
+        # Reference regions
+        pulse_window = (t >= t_biasOn) & (t < t_biasOff)
+
+        # Amplitude curve
+        amplitude_curve = np.zeros_like(t)
+        amplitude_curve[pulse_window] = 1
+
+        # Note that this function does not prepare the waveform with pack_keysight_packet,
+        # unlike the previous function. This is done in the Labrad setting, similar to how
+        # the keysight_33500B class is written.
+
+        return amplitude_curve
+
+
+    ################################# LABRAD SETTINGS #################################
+
+    @setting(0, "Set State", channel = 'i', state = 'i')
+    def set_state(self, c, channel, state):
+        if state == 1:
+            self.write(self.instr,':OUTPut' +str(channel) + ' ON')
+        if state == 0:
+            self.write(self.instr,':OUTPut' +str(channel) + ' OFF')
+
+    @setting(1, "Get State", channel = 'i')
+    def get_state(self, c, channel):
+        self.ask(self.instr,':OUTPut' +str(channel) + ':STATe?')
+            
+    @setting(2, "Set Phase", channel = 'i', phase = 'v')        
+    def set_phase(self, c, channel, phase):
+        if not 0<=phase<=360:
+            phase = phase % 360
+        self.write(self.instr,'SOURce' +str(channel) + ':PHASe ' + str(phase))
+
+    @setting(3, "Sync Phases")
+    def sync_phases(self,c):
+        self.write(self.instr,'PHAS:SYNC')
+
+    @setting(4, "Program Noise", center_frequency = 'v', bandwidth= 'v',amplitude = 'v')
     def program_noise(self, c, center_frequency,bandwidth,amplitude): #in Hz and arbitrary
 
         wf_str = self.noise_waveform(bandwidth,center_frequency)
@@ -216,26 +221,65 @@ class KEYSIGHT_33600A(LabradServer):
 
         #self.read_error_queue()
 
+    @setting(5,"Program Biaspulse", waveform='*v', bias='v')
+    def program_biaspulse(self, c, waveform, bias):
+        #create packed waveform string
+        wf_str = self.pack_keysight_packet(waveform)
 
-    @setting(6,"Program Square Wave", frequency = 'v', amplitude= 'v', offset = 'v', dutyCycle = 'v' )
-    def programSquareWave(self,c,frequency,amplitude,offset,dutyCycle):
-        frequency = abs(frequency)*1e3 # originally in kHz
-        self.write(self.instr,'FUNC SQU')
-        self.write(self.instr,'FUNC:SQU:DCYC '+str(dutyCycle))
-        self.write(self.instr,'FREQ '+str(frequency))
-        self.write(self.instr,'SOUR:VOLT '+str(amplitude))
-        self.write(self.instr,'SOUR:VOLT:OFFS '+str(offset))
-        self.set_state(c,1,1)
+        #initialize
+        self.write(self.instr,'*RST;*CLS')
+        self.write(self.instr,'FORM:BORD NORM')
+        self.write(self.instr,'SOUR1:DATA:VOL:CLE')
 
+        #program awf
+        self.write(self.instr,':SOUR1:FUNC ARB')
+        self.write(self.instr,':SOUR1:DATA:ARB channel1_awf,{}'.format(wf_str))
+        self.write(self.instr,':SOUR1:FUNC:ARB channel1_awf')
+
+        #set waveform settings
+        self.write(self.instr,'SOUR1:VOLT '+str(bias))
+        self.write(self.instr,'SOUR1:VOLT:OFFS 0')
+        self.write(self.instr,'OUTP1:LOAD 50')    
+        self.write(self.instr,'SOUR1:FUNC:ARB:SRAT ' + str(self.samp_rate))
+
+        #set triggering
+        self.write(self.instr,'TRIG1:SOUR EXT')
+        self.write(self.instr,':SOUR1:BURS:MODE TRIG')  
+        self.write(self.instr,':SOUR1:BURS:NCYC 1')
+        self.write(self.instr,':SOUR1:BURS:STAT ON')
+        self.set_state(c, 1, 1)
         self.read_error_queue()
 
-
-    @setting(7, "DC Bias Waveform", )
-    def dcBiasWaveform(self, )
-
+    @setting(6, "Biaspulse Run Initial", bias_start_time='v', time_start_readout='v', total_time='v', scan_param_name='s', scan_param_value='v')
+    def biaspulse_run_initial(self, c, bias_start_time, time_start_readout, total_time, scan_param_name=None, scan_param_value=None):
         
+        ss = self.client.scriptscanner
+
+        # Create a dictionary with all the bias pulse parameters
+        biasPulse_parameter_names = yield ss.get_parameter_names('BiasPulse')
+        bpp = TreeDict() # bias pulse parameters dictionary
+        for param_name in biasPulse_parameter_names:
+            if param_name == scan_param_name:
+                bpp[param_name] = scan_param_value
+            else:
+                bpp[param_name] = yield ss.get_parameter('BiasPulse', param_name)
+
+        bias = bpp.voltage
+
+        amplitude_curve = self.biasPulse_waveform(bias_start_time['s'], time_start_readout['s'], total_time['s'])
+
+        # Program the waveforms to the AWG channel
+        self.program_biaspulse(c, amplitude_curve, bias['V'])
+
+    @setting(7, "Biaspulse Run Finally")
+    def biaspulse_run_finally(self,c):
+        self.write(self.instr,'SOUR1:BURS:STAT OFF')
+        self.write(self.instr,'OUTPut1:STATe OFF')
+
+
 __server__ = KEYSIGHT_33600A()
-        
+
+
 if __name__ == '__main__':
     from labrad import util
-    util.runServer(__server__)    
+    util.runServer(__server__)  

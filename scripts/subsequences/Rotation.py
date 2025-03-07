@@ -10,5 +10,7 @@ class Rotation(pulse_sequence):
         rot_prep_time = rot.spinup_time + rot.middle_hold + rot.release_time
         # Add empty sequence for rotation AWF plus 400 us cushion (200 us before, 200 us after)
         self.addSequence(EmptySequence, {'EmptySequence.empty_sequence_duration':rot_prep_time + U(400.0, 'us'),
-                                         'EmptySequence.noise_enable':False})
+                                         'EmptySequence.noise_enable':False,
+                                         'EmptySequence.enable729':False,
+                                         'EmptySequence.enable866':False})
         

@@ -21,8 +21,12 @@ class StatePreparation(pulse_sequence):
         from OpticalPumping import OpticalPumping
         from SidebandCooling import SidebandCooling
         from Rotation import Rotation
+        from EmptySequence import EmptySequence
+        from GatePulse import GatePulse
+        from RFModulation import RFModulation
 
         sp = self.parameters.StatePreparation
+        rfmod = self.parameters.RFModulation
 
         self.end = U(10., 'us')
 
@@ -40,8 +44,16 @@ class StatePreparation(pulse_sequence):
             self.addSequence(OpticalPumping, {'OpticalPumping.optical_pumping_frequency_729':freq729})
 
         if sp.sideband_cooling_enable:
+            if rfmod.turn_on_before == 'sideband_cooling':
+                self.addSequence(EmptySequence, {"EmptySequence.empty_sequence_duration":rfmod.padtime})
             self.addSequence(SidebandCooling)
 
+        self.addSequence(GatePulse)
+        
         if sp.rotation_enable:
+            if rfmod.turn_on_before == 'rotational_state_prep':
+                self.addSequence(EmptySequence, {"EmptySequence.empty_sequence_duration":rfmod.padtime})
             self.addSequence(Rotation)
+        if (rfmod.turn_on_before == 'wait_time'):
+            self.addSequence(EmptySequence, {"EmptySequence.empty_sequence_duration":rfmod.padtime})
             

@@ -26,6 +26,10 @@ class RabiExcitation(pulse_sequence):
             start = self.start+fad
         #then do actual 729 pulse
         self.addDDS(channel_729, start, duration_729, freq_729, amp_729, phase_729)
-        self.end = start + duration_729
+        
+        if changeDDS:
+            self.end = start + fad + duration_729
+        else:
+            self.end = start + duration_729
                     
     

@@ -502,13 +502,7 @@ class KEYSIGHT_33500B(LabradServer):
         ss = self.client.scriptscanner
 
         # Create a dictionary with all the rotation parameters
-        rotation_parameter_names = ['voltage_pp',
-                                    'final_drive_frequency',
-                                    'start_phase',
-                                    'middle_hold',
-                                    'release_time', 
-                                    'spinup_time',
-                                    'waveform_label']
+        rotation_parameter_names = yield ss.get_parameter_names('Rotation')
         rp = TreeDict() # rotation parameters dictionary
         for param_name in rotation_parameter_names:
             if param_name == scan_param_name:

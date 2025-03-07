@@ -52,6 +52,15 @@ class Ramsey(pulse_sequence):
 
                   'EmptySequence.empty_sequence_duration',
                   'EmptySequence.noise_enable',
+                  'GatePulse.gate_pulse_duration',
+                  'GatePulse.enable729',
+                  'GatePulse.channel729',
+                  'GatePulse.amplitude729',
+                  'GatePulse.enable866',
+                  'GatePulse.frequency866',
+                  'GatePulse.amplitude866',
+                  'GatePulse.line_selection',
+                  'GatePulse.stark_shift_729',
                       ]
 
     

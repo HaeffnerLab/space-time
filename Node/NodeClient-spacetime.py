@@ -20,6 +20,7 @@ nodeDict = {
 				'Pulser',
 				'DAC Server', 
 				'KEYSIGHT_33500B',
+				'KEYSIGHT_33600A',
 				'Data Vault', 
 				'NormalPMTFlow',
 				#'SD Tracker Global', # Turns out since this is running on the laser room computer, this is totally unneccessary!
